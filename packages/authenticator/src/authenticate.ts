@@ -1,7 +1,4 @@
-import {
-  saveProductSession,
-  type ProductAuthenticator,
-} from "@proton-cli/core";
+import type { ProductAuthenticator } from "@proton-cli/core";
 import {
   ensureFullScope,
   loginWithPassword,
@@ -11,7 +8,7 @@ import {
 
 /**
  * Dual-mint authenticator for Authenticator API (authenticator-api.proton.me).
- * Also writes the product-local session.json used by auth commands.
+ * Persists product-local + shared session via store.saveSession.
  */
 export const authenticateAuthenticator: ProductAuthenticator = async (
   credentials,
@@ -28,7 +25,5 @@ export const authenticateAuthenticator: ProductAuthenticator = async (
   }
 
   await persistSession(session, username);
-  await saveProductSession("authenticator", session, username);
-
   return { product: "authenticator", session };
 };

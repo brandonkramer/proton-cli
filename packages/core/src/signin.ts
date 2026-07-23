@@ -19,6 +19,8 @@ export interface DualSignInOptions {
    * Default false: on any failure, clear sessions written in this attempt.
    */
   partialOk?: boolean;
+  /** Extra cleanup for product-local state when rolling back a failed dual mint. */
+  clearers?: Partial<Record<ProductId, () => Promise<void>>>;
 }
 
 /**
@@ -28,7 +30,13 @@ export interface DualSignInOptions {
 export async function dualMintSignIn(
   options: DualSignInOptions,
 ): Promise<DualSignInResult> {
-  const { credentials, products, authenticators, partialOk = false } = options;
+  const {
+    credentials,
+    products,
+    authenticators,
+    partialOk = false,
+    clearers,
+  } = options;
   const succeeded: ProductId[] = [];
   const failed: DualSignInResult["failed"] = [];
   const written: ProductId[] = [];
@@ -62,7 +70,12 @@ export async function dualMintSignIn(
   }
 
   if (failed.length > 0 && !partialOk) {
-    await Promise.all(written.map((p) => clearProductSession(p)));
+    await Promise.all(
+      written.map(async (p) => {
+        await clearProductSession(p);
+        await clearers?.[p]?.();
+      }),
+    );
     return {
       username: credentials.username,
       succeeded: [],

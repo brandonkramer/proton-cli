@@ -3,10 +3,11 @@
 Unofficial unified Proton command-line client (VPN + Authenticator) with **one install** and **shared sign-in UX**.
 
 ```bash
-proton signin              # credentials once → vpn + authenticator sessions
+proton signin --pass pass://Vault/Proton   # credentials once → vpn + authenticator sessions
 proton vpn connect --country US
 proton auth code github
-proton status
+proton status --json
+proton signout
 ```
 
 Legacy bins still work:

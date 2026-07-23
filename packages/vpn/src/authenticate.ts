@@ -1,7 +1,4 @@
-import {
-  saveProductSession,
-  type ProductAuthenticator,
-} from "@proton-cli/core";
+import type { ProductAuthenticator } from "@proton-cli/core";
 import {
   ensureVpnScope,
   loginWithPassword,
@@ -12,7 +9,7 @@ import {
 
 /**
  * Dual-mint authenticator for VPN (vpn-api.proton.me).
- * Also writes the product-local session.json used by VPN commands.
+ * Persists product-local + shared session via store.saveSession.
  */
 export const authenticateVpn: ProductAuthenticator = async (credentials) => {
   const username = normalizeUsername(credentials.username);
@@ -30,7 +27,5 @@ export const authenticateVpn: ProductAuthenticator = async (credentials) => {
   }
 
   await persistSession(session, username);
-  await saveProductSession("vpn", session, username);
-
   return { product: "vpn", session };
 };
