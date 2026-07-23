@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-24
+
+### Fixed
+- Ship full GPL-3.0 license text (was a short stub)
+- OpenPGP postinstall patch finds Bun’s nested `.bun/@protontech+openpgp@*` store (not only classic `node_modules/openpgp`)
+
 ### Changed
+- Authenticator HTTP User-Agent uses `@bkramer/proton-cli/<version>`
 - npm package renamed to `@bkramer/proton-cli` (was briefly `proton-unified-cli`)
 - Workspace packages renamed to `@bkramer/proton-core`, `@bkramer/proton-vpn`, `@bkramer/proton-authenticator`
 
@@ -21,5 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI + Release workflows; migration guide from standalone CLIs
 - Publish as **`@bkramer/proton-cli`** (npm); GitHub repo `brandonkramer/proton-cli`
 
-[Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/brandonkramer/proton-cli/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/brandonkramer/proton-cli/releases/tag/v0.1.0
