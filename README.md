@@ -68,8 +68,10 @@ Coming from `proton-vpn-cli` / `proton-authenticator-cli`? See [MIGRATION.md](./
 GitHub Actions workflow **Release** (`workflow_dispatch` with a semver version) bumps `package.json`, tags `v*`, creates a GitHub Release, and publishes `proton-unified-cli` to npm via Trusted Publisher (environment `npm`).
 
 ```bash
-gh workflow run Release -f version=0.1.0
+gh workflow run Release -f version=0.1.1
 ```
+
+One-time npm Trusted Publisher setup: [docs/PUBLISH.md](./docs/PUBLISH.md).
 
 ## License
 
