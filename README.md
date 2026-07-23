@@ -59,10 +59,6 @@ Config root: `~/.config/proton-cli/` with per-product sessions under `sessions/`
 
 Proton VPN and Authenticator use **different API hosts and app-version headers**, so tokens are not shared across products. `proton signin` still feels like one login: credentials are collected once, then each product mints and stores its own session.
 
-## Migration
-
-Coming from `proton-vpn-cli` / `proton-authenticator-cli`? See [MIGRATION.md](./MIGRATION.md).
-
 ## Release
 
 GitHub Actions workflow **Release** (`workflow_dispatch` with a semver version) bumps `package.json`, tags `v*`, creates a GitHub Release, and publishes `@bkramer/proton-cli` to npm via Trusted Publisher (environment `npm`).

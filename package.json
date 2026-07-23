@@ -40,7 +40,6 @@
     "LICENSE",
     "README.md",
     "CHANGELOG.md",
-    "MIGRATION.md",
     "package.json",
     "tsconfig.json"
   ],
