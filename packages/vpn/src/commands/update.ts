@@ -20,7 +20,7 @@ async function currentVersion(): Promise<string> {
 export function registerUpdate(program: Command): void {
   program
     .command("update")
-    .description("Update proton-vpn-cli to the latest version (or a given one)")
+    .description("Update proton-cli to the latest version (or a given one)")
     .argument("[version]", "Target version (default: latest)")
     .option("--check", "Only check for updates; do not install")
     .action(async (versionArg: string | undefined, opts: { check?: boolean }) => {
@@ -48,7 +48,7 @@ export function registerUpdate(program: Command): void {
             variant: info.updateAvailable ? "info" : "success",
             title: opts.check ? "Update check" : "Up to date",
             body: info.updateAvailable
-              ? `Current ${info.current} → latest ${info.latest} (${plan.channel}).\nRun \`protonvpn update\` to install.`
+              ? `Current ${info.current} → latest ${info.latest} (${plan.channel}).\nRun \`proton update\` to install.`
               : `Already on latest (${info.current}) via ${plan.channel}.`,
             holdMs: 1200,
           });
@@ -57,7 +57,7 @@ export function registerUpdate(program: Command): void {
 
         if (!wantsJson()) {
           console.log(
-            `Updating proton-vpn-cli ${info.current} → ${latest} via ${plan.command}…`,
+            `Updating proton-cli ${info.current} → ${latest} via ${plan.command}…`,
           );
         }
 
@@ -81,7 +81,7 @@ export function registerUpdate(program: Command): void {
           title: "Updated",
           body:
             after === info.current
-              ? `Update command finished (${plan.command}). Restart the shell if \`protonvpn --version\` still shows ${info.current}.`
+              ? `Update command finished (${plan.command}). Restart the shell if \`proton --version\` still shows ${info.current}.`
               : `${info.current} → ${after} (${plan.channel})`,
           holdMs: 1400,
         });

@@ -9,7 +9,7 @@ describe("detectInstallChannel", () => {
   test("detects bun global path", () => {
     expect(
       detectInstallChannel(
-        "/Users/me/.bun/install/global/node_modules/proton-vpn-cli/src/index.ts",
+        "/Users/me/.bun/install/global/node_modules/proton-cli/src/index.ts",
         true,
       ),
     ).toBe("bun");
@@ -18,7 +18,7 @@ describe("detectInstallChannel", () => {
   test("detects npm global path", () => {
     expect(
       detectInstallChannel(
-        "/usr/local/lib/node_modules/proton-vpn-cli/src/index.ts",
+        "/usr/local/lib/node_modules/proton-cli/src/index.ts",
         false,
       ),
     ).toBe("npm");
@@ -27,7 +27,7 @@ describe("detectInstallChannel", () => {
   test("prefers bun when runtime is bun and path is ambiguous", () => {
     expect(
       detectInstallChannel(
-        "/opt/node_modules/proton-vpn-cli/src/index.ts",
+        "/opt/node_modules/proton-cli/src/index.ts",
         true,
       ),
     ).toBe("bun");
@@ -39,7 +39,7 @@ describe("buildUpdatePlan", () => {
     expect(buildUpdatePlan("bun")).toEqual({
       channel: "bun",
       command: "bun",
-      args: ["add", "-g", "proton-vpn-cli@latest"],
+      args: ["add", "-g", "proton-cli@latest"],
     });
   });
 
@@ -47,7 +47,7 @@ describe("buildUpdatePlan", () => {
     expect(buildUpdatePlan("npm", "0.3.1")).toEqual({
       channel: "npm",
       command: "npm",
-      args: ["install", "-g", "proton-vpn-cli@0.3.1"],
+      args: ["install", "-g", "proton-cli@0.3.1"],
     });
   });
 });
