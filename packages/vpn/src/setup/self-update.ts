@@ -50,8 +50,8 @@ export function detectInstallChannel(
   }
   if (
     path.includes("/npm/node_modules/") ||
+    path.includes("/lib/node_modules/@bkramer/proton-cli") ||
     path.includes("/lib/node_modules/proton-unified-cli") ||
-    path.includes("/lib/node_modules/proton-cli") ||
     path.includes("/lib/node_modules/proton-vpn-cli") ||
     path.includes("/pnpm-global/")
   ) {
@@ -59,16 +59,16 @@ export function detectInstallChannel(
   }
   // Bun global packages also live under node_modules; prefer bun when runtime is Bun.
   if (
-    (path.includes("node_modules/proton-unified-cli") ||
-      path.includes("node_modules/proton-cli") ||
+    (path.includes("node_modules/@bkramer/proton-cli") ||
+      path.includes("node_modules/proton-unified-cli") ||
       path.includes("node_modules/proton-vpn-cli")) &&
     hasBunRuntime
   ) {
     return "bun";
   }
   if (
+    path.includes("node_modules/@bkramer/proton-cli") ||
     path.includes("node_modules/proton-unified-cli") ||
-    path.includes("node_modules/proton-cli") ||
     path.includes("node_modules/proton-vpn-cli")
   ) {
     return "npm";
@@ -83,8 +83,8 @@ export function buildUpdatePlan(
 ): UpdatePlan {
   const spec =
     target === "latest"
-      ? "proton-unified-cli@latest"
-      : `proton-unified-cli@${target}`;
+      ? "@bkramer/proton-cli@latest"
+      : `@bkramer/proton-cli@${target}`;
   if (channel === "npm") {
     return { channel, command: "npm", args: ["install", "-g", spec] };
   }
@@ -98,7 +98,7 @@ export function buildUpdatePlan(
 
 export async function fetchLatestVersion(): Promise<string> {
   const response = await fetch(
-    "https://registry.npmjs.org/proton-unified-cli/latest",
+    "https://registry.npmjs.org/@bkramer/proton-cli/latest",
     {
       headers: { Accept: "application/json" },
     },

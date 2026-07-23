@@ -15,7 +15,7 @@ export interface VersionInfo {
 }
 
 /** npm package name (GitHub repo is brandonkramer/proton-cli). */
-const PACKAGE_NAME = "proton-unified-cli";
+const PACKAGE_NAME = "@bkramer/proton-cli";
 
 function run(
   command: string,
@@ -51,22 +51,22 @@ export function detectInstallChannel(
   }
   if (
     path.includes("/npm/node_modules/") ||
+    path.includes("/lib/node_modules/@bkramer/proton-cli") ||
     path.includes("/lib/node_modules/proton-unified-cli") ||
-    path.includes("/lib/node_modules/proton-cli") ||
     path.includes("/pnpm-global/")
   ) {
     return "npm";
   }
   if (
-    (path.includes("node_modules/proton-unified-cli") ||
-      path.includes("node_modules/proton-cli")) &&
+    (path.includes("node_modules/@bkramer/proton-cli") ||
+      path.includes("node_modules/proton-unified-cli")) &&
     hasBunRuntime
   ) {
     return "bun";
   }
   if (
-    path.includes("node_modules/proton-unified-cli") ||
-    path.includes("node_modules/proton-cli")
+    path.includes("node_modules/@bkramer/proton-cli") ||
+    path.includes("node_modules/proton-unified-cli")
   ) {
     return "npm";
   }

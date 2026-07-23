@@ -21,7 +21,7 @@ export function registerUpdate(program: Command): void {
   program
     .command("update")
     .description(
-      "Update proton-unified-cli to the latest version (or a given one)",
+      "Update @bkramer/proton-cli to the latest version (or a given one)",
     )
     .argument("[version]", "Target version (default: latest)")
     .option("--check", "Only check for updates; do not install")
@@ -59,7 +59,7 @@ export function registerUpdate(program: Command): void {
 
         if (!wantsJson()) {
           console.log(
-            `Updating proton-unified-cli ${info.current} → ${latest} via ${plan.command}…`,
+            `Updating @bkramer/proton-cli ${info.current} → ${latest} via ${plan.command}…`,
           );
         }
 

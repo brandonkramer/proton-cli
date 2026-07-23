@@ -1,5 +1,5 @@
 {
-  "name": "proton-unified-cli",
+  "name": "@bkramer/proton-cli",
   "version": "0.1.0",
   "description": "Unofficial unified Proton CLI (VPN, Authenticator, shared sign-in)",
   "license": "GPL-3.0-or-later",

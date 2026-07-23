@@ -24,7 +24,7 @@ protonauth list            # → proton auth list
 Requires [Bun](https://bun.sh) ≥ 1.1.
 
 ```bash
-bun add -g proton-unified-cli
+bun add -g @bkramer/proton-cli
 ```
 
 Or from GitHub:
@@ -33,7 +33,7 @@ Or from GitHub:
 bun install -g github:brandonkramer/proton-cli
 ```
 
-> npm name is **`proton-unified-cli`** because plain `proton-cli` is taken on the registry. Bins are still `proton` / `protonvpn` / `protonauth`.
+> npm name is **`@bkramer/proton-cli`** (unscoped `proton-cli` is taken on the registry). Bins are still `proton` / `protonvpn` / `protonauth`.
 
 ### From a clone
 
@@ -65,7 +65,7 @@ Coming from `proton-vpn-cli` / `proton-authenticator-cli`? See [MIGRATION.md](./
 
 ## Release
 
-GitHub Actions workflow **Release** (`workflow_dispatch` with a semver version) bumps `package.json`, tags `v*`, creates a GitHub Release, and publishes `proton-unified-cli` to npm via Trusted Publisher (environment `npm`).
+GitHub Actions workflow **Release** (`workflow_dispatch` with a semver version) bumps `package.json`, tags `v*`, creates a GitHub Release, and publishes `@bkramer/proton-cli` to npm via Trusted Publisher (environment `npm`).
 
 ```bash
 gh workflow run Release -f version=0.1.1

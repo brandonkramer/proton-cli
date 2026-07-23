@@ -7,15 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- npm package renamed to `@bkramer/proton-cli` (was briefly `proton-unified-cli`)
+
 ## [0.1.0] - 2026-07-24
 
 ### Added
 - Unified `proton` CLI monorepo with `vpn` and `auth` namespaces
 - Shared `proton signin` dual-mint sessions (Pass-aware) and `proton signout` / `status`
 - Legacy bins `protonvpn` and `protonauth` forwarding to namespaced commands
-- `proton update` / `update --check` for self-upgrades of `proton-unified-cli`
+- `proton update` / `update --check` for self-upgrades of `@bkramer/proton-cli`
 - CI + Release workflows; migration guide from standalone CLIs
-- Publish as **`proton-unified-cli`** (npm); GitHub repo `brandonkramer/proton-cli`
+- Publish as **`@bkramer/proton-cli`** (npm); GitHub repo `brandonkramer/proton-cli`
 
 [Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/brandonkramer/proton-cli/releases/tag/v0.1.0

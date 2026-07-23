@@ -147,7 +147,7 @@ jobs:
             echo "## Install"
             echo ""
             echo '```bash'
-            echo "bun add -g proton-unified-cli@${{ steps.ver.outputs.version }}"
+            echo "bun add -g @bkramer/proton-cli@${{ steps.ver.outputs.version }}"
             echo "# or from GitHub:"
             echo "bun install -g github:brandonkramer/proton-cli#${TAG}"
             echo '```'
@@ -188,8 +188,8 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${{ steps.ver.outputs.version }}"
-          if npm view "proton-unified-cli@${VERSION}" version >/dev/null 2>&1; then
-            echo "npm already has proton-unified-cli@${VERSION} — skipping publish"
+          if npm view "@bkramer/proton-cli@${VERSION}" version >/dev/null 2>&1; then
+            echo "npm already has @bkramer/proton-cli@${VERSION} — skipping publish"
             exit 0
           fi
 
@@ -198,4 +198,5 @@ jobs:
           npm install -g npm@latest
           npm --version
 
+          # Scoped packages require --access public on first publish
           npm publish --access public --provenance
