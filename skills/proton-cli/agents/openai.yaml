@@ -1,0 +1,7 @@
+interface:
+  display_name: "Proton CLI"
+  short_description: "Unified Proton VPN + Authenticator CLI"
+  default_prompt: "Use $proton-cli to sign in once with Pass, then run VPN or Authenticator commands with --json where helpful."
+
+policy:
+  allow_implicit_invocation: true
