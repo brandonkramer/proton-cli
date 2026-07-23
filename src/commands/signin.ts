@@ -1,17 +1,39 @@
-import { authenticateAuthenticator } from "@proton-cli/authenticator";
+import {
+  authenticateAuthenticator,
+  clearAuthenticatorState,
+} from "@proton-cli/authenticator";
 import {
   dualMintSignIn,
   parseProductList,
+  resolvePassLogin,
+  resolvePassRefFromEnv,
+  resolvePassTotp,
   type SignInCredentials,
 } from "@proton-cli/core";
-import { authenticateVpn } from "@proton-cli/vpn";
+import { authenticateVpn, clearVpnSession } from "@proton-cli/vpn";
 import type { Command } from "commander";
 
 async function readCredentials(opts: {
   username?: string;
   password?: string;
   totp?: string;
+  pass?: string;
 }): Promise<SignInCredentials> {
+  const passRef = resolvePassRefFromEnv(opts.pass);
+  if (passRef) {
+    const login = await resolvePassLogin(passRef);
+    const totp =
+      opts.totp ??
+      process.env.PROTON_TOTP ??
+      (await resolvePassTotp(passRef)) ??
+      undefined;
+    return {
+      username: opts.username ?? login.username,
+      password: login.password,
+      totp,
+    };
+  }
+
   const username =
     opts.username ??
     process.env.PROTON_USERNAME ??
@@ -23,7 +45,8 @@ async function readCredentials(opts: {
 
   if (!username || !password) {
     throw new Error(
-      "Username and password required. Pass --username/--password or set PROTON_USERNAME / PROTON_PASSWORD (pass:// supported later in PH2).",
+      "Username and password required.\n" +
+        "Use --pass pass://Vault/Item, --username/--password, or set PROTON_USERNAME / PROTON_PASSWORD / PROTON_PASS.",
     );
   }
 
@@ -42,6 +65,10 @@ export function registerSignin(program: Command): void {
     )
     .option("-u, --username <username>", "Proton username / email")
     .option("-p, --password <password>", "Proton password (prefer env / Pass)")
+    .option(
+      "--pass <ref>",
+      "Proton Pass login item (pass://Vault/Item). Also: PROTON_PASS / PROTONVPN_PASS / PROTONAUTH_PASS",
+    )
     .option("--totp <code>", "TOTP code if required")
     .option(
       "--products <list>",
@@ -58,6 +85,7 @@ export function registerSignin(program: Command): void {
         username?: string;
         password?: string;
         totp?: string;
+        pass?: string;
         products?: string;
         partialOk?: boolean;
         json?: boolean;
@@ -73,10 +101,14 @@ export function registerSignin(program: Command): void {
             vpn: authenticateVpn,
             authenticator: authenticateAuthenticator,
           },
+          clearers: {
+            vpn: clearVpnSession,
+            authenticator: clearAuthenticatorState,
+          },
         });
 
         if (opts.json) {
-          console.log(JSON.stringify({ version: 1, ...result }, null, 2));
+          console.log(JSON.stringify({ version: 1, ok: result.failed.length === 0, ...result }, null, 2));
         } else if (result.failed.length && result.succeeded.length === 0) {
           console.error("Sign-in failed:");
           for (const f of result.failed) {

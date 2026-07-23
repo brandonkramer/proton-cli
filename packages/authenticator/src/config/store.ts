@@ -1,3 +1,8 @@
+import {
+  clearProductSession,
+  loadProductSession,
+  saveProductSession,
+} from "@proton-cli/core";
 import { chmod, mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import type {
   LocalEntriesStore,
@@ -61,25 +66,36 @@ export async function saveSession(
   };
 
   await writeSecureJson(sessionPath(), payload);
+  await saveProductSession("authenticator", session, username);
 }
 
 export async function loadSession(
   expectedUsername?: string,
 ): Promise<SavedSession | null> {
   const saved = await readJsonFile<SavedSession>(sessionPath());
-  if (!saved) return null;
-  if (expectedUsername && saved.username !== expectedUsername) {
-    return null;
-  }
-  if (new Date(saved.expiresAt).getTime() <= Date.now()) {
+  if (saved) {
+    if (expectedUsername && saved.username !== expectedUsername) {
+      return null;
+    }
     // Access token expired — keep file so refresh can still use RefreshToken.
-    // Caller handles refresh; we only reject if refresh token path fails.
+    return saved;
   }
-  return saved;
+
+  const shared = await loadProductSession("authenticator", expectedUsername);
+  if (!shared) return null;
+  const hydrated: SavedSession = {
+    session: shared.session,
+    username: shared.username,
+    savedAt: shared.savedAt,
+    expiresAt: shared.expiresAt,
+  };
+  await writeSecureJson(sessionPath(), hydrated);
+  return hydrated;
 }
 
 export async function clearSession(): Promise<void> {
   await unlinkIfExists(sessionPath());
+  await clearProductSession("authenticator");
 }
 
 export async function saveLocalEntries(store: LocalEntriesStore): Promise<void> {

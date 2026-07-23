@@ -24,6 +24,14 @@ export {
   saveProductSession,
 } from "./store.ts";
 export { dualMintSignIn, type DualSignInOptions } from "./signin.ts";
+export {
+  normalizePassItemRef,
+  PASS_ENV_CANDIDATES,
+  resolvePassLogin,
+  resolvePassRefFromEnv,
+  resolvePassTotp,
+  type PassLoginFields,
+} from "./pass.ts";
 export type {
   AccountRecord,
   DualSignInResult,

@@ -1,3 +1,8 @@
+import {
+  clearProductSession,
+  loadProductSession,
+  saveProductSession,
+} from "@proton-cli/core";
 import { chmod, mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import type {
   ActiveTunnel,
@@ -64,25 +69,43 @@ export async function saveSession(
   };
 
   await writeSecureJson(sessionPath(), payload);
+  await saveProductSession("vpn", session, username);
 }
 
 export async function loadSession(
   expectedUsername?: string,
 ): Promise<SavedSession | null> {
   const saved = await readJsonFile<SavedSession>(sessionPath());
-  if (!saved) return null;
-  if (expectedUsername && saved.username !== expectedUsername) {
-    return null;
+  if (saved) {
+    if (expectedUsername && saved.username !== expectedUsername) {
+      return null;
+    }
+    if (new Date(saved.expiresAt).getTime() <= Date.now()) {
+      await clearSession();
+      return null;
+    }
+    return saved;
   }
-  if (new Date(saved.expiresAt).getTime() <= Date.now()) {
+
+  const shared = await loadProductSession("vpn", expectedUsername);
+  if (!shared) return null;
+  if (new Date(shared.expiresAt).getTime() <= Date.now()) {
     await clearSession();
     return null;
   }
-  return saved;
+  const hydrated: SavedSession = {
+    session: shared.session,
+    username: shared.username,
+    savedAt: shared.savedAt,
+    expiresAt: shared.expiresAt,
+  };
+  await writeSecureJson(sessionPath(), hydrated);
+  return hydrated;
 }
 
 export async function clearSession(): Promise<void> {
   await unlinkIfExists(sessionPath());
+  await clearProductSession("vpn");
   await clearWireGuardCredentials();
 }
 
