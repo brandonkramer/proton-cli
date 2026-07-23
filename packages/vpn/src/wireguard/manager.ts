@@ -82,7 +82,7 @@ function privilegeError(detail: string): CliError {
     `${detail}\n` +
       "Privilege required for wg-quick. Options:\n" +
       "  • Run `sudo -v` first (caches credentials), then retry\n" +
-      "  • Use `protonvpn --sudo connect …` to allow an interactive sudo prompt\n" +
+      "  • Use `proton vpn --sudo connect …` to allow an interactive sudo prompt\n" +
       "  • Configure NOPASSWD for wg-quick in sudoers for headless/agent use",
     ExitCode.PRIVILEGE,
   );
@@ -148,7 +148,7 @@ async function findWireGuardWindows(): Promise<string> {
 
   throw new CliError(
     "WireGuard for Windows was not found.\n" +
-      "Run `protonvpn setup`, or install from https://www.wireguard.com/install/",
+      "Run `proton vpn setup`, or install from https://www.wireguard.com/install/",
   );
 }
 
@@ -161,11 +161,10 @@ export async function ensureWireGuardTools(): Promise<void> {
   if (!(await commandExists("wg-quick"))) {
     throw new CliError(
       "wg-quick was not found.\n" +
-        "Run `protonvpn setup` (macOS: needs Homebrew for `wireguard-tools`).",
+        "Run `proton vpn setup` (macOS: needs Homebrew for `wireguard-tools`).",
     );
   }
 }
-
 export async function bringUp(confPath: string): Promise<void> {
   await ensureWireGuardTools();
   warnAboutPrivilege();
@@ -194,7 +193,7 @@ export async function bringUp(confPath: string): Promise<void> {
     }
     throw new CliError(
       `Failed to start WireGuard tunnel.\n${combined}\n` +
-        "If sudo failed, retry with `protonvpn --sudo connect` or `sudo -v` first.",
+        "If sudo failed, retry with `proton vpn --sudo connect` or `sudo -v` first.",
     );
   }
 }
@@ -228,7 +227,7 @@ export async function bringDown(confPath: string): Promise<void> {
     }
     throw new CliError(
       `Failed to stop WireGuard tunnel.\n${combined}\n` +
-        "If sudo failed, retry with `protonvpn --sudo disconnect` or `sudo -v` first.",
+        "If sudo failed, retry with `proton vpn --sudo disconnect` or `sudo -v` first.",
     );
   }
 }

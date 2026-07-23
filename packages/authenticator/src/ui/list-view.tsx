@@ -57,7 +57,7 @@ function ListApp({
         <Text dimColor>
           No entries
           {typeFilter === "all"
-            ? ". Run `protonauth sync` after sign-in."
+            ? ". Run `proton auth sync` after sign-in."
             : ` matching type ${typeFilter}.`}
         </Text>
       ) : (

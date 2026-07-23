@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Postinstall / error hints use `@bkramer/proton-cli` and `proton vpn` / `proton auth` (not legacy package names)
+
+### Changed
+- README and skill document WireGuard/CAPTCHA requirements, connect flags, exit codes, agent envs, and Pass/`pass-cli`
+- Root `bun run build:captcha` script for retrying the macOS CAPTCHA helper build
+
 ## [0.1.1] - 2026-07-24
 
 ### Fixed
