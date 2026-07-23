@@ -8,3 +8,5 @@ coverage/
 .turbo/
 bun.lockb
 packages/authenticator/bin/
+.cursor/
+.claude/
