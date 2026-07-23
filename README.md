@@ -67,8 +67,6 @@ GitHub Actions workflow **Release** (`workflow_dispatch` with a semver version) 
 gh workflow run Release -f version=0.1.1
 ```
 
-One-time npm Trusted Publisher setup: [docs/PUBLISH.md](./docs/PUBLISH.md).
-
 ## License
 
 GPL-3.0-or-later
