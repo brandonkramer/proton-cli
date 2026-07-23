@@ -10,20 +10,11 @@ proton status --json
 proton signout
 ```
 
-Legacy bins still work:
-
-```bash
-protonvpn status --json    # → proton vpn status --json
-protonauth list            # → proton auth list
-```
-
 > **Not an official Proton product.** Not affiliated with Proton AG.
 
 ## Install
 
 Requires [Bun](https://bun.sh) ≥ 1.1 at runtime (even when installing via npm).
-
-Package on npm: **`@bkramer/proton-cli`** (unscoped `proton-cli` is taken). Bins: `proton`, `protonvpn`, `protonauth`.
 
 ```bash
 bun add -g @bkramer/proton-cli
@@ -45,6 +36,52 @@ cd proton-cli
 bun install
 bun link
 ```
+
+## Commands
+
+Global options: `--json`, `-y` / `--yes`, `--sudo` (WireGuard on macOS).
+
+### Shared
+
+```bash
+proton signin
+proton signin --pass "pass://Vault/Item"
+proton signin --products vpn          # or auth / all
+proton signin --partial-ok
+proton status --json
+proton signout
+proton update --check
+proton update
+```
+
+### VPN (`proton vpn …`)
+
+Needs system WireGuard (`proton vpn setup` can install tools). Close the Proton VPN desktop app before connecting.
+
+```bash
+proton vpn setup
+proton vpn countries
+proton vpn servers --country US
+proton vpn connect --country US
+proton vpn connect --city "New York"
+proton vpn connect US#23
+proton vpn connect --p2p
+proton vpn status --json
+proton vpn disconnect
+proton vpn tui
+```
+
+### Authenticator (`proton auth …`)
+
+```bash
+proton auth sync
+proton auth list
+proton auth code github
+proton auth status --output json
+proton auth tui
+```
+
+Product-only `proton vpn signin` / `proton auth signin` exist; prefer shared `proton signin`.
 
 ## Monorepo
 
