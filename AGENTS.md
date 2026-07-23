@@ -3,7 +3,7 @@
 Unofficial unified Proton CLI. Bun workspaces under `packages/`.
 
 - **GitHub:** `brandonkramer/proton-cli`
-- **npm:** `proton-unified-cli` (`proton-cli` is taken on the registry)
+- **npm:** `@bkramer/proton-cli` (unscoped `proton-cli` is taken on the registry)
 - **Bins:** `proton`, `protonvpn`, `protonauth`
 
 ## Layout

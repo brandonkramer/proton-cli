@@ -34,7 +34,7 @@ try {
   }
 } catch (error) {
   console.warn(
-    "proton-unified-cli: workspace link skipped:",
+    "@bkramer/proton-cli: workspace link skipped:",
     error instanceof Error ? error.message : error,
   );
 }

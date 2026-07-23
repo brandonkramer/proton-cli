@@ -1,27 +1,27 @@
-# Publishing proton-unified-cli
+# Publishing @bkramer/proton-cli
 
 ## Names
 
 | Surface | Value |
 |---|---|
 | GitHub | https://github.com/brandonkramer/proton-cli |
-| npm | `proton-unified-cli` |
+| npm | `@bkramer/proton-cli` |
 | Bins | `proton`, `protonvpn`, `protonauth` |
 
-`proton-cli` is already taken on npm by an unrelated abandoned package.
+Unscoped `proton-cli` is taken on npm by an unrelated abandoned package.
 
 ## One-time: npm Trusted Publisher
 
 Required for the GitHub Actions Release workflow (OIDC, no long-lived token).
 
-1. Sign in at https://www.npmjs.com as the publish account.
-2. Create / open package **`proton-unified-cli`** (or use “Trusted Publisher” setup for a new package).
+1. Sign in at https://www.npmjs.com as the publish account (must own the `@bkramer` scope, or create it).
+2. Create / open package **`@bkramer/proton-cli`**.
 3. Add a GitHub Actions trusted publisher:
    - **Organization / user:** `brandonkramer`
    - **Repository:** `proton-cli`
    - **Workflow filename:** `release.yml`
    - **Environment name:** `npm` (must match the workflow `environment: npm`)
-4. Ensure the GitHub repo has an **Environment** named `npm` (no required reviewers needed for automation).
+4. Ensure the GitHub repo has an **Environment** named `npm`.
 
 Then:
 
@@ -35,14 +35,13 @@ If Trusted Publisher is not configured yet:
 
 ```bash
 cd /path/to/proton-cli
-# ensure package.json version is new
 npm publish --access public --otp=<code-from-authenticator>
 ```
 
 ## Verify
 
 ```bash
-npm view proton-unified-cli version
-bun add -g proton-unified-cli@latest
+npm view @bkramer/proton-cli version
+bun add -g @bkramer/proton-cli@latest
 proton --version
 ```

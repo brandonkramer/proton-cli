@@ -4,14 +4,14 @@ Cut over from the standalone CLIs to the unified package.
 
 | Before | After |
 |---|---|
-| `proton-vpn-cli` (npm) | `proton-unified-cli` |
-| `proton-authenticator-cli` (npm) | `proton-unified-cli` |
+| `proton-vpn-cli` (npm) | `@bkramer/proton-cli` |
+| `proton-authenticator-cli` (npm) | `@bkramer/proton-cli` |
 | GitHub `brandonkramer/proton-vpn-cli` | `brandonkramer/proton-cli` |
 | GitHub `brandonkramer/proton-authenticator-cli` | `brandonkramer/proton-cli` |
 | `~/.config/proton-vpn-cli/` | `~/.config/proton-cli/vpn/` (+ `sessions/vpn.json`) |
 | `~/.config/proton-authenticator-cli/` | `~/.config/proton-cli/authenticator/` (+ `sessions/authenticator.json`) |
 
-> **Why not `proton-cli` on npm?** That name is already taken by an unrelated abandoned package (2017). This project publishes as **`proton-unified-cli`**. The GitHub repo is still `brandonkramer/proton-cli`.
+> **Why not `proton-cli` on npm?** That name is already taken by an unrelated abandoned package (2017). This project publishes as **`@bkramer/proton-cli`**. The GitHub repo is `brandonkramer/proton-cli`.
 
 ## Install
 
@@ -20,7 +20,7 @@ Cut over from the standalone CLIs to the unified package.
 bun remove -g proton-vpn-cli proton-authenticator-cli
 
 # install unified CLI (bins: proton, protonvpn, protonauth)
-bun add -g proton-unified-cli
+bun add -g @bkramer/proton-cli
 
 # or from GitHub
 bun install -g github:brandonkramer/proton-cli
