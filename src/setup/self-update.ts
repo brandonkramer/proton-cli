@@ -1,5 +1,4 @@
 import { spawn } from "node:child_process";
-import { CliError } from "../util/errors.ts";
 
 export type InstallChannel = "bun" | "npm" | "unknown";
 
@@ -14,6 +13,8 @@ export interface VersionInfo {
   latest: string;
   updateAvailable: boolean;
 }
+
+const PACKAGE_NAME = "proton-cli";
 
 function run(
   command: string,
@@ -39,7 +40,6 @@ function run(
   });
 }
 
-/** Infer bun vs npm global install from the running entry path. */
 export function detectInstallChannel(
   entryPath = process.argv[1] ?? "",
   hasBunRuntime = typeof process.versions.bun === "string",
@@ -51,23 +51,14 @@ export function detectInstallChannel(
   if (
     path.includes("/npm/node_modules/") ||
     path.includes("/lib/node_modules/proton-cli") ||
-    path.includes("/lib/node_modules/proton-vpn-cli") ||
     path.includes("/pnpm-global/")
   ) {
     return "npm";
   }
-  // Bun global packages also live under node_modules; prefer bun when runtime is Bun.
-  if (
-    (path.includes("node_modules/proton-cli") ||
-      path.includes("node_modules/proton-vpn-cli")) &&
-    hasBunRuntime
-  ) {
+  if (path.includes("node_modules/proton-cli") && hasBunRuntime) {
     return "bun";
   }
-  if (
-    path.includes("node_modules/proton-cli") ||
-    path.includes("node_modules/proton-vpn-cli")
-  ) {
+  if (path.includes("node_modules/proton-cli")) {
     return "npm";
   }
   if (hasBunRuntime) return "bun";
@@ -79,11 +70,10 @@ export function buildUpdatePlan(
   target = "latest",
 ): UpdatePlan {
   const spec =
-    target === "latest" ? "proton-cli@latest" : `proton-cli@${target}`;
+    target === "latest" ? `${PACKAGE_NAME}@latest` : `${PACKAGE_NAME}@${target}`;
   if (channel === "npm") {
     return { channel, command: "npm", args: ["install", "-g", spec] };
   }
-  // bun is the default/preferred channel for this project
   return {
     channel: channel === "unknown" ? "bun" : channel,
     command: "bun",
@@ -92,17 +82,18 @@ export function buildUpdatePlan(
 }
 
 export async function fetchLatestVersion(): Promise<string> {
-  const response = await fetch("https://registry.npmjs.org/proton-cli/latest", {
-    headers: { Accept: "application/json" },
-  });
+  const response = await fetch(
+    `https://registry.npmjs.org/${PACKAGE_NAME}/latest`,
+    { headers: { Accept: "application/json" } },
+  );
   if (!response.ok) {
-    throw new CliError(
+    throw new Error(
       `Failed to check npm for updates (HTTP ${response.status}).`,
     );
   }
   const data = (await response.json()) as { version?: string };
   if (!data.version) {
-    throw new CliError("npm registry response missing version.");
+    throw new Error("npm registry response missing version.");
   }
   return data.version;
 }
@@ -121,7 +112,7 @@ export async function runSelfUpdate(plan: UpdatePlan): Promise<{
 }> {
   const result = await run(plan.command, plan.args);
   if (result.code !== 0) {
-    throw new CliError(
+    throw new Error(
       `Update failed (${plan.command} ${plan.args.join(" ")}).\n` +
         `${result.stderr || result.stdout}`.trim(),
     );
