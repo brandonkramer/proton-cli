@@ -46,6 +46,7 @@
   ],
   "scripts": {
     "postinstall": "bun run scripts/postinstall.ts",
+    "build:captcha": "bun run packages/authenticator/scripts/build-captcha.ts",
     "start": "bun run src/index.ts",
     "proton": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",

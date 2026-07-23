@@ -34,6 +34,13 @@ bun install -g github:brandonkramer/proton-cli
 
 Bins: `proton`, `protonvpn`, `protonauth` (legacy wrappers → `proton vpn` / `proton auth`).
 
+## Requirements
+
+- Proton account in [Single Password Mode](https://proton.me/support/single-password); TOTP 2FA OK; FIDO2 not supported
+- **VPN:** WireGuard tools (`proton vpn setup`; macOS Homebrew `wireguard-tools` + sudo; Windows winget WireGuard + Admin). Close the Proton VPN desktop app before connect.
+- **Authenticator CAPTCHA (macOS):** native WKWebView helper (`bun run build:captcha` if postinstall skipped; needs Xcode CLT). Solve CAPTCHA in that window, not Safari.
+- Optional: [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`)
+
 ## Quick start
 
 ```bash
@@ -43,13 +50,6 @@ proton auth sync
 proton auth code github
 proton status --json
 proton signout
-```
-
-Legacy:
-
-```bash
-protonvpn status --json
-protonauth list
 ```
 
 ## Shared sign-in
@@ -68,25 +68,48 @@ proton status
 proton signout
 ```
 
-Account should be in [Single Password Mode](https://proton.me/support/single-password). TOTP 2FA is supported; FIDO2/security keys are not.
+### Proton Pass
+
+```bash
+pass-cli login   # once, if needed
+proton signin --pass "pass://Personal/Proton"
+# or:
+export PROTON_PASS="pass://Personal/Proton"
+proton signin
+# or field refs:
+export PROTON_PASSWORD='pass://Personal/Proton/password'
+export PROTON_TOTP='pass://Personal/Proton/totp'
+pass-cli run -- proton signin
+```
+
+Env aliases: `PROTON_PASS`, `PROTONVPN_PASS`, `PROTONAUTH_PASS`, `PROTON_USERNAME`, `PROTON_PASSWORD`, `PROTON_TOTP`. Never log resolved secrets.
 
 ## VPN (`proton vpn …`)
 
-Needs system WireGuard tools (`proton vpn setup` can help). Close the Proton VPN desktop app before connecting.
-
 ```bash
 proton vpn setup
-proton vpn signin                   # product-only (prefer proton signin)
 proton vpn countries
 proton vpn servers --country US
 proton vpn connect --country US
 proton vpn connect --city "New York"
 proton vpn connect US#23
 proton vpn connect --p2p
+proton vpn connect --securecore
+proton vpn connect --tor
+proton vpn connect --free-only
 proton vpn status --json
 proton vpn disconnect
 proton vpn tui
 ```
+
+| Flag | Meaning |
+|------|---------|
+| `--country <code>` | Exit country (e.g. `NL`) |
+| `--city <name>` | City name |
+| `--p2p` | P2P servers |
+| `--securecore` | Secure Core |
+| `--tor` | Tor over VPN |
+| `--free-only` | Free-tier only |
 
 On macOS, connect/disconnect may need sudo. In agent mode use `--sudo` only when an interactive password prompt is OK; otherwise `sudo -n` / elevated shell.
 
@@ -95,6 +118,7 @@ On macOS, connect/disconnect may need sudo. In agent mode use `--sudo` only when
 ```bash
 proton auth sync
 proton auth list
+proton auth list --type totp
 proton auth code github
 proton auth status --output json
 proton auth tui
@@ -105,6 +129,9 @@ CAPTCHA (if required) needs a human on macOS; agents should reuse an existing se
 ## Agent / scripting
 
 ```bash
+export PROTON_AGENT=1
+export PROTONVPN_AGENT=1
+export PROTONAUTH_AGENT=1
 proton status --json
 proton vpn status --json
 proton vpn connect --json --country US
@@ -114,12 +141,17 @@ proton auth code github --output json
 
 | Flag / env | Meaning |
 |---|---|
-| `--json` / `PROTONVPN_JSON=1` | JSON on stdout for supported commands |
+| `--json` / `PROTONVPN_JSON=1` | JSON on stdout (VPN / shared) |
+| `--output json\|plain\|ink` / `PROTONAUTH_OUTPUT` | Authenticator output format |
 | `-y` / `--yes` | Non-interactive confirms |
 | `--sudo` | Allow interactive macOS sudo for WireGuard |
-| `CI=true` / `PROTON_AGENT=1` | Agent-friendly (no accidental TUI) |
+| `PROTON_AGENT=1` | Root agent-friendly (no accidental TUI) |
+| `PROTONVPN_AGENT=1` | VPN agent mode |
+| `PROTONAUTH_AGENT=1` / `CI=1` | Auth agent mode (default JSON; no CAPTCHA window / TUI) |
 
-Prefer subcommands over the TUI. No-args `proton` on a non-TTY exits with usage.
+VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
+
+Prefer subcommands over the TUI. No-args `proton` on a non-TTY exits with usage. Auth CAPTCHA never opens in agent mode (`captcha_required`).
 
 ## Update
 

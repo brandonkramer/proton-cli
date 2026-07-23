@@ -190,7 +190,7 @@ export async function solveCaptchaInBrowser(
 
   if (preferNonInteractive()) {
     throw new CliError(
-      "CAPTCHA required. Run `protonauth signin` interactively once " +
+      "CAPTCHA required. Run `proton auth signin` (or `proton signin`) interactively once " +
         "(solve the floating native window), then retry from the agent.",
       "captcha_required",
     );
@@ -201,7 +201,7 @@ export async function solveCaptchaInBrowser(
   if (process.platform !== "darwin") {
     throw new CliError(
       "CAPTCHA is currently supported on macOS only (native WKWebView helper).\n" +
-        "Run `protonauth signin` from a Mac desktop session.",
+        "Run `proton auth signin` (or `proton signin`) from a Mac desktop session.",
       "captcha_unsupported",
     );
   }

@@ -13,16 +13,15 @@ const source = join(root, "scripts", "captcha-webview.swift");
 
 if (process.platform !== "darwin") {
   console.log(
-    "@bkramer/proton-authenticator: CAPTCHA helper is macOS-only; skipping build",
+    "@bkramer/proton-cli: CAPTCHA helper is macOS-only; skipping build",
   );
   process.exit(0);
 }
 
 if (await Bun.file(bin).exists()) {
-  console.log("@bkramer/proton-authenticator: CAPTCHA helper already built");
+  console.log("@bkramer/proton-cli: CAPTCHA helper already built");
   process.exit(0);
 }
-
 await mkdir(binDir, { recursive: true });
 
 const proc = Bun.spawn(["swiftc", "-O", "-o", bin, source], {
@@ -38,13 +37,13 @@ const [stdout, stderr, exitCode] = await Promise.all([
 
 if (exitCode !== 0) {
   console.log(
-    "proton-authenticator-cli: could not build CAPTCHA helper (needs Xcode CLT).",
+    "@bkramer/proton-cli: could not build CAPTCHA helper (needs Xcode CLT).",
   );
   if (stderr.trim() || stdout.trim()) {
     console.log(stderr.trim() || stdout.trim());
   }
   console.log(
-    "proton-authenticator-cli: retry later with: bun run build:captcha",
+    "@bkramer/proton-cli: retry later with: bun run build:captcha",
   );
   process.exit(0);
 }
@@ -55,5 +54,5 @@ try {
   // ignore
 }
 
-console.log("proton-authenticator-cli: CAPTCHA helper built (bin/captcha-webview)");
+console.log("@bkramer/proton-cli: CAPTCHA helper built (bin/captcha-webview)");
 process.exit(0);

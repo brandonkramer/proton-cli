@@ -39,7 +39,7 @@ export function registerCode(program: Command): void {
       const local = await loadLocalEntries();
       if (local.entries.length === 0) {
         throw new CliError(
-          'No local entries. Run "protonauth sync" first.',
+          'No local entries. Run "proton auth sync" first.',
           "no_entries",
         );
       }
@@ -49,7 +49,7 @@ export function registerCode(program: Command): void {
         if (format !== "ink" || preferNonInteractive()) {
           throw new CliError(
             "Query required in non-interactive mode.\n" +
-              "Usage: protonauth code <issuer-or-name> --output json",
+              "Usage: proton auth code <issuer-or-name> --output json",
             "query_required",
           );
         }

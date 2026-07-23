@@ -126,7 +126,7 @@ export async function showHome(): Promise<TuiIntent> {
               }}
             />
           ) : null}
-          <Footer text="Tip: run protonvpn connect --country US for scripting" />
+          <Footer text="Tip: run proton vpn connect --country US for scripting" />
         </Box>
       );
     }

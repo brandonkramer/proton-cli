@@ -29,6 +29,23 @@ bun install
 bun link
 ```
 
+## Requirements
+
+- Bun ≥ 1.1
+- Proton account in [Single Password Mode](https://proton.me/support/single-password)
+- TOTP if you use 2FA (FIDO2/security keys are not supported)
+- **VPN — WireGuard tools** (install tries this via Homebrew / winget; or `proton vpn setup`)
+  - **macOS:** Homebrew → `wireguard-tools` (sudo for connect/disconnect)
+  - **Windows:** WireGuard app via winget (Administrator terminal for connect/disconnect)
+- **Authenticator — CAPTCHA (macOS):** native WKWebView helper, built on `postinstall` when possible (`bun run build:captcha` to retry; needs Xcode CLT)
+- Optional: [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`) for credential injection
+
+Close the Proton VPN desktop app before connecting so tunnels do not conflict.
+
+On macOS, VPN connect/disconnect may ask for your **Mac login password** (sudo), not your Proton password.
+
+CAPTCHA (if Proton requires it on sign-in): solve it in the **native WKWebView window**, not Safari/`verify.proton.me`.
+
 ## Commands
 
 Global options: `--json`, `-y` / `--yes`, `--sudo` (WireGuard on macOS).
@@ -48,8 +65,6 @@ proton update
 
 ### VPN (`proton vpn …`)
 
-Needs system WireGuard (`proton vpn setup` can install tools). Close the Proton VPN desktop app before connecting.
-
 ```bash
 proton vpn setup
 proton vpn countries
@@ -63,6 +78,17 @@ proton vpn disconnect
 proton vpn tui
 ```
 
+| Flag | Meaning |
+|------|---------|
+| `--country <code>` | Exit country (e.g. `NL`) |
+| `--city <name>` | City name |
+| `--p2p` | P2P servers |
+| `--securecore` | Secure Core |
+| `--tor` | Tor over VPN |
+| `--free-only` | Free-tier only |
+
+Country / feature availability depends on your Proton plan.
+
 ### Authenticator (`proton auth …`)
 
 ```bash
@@ -74,6 +100,52 @@ proton auth tui
 ```
 
 Product-only `proton vpn signin` / `proton auth signin` exist; prefer shared `proton signin`.
+
+## Proton Pass (optional)
+
+If you use [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`):
+
+```bash
+pass-cli login   # once, if needed
+proton signin --pass "pass://Personal/Proton"
+# or:
+export PROTON_PASS="pass://Personal/Proton"
+proton signin
+```
+
+Also supported:
+
+```bash
+export PROTON_PASSWORD='pass://Personal/Proton/password'
+export PROTON_TOTP='pass://Personal/Proton/totp'   # optional
+pass-cli run -- proton signin
+```
+
+`Vault/Item` works too (`pass://` prefix optional). Env aliases: `PROTON_PASS`, `PROTONVPN_PASS`, `PROTONAUTH_PASS`, `PROTON_USERNAME`, `PROTON_PASSWORD`, `PROTON_TOTP`. Interactive prompts remain the default when Pass is unset. Never log resolved secrets.
+
+## Agents / scripting
+
+```bash
+proton status --json
+proton vpn status --json
+proton vpn connect --json --country US
+proton auth status --output json
+proton auth code github --output json
+```
+
+| Flag / env | Meaning |
+|---|---|
+| `--json` / `PROTONVPN_JSON=1` | JSON on stdout (VPN / shared) |
+| `--output json\|plain\|ink` / `PROTONAUTH_OUTPUT` | Authenticator output format |
+| `-y` / `--yes` | Non-interactive confirms |
+| `--sudo` | Allow interactive macOS sudo for WireGuard |
+| `PROTON_AGENT=1` | Root `proton` agent-friendly (no accidental TUI) |
+| `PROTONVPN_AGENT=1` | VPN agent mode (JSON-friendly; `sudo -n` only unless `--sudo`) |
+| `PROTONAUTH_AGENT=1` / `CI=1` | Auth agent mode (default JSON; no CAPTCHA window / TUI) |
+
+VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
+
+CAPTCHA never opens a window in agent mode (`captcha_required` — sign in interactively once, then reuse the session).
 
 ## Monorepo
 
@@ -93,14 +165,6 @@ Proton VPN and Authenticator use **different API hosts and app-version headers**
 ## Agent skill
 
 End-user usage skill for agents: [`skills/proton-cli/SKILL.md`](./skills/proton-cli/SKILL.md).
-
-## Release
-
-GitHub Actions workflow **Release** (`workflow_dispatch` with a semver version) bumps `package.json`, tags `v*`, creates a GitHub Release, and publishes `@bkramer/proton-cli` to npm via Trusted Publisher (environment `npm`).
-
-```bash
-gh workflow run Release -f version=0.1.1
-```
 
 ## License
 

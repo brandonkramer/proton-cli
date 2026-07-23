@@ -8,11 +8,11 @@ import {
 } from "../src/setup/wireguard.ts";
 
 const result = await ensureWireGuardInstalled();
-console.log(`proton-vpn-cli: ${formatSetupResult(result)}`);
+console.log(`@bkramer/proton-cli: ${formatSetupResult(result)}`);
 
 if (result.status === "failed") {
   console.log(
-    "proton-vpn-cli: You can retry later with: protonvpn setup",
+    "@bkramer/proton-cli: You can retry later with: proton vpn setup",
   );
 }
 

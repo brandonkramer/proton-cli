@@ -35,7 +35,7 @@ export async function resolveAccountPassword(options: {
   return inkPromptPassword("Proton password", {
     hint:
       options.promptHint ??
-      `Account password (Single Password Mode). Prefer Pass: export ${PASSWORD_ENV}='pass://…' && pass-cli run -- protonauth …`,
+      `Account password (Single Password Mode). Prefer Pass: export ${PASSWORD_ENV}='pass://…' && pass-cli run -- proton signin`,
   });
 }
 
