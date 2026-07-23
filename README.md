@@ -2,14 +2,6 @@
 
 Unofficial unified Proton command-line client (**VPN + Authenticator**) with one install and shared sign-in UX.
 
-```bash
-proton signin --pass pass://Vault/Proton   # credentials once → vpn + authenticator sessions
-proton vpn connect --country US
-proton auth code github
-proton status --json
-proton signout
-```
-
 > **Not an official Proton product.** Not affiliated with Proton AG.
 
 ## Install
