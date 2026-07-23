@@ -1,7 +1,7 @@
 {
   "name": "@proton-cli/core",
   "version": "0.1.0",
-  "description": "Shared account, session, and agent primitives for proton-cli",
+  "description": "Shared account, session, and agent primitives for proton-unified-cli",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "private": true,

@@ -5,10 +5,12 @@
     "": {
       "name": "proton-cli",
       "dependencies": {
-        "@proton-cli/authenticator": "workspace:*",
-        "@proton-cli/core": "workspace:*",
-        "@proton-cli/vpn": "workspace:*",
+        "@inkjs/ui": "^2.0.0",
+        "@protontech/authenticator-rust-core": "1.7.2",
+        "@protontech/crypto": "^2.1.1",
         "commander": "^14.0.0",
+        "ink": "^7.1.1",
+        "react": "^19.2.8",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -19,15 +21,6 @@
     "packages/authenticator": {
       "name": "@proton-cli/authenticator",
       "version": "0.1.0",
-      "dependencies": {
-        "@inkjs/ui": "^2.0.0",
-        "@proton-cli/core": "workspace:*",
-        "@protontech/authenticator-rust-core": "1.7.2",
-        "@protontech/crypto": "^2.1.1",
-        "commander": "^14.0.0",
-        "ink": "^7.1.1",
-        "react": "^19.2.8",
-      },
     },
     "packages/core": {
       "name": "@proton-cli/core",
@@ -36,14 +29,6 @@
     "packages/vpn": {
       "name": "@proton-cli/vpn",
       "version": "0.1.0",
-      "dependencies": {
-        "@inkjs/ui": "^2.0.0",
-        "@proton-cli/core": "workspace:*",
-        "@protontech/crypto": "^2.1.1",
-        "commander": "^14.0.0",
-        "ink": "^7.1.1",
-        "react": "^19.2.8",
-      },
     },
   },
   "packages": {

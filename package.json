@@ -1,17 +1,27 @@
 {
-  "name": "proton-cli",
+  "name": "proton-unified-cli",
   "version": "0.1.0",
   "description": "Unofficial unified Proton CLI (VPN, Authenticator, shared sign-in)",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brandonkramer/proton-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brandonkramer/proton-cli/issues"
+  },
+  "homepage": "https://github.com/brandonkramer/proton-cli#readme",
   "author": "Brandon Kramer",
   "keywords": [
     "proton",
     "protonvpn",
     "authenticator",
     "cli",
-    "bun"
+    "bun",
+    "wireguard",
+    "totp"
   ],
   "bin": {
     "proton": "./src/index.ts",
@@ -24,12 +34,16 @@
   "files": [
     "src",
     "packages",
+    "scripts",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
+    "MIGRATION.md",
     "package.json",
     "tsconfig.json"
   ],
   "scripts": {
+    "postinstall": "bun run scripts/postinstall.ts",
     "start": "bun run src/index.ts",
     "proton": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
@@ -40,10 +54,12 @@
     "bun": ">=1.1.0"
   },
   "dependencies": {
-    "@proton-cli/authenticator": "workspace:*",
-    "@proton-cli/core": "workspace:*",
-    "@proton-cli/vpn": "workspace:*",
-    "commander": "^14.0.0"
+    "@inkjs/ui": "^2.0.0",
+    "@protontech/authenticator-rust-core": "1.7.2",
+    "@protontech/crypto": "^2.1.1",
+    "commander": "^14.0.0",
+    "ink": "^7.1.1",
+    "react": "^19.2.8"
   },
   "devDependencies": {
     "@types/bun": "latest",

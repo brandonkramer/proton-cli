@@ -20,7 +20,9 @@ async function currentVersion(): Promise<string> {
 export function registerUpdate(program: Command): void {
   program
     .command("update")
-    .description("Update proton-cli to the latest version (or a given one)")
+    .description(
+      "Update proton-unified-cli to the latest version (or a given one)",
+    )
     .argument("[version]", "Target version (default: latest)")
     .option("--check", "Only check for updates; do not install")
     .action(async (versionArg: string | undefined, opts: { check?: boolean }) => {
@@ -57,7 +59,7 @@ export function registerUpdate(program: Command): void {
 
         if (!wantsJson()) {
           console.log(
-            `Updating proton-cli ${info.current} → ${latest} via ${plan.command}…`,
+            `Updating proton-unified-cli ${info.current} → ${latest} via ${plan.command}…`,
           );
         }
 
