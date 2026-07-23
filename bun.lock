@@ -20,8 +20,13 @@
       "name": "@proton-cli/authenticator",
       "version": "0.1.0",
       "dependencies": {
+        "@inkjs/ui": "^2.0.0",
         "@proton-cli/core": "workspace:*",
+        "@protontech/authenticator-rust-core": "1.7.2",
+        "@protontech/crypto": "^2.1.1",
         "commander": "^14.0.0",
+        "ink": "^7.1.1",
+        "react": "^19.2.8",
       },
     },
     "packages/core": {
@@ -55,6 +60,8 @@
     "@proton-cli/core": ["@proton-cli/core@workspace:packages/core"],
 
     "@proton-cli/vpn": ["@proton-cli/vpn@workspace:packages/vpn"],
+
+    "@protontech/authenticator-rust-core": ["@protontech/authenticator-rust-core@1.7.2", "", {}, "sha512-bBJs46iyl1qM+rYU4+gsW6B8yKqpWMiNrrrePEErY1THdb/ZawGuQNQwiJ/iYgDfN0WUTijO3LauoFAp8mrM1Q=="],
 
     "@protontech/crypto": ["@protontech/crypto@2.1.1", "", { "dependencies": { "@noble/hashes": "^2.2.0", "@openpgp/web-stream-tools": "~0.3.1", "bcryptjs": "^3.0.3", "comlink": "^4.4.2", "core-js": "^3.49.0", "jsmimeparser": "npm:@protontech/jsmimeparser@^3.0.2", "openpgp": "npm:@protontech/openpgp@~6.3.1-0" } }, "sha512-ZQX+xFDOTYA297gdjDPbw4IIx6ULTYajjA0dNg8xUMJuFkXgmQDbQupUoCoZfez2iCf9bEzfQcZRq5vfWroPeA=="],
 

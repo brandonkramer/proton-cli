@@ -1,16 +1,34 @@
-import type {
-  ProductAuthenticator,
-  SignInCredentials,
+import {
+  saveProductSession,
+  type ProductAuthenticator,
 } from "@proton-cli/core";
+import {
+  ensureFullScope,
+  loginWithPassword,
+  normalizeUsername,
+  persistSession,
+} from "./proton/auth.ts";
 
 /**
- * Placeholder until the full authenticator-api SRP + key unlock flow is ported.
- * Real implementation must mint a session against authenticator-api.proton.me only.
+ * Dual-mint authenticator for Authenticator API (authenticator-api.proton.me).
+ * Also writes the product-local session.json used by auth commands.
  */
 export const authenticateAuthenticator: ProductAuthenticator = async (
-  _credentials: SignInCredentials,
+  credentials,
 ) => {
-  throw new Error(
-    "Authenticator authenticator not ported yet. Use the sibling proton-authenticator-cli for live sign-in, or wait for PH2 port.",
-  );
+  const username = normalizeUsername(credentials.username);
+  let session = await loginWithPassword({
+    username,
+    password: credentials.password,
+    totp: credentials.totp,
+  });
+
+  if (credentials.totp) {
+    session = await ensureFullScope(session, credentials.totp);
+  }
+
+  await persistSession(session, username);
+  await saveProductSession("authenticator", session, username);
+
+  return { product: "authenticator", session };
 };

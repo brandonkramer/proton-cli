@@ -1,44 +1,33 @@
 import type { Command } from "commander";
+import { registerCode } from "./commands/code.ts";
+import { registerList } from "./commands/list.ts";
+import { registerSignin } from "./commands/signin.ts";
+import { registerSignout } from "./commands/signout.ts";
+import { registerStatus } from "./commands/status.ts";
+import { registerSync } from "./commands/sync.ts";
+import { launchTui } from "./tui/launch.ts";
+import { shouldRefuseInteractiveMenu } from "./util/agent.ts";
 
-/** Register `proton auth …` subcommands. Full port lands in PH2. */
+/** Register `proton auth …` (and legacy `protonauth …`) commands. */
 export function registerAuthCommands(auth: Command): void {
-  auth
-    .command("status")
-    .description("Show Authenticator session / sync status (port in progress)")
-    .option("--json", "Machine-readable JSON")
-    .option("--output <format>", "Output format (json|text)", "text")
-    .action(async function (this: Command) {
-      const opts = this.optsWithGlobals() as { json?: boolean; output?: string };
-      const payload = {
-        version: 1,
-        product: "authenticator",
-        ported: false,
-        message:
-          "Authenticator commands are scaffolding in the monorepo; full port from proton-authenticator-cli is next.",
-      };
-      if (opts.json || opts.output === "json") {
-        console.log(JSON.stringify(payload, null, 2));
-        return;
-      }
-      console.log(payload.message);
-    });
+  registerSignin(auth);
+  registerSignout(auth);
+  registerSync(auth);
+  registerList(auth);
+  registerCode(auth);
+  registerStatus(auth);
 
-  for (const name of [
-    "signin",
-    "signout",
-    "sync",
-    "list",
-    "code",
-  ] as const) {
-    auth
-      .command(name)
-      .description(`Authenticator ${name} (port in progress — see proton-authenticator-cli)`)
-      .allowUnknownOption(true)
-      .action(async () => {
+  auth
+    .command("tui")
+    .description("Open the interactive Authenticator menu")
+    .action(async () => {
+      if (shouldRefuseInteractiveMenu()) {
         console.error(
-          `proton auth ${name}: not ported yet. Use proton-authenticator-cli meanwhile, or continue the monorepo PH2 port.`,
+          "proton auth tui: refused in agent/non-interactive mode.\n" +
+            "Unset PROTONAUTH_AGENT/CI and use a TTY, or call a subcommand directly.",
         );
-        process.exitCode = 1;
-      });
-  }
+        process.exit(2);
+      }
+      await launchTui();
+    });
 }
