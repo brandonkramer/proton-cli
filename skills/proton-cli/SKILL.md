@@ -2,9 +2,14 @@
 name: proton-cli
 description: >-
   Use the unofficial unified Proton CLI (proton / @bkramer/proton-cli): install,
-  shared sign-in (Pass-aware dual-mint), VPN connect/disconnect, Authenticator
-  sync/codes, status/signout, and agent scripting with --json. Use when the user
-  wants to run proton, protonvpn, or protonauth from the unified package.
+  shared Pass-aware sign-in (dual-mint), WireGuard VPN connect/disconnect,
+  Authenticator TOTP/Steam sync and codes, status/signout, update, and agent
+  scripting with --json / pass:// / pass-cli. Use when the user wants to run
+  proton, protonvpn, or protonauth, automate Proton VPN or Authenticator from a
+  terminal or AI agent, or set up Pass-based sign-in for the unified package.
+  Do not invoke for official Proton apps, FIDO2/security-key auth, or general
+  networking troubleshooting unrelated to this CLI.
+short-description: Unified Proton CLI (VPN + Authenticator)
 ---
 
 # proton (@bkramer/proton-cli)
