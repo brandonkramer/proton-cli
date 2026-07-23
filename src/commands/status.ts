@@ -2,7 +2,7 @@ import {
   listSavedSessions,
   loadAccount,
   PRODUCTS,
-} from "@proton-cli/core";
+} from "@bkramer/proton-core";
 import type { Command } from "commander";
 
 export function registerStatus(program: Command): void {

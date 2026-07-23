@@ -1,4 +1,4 @@
-import type { ProductAuthenticator } from "@proton-cli/core";
+import type { ProductAuthenticator } from "@bkramer/proton-core";
 import {
   ensureVpnScope,
   loginWithPassword,

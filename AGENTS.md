@@ -10,9 +10,9 @@ Unofficial unified Proton CLI. Bun workspaces under `packages/`.
 
 | Path | Package | Owns |
 |---|---|---|
-| `packages/core` | `@proton-cli/core` | Shared config root, multi-product sessions, dual-mint sign-in, agent/errors helpers |
-| `packages/vpn` | `@proton-cli/vpn` | VPN API + WireGuard commands (`proton vpn …`) |
-| `packages/authenticator` | `@proton-cli/authenticator` | Authenticator sync/codes (`proton auth …`) |
+| `packages/core` | `@bkramer/proton-core` | Shared config root, multi-product sessions, dual-mint sign-in, agent/errors helpers |
+| `packages/vpn` | `@bkramer/proton-vpn` | VPN API + WireGuard commands (`proton vpn …`) |
+| `packages/authenticator` | `@bkramer/proton-authenticator` | Authenticator sync/codes (`proton auth …`) |
 | `src/` | root bins | `proton` router, `protonvpn` / `protonauth` wrappers |
 
 ## Rules

@@ -1,7 +1,7 @@
 import {
   authenticateAuthenticator,
   clearAuthenticatorState,
-} from "@proton-cli/authenticator";
+} from "@bkramer/proton-authenticator";
 import {
   dualMintSignIn,
   parseProductList,
@@ -9,8 +9,8 @@ import {
   resolvePassRefFromEnv,
   resolvePassTotp,
   type SignInCredentials,
-} from "@proton-cli/core";
-import { authenticateVpn, clearVpnSession } from "@proton-cli/vpn";
+} from "@bkramer/proton-core";
+import { authenticateVpn, clearVpnSession } from "@bkramer/proton-vpn";
 import type { Command } from "commander";
 
 async function readCredentials(opts: {

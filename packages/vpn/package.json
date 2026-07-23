@@ -1,5 +1,5 @@
 {
-  "name": "@proton-cli/vpn",
+  "name": "@bkramer/proton-vpn",
   "version": "0.1.0",
   "description": "Proton VPN product commands for @bkramer/proton-cli",
   "license": "GPL-3.0-or-later",

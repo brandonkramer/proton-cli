@@ -1,5 +1,5 @@
 /**
- * Ensure @proton-cli/* resolves after install (npm tarball or bun workspaces).
+ * Ensure @bkramer/proton-* workspace packages resolve after install.
  * Safe to re-run; never fails the overall install.
  */
 import { lstat, mkdir, rm, symlink } from "node:fs/promises";
@@ -9,9 +9,9 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const packages: Array<[string, string]> = [
-  ["@proton-cli/core", "packages/core"],
-  ["@proton-cli/vpn", "packages/vpn"],
-  ["@proton-cli/authenticator", "packages/authenticator"],
+  ["@bkramer/proton-core", "packages/core"],
+  ["@bkramer/proton-vpn", "packages/vpn"],
+  ["@bkramer/proton-authenticator", "packages/authenticator"],
 ];
 
 async function linkOne(name: string, rel: string): Promise<void> {

@@ -19,32 +19,32 @@
       },
     },
     "packages/authenticator": {
-      "name": "@proton-cli/authenticator",
+      "name": "@bkramer/proton-authenticator",
       "version": "0.1.0",
     },
     "packages/core": {
-      "name": "@proton-cli/core",
+      "name": "@bkramer/proton-core",
       "version": "0.1.0",
     },
     "packages/vpn": {
-      "name": "@proton-cli/vpn",
+      "name": "@bkramer/proton-vpn",
       "version": "0.1.0",
     },
   },
   "packages": {
     "@alcalzone/ansi-tokenize": ["@alcalzone/ansi-tokenize@0.3.0", "", { "dependencies": { "ansi-styles": "^6.2.1", "is-fullwidth-code-point": "^5.0.0" } }, "sha512-p+CMKJ93HFmLkjXKlXiVGlMQEuRb6H0MokBSwUsX+S6BRX8eV5naFZpQJFfJHjRZY0Hmnqy1/r6UWl3x+19zYA=="],
 
+    "@bkramer/proton-authenticator": ["@bkramer/proton-authenticator@workspace:packages/authenticator"],
+
+    "@bkramer/proton-core": ["@bkramer/proton-core@workspace:packages/core"],
+
+    "@bkramer/proton-vpn": ["@bkramer/proton-vpn@workspace:packages/vpn"],
+
     "@inkjs/ui": ["@inkjs/ui@2.0.0", "", { "dependencies": { "chalk": "^5.3.0", "cli-spinners": "^3.0.0", "deepmerge": "^4.3.1", "figures": "^6.1.0" }, "peerDependencies": { "ink": ">=5" } }, "sha512-5+8fJmwtF9UvikzLfph9sA+LS+l37Ij/szQltkuXLOAXwNkBX9innfzh4pLGXIB59vKEQUtc6D4qGvhD7h3pAg=="],
 
     "@noble/hashes": ["@noble/hashes@2.2.0", "", {}, "sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg=="],
 
     "@openpgp/web-stream-tools": ["@openpgp/web-stream-tools@0.3.1", "", { "peerDependencies": { "@types/node": ">=18.0.0", "typescript": ">=4.7" }, "optionalPeers": ["@types/node", "typescript"] }, "sha512-EV+VQ4Dr8b+JmlGnc74FLgx7EhLyydOr4j6s6Hp+2scQh6sLQMs2h+1oEYUIslXcQPicWKG5ZQx+/dua0dgPWA=="],
-
-    "@proton-cli/authenticator": ["@proton-cli/authenticator@workspace:packages/authenticator"],
-
-    "@proton-cli/core": ["@proton-cli/core@workspace:packages/core"],
-
-    "@proton-cli/vpn": ["@proton-cli/vpn@workspace:packages/vpn"],
 
     "@protontech/authenticator-rust-core": ["@protontech/authenticator-rust-core@1.7.2", "", {}, "sha512-bBJs46iyl1qM+rYU4+gsW6B8yKqpWMiNrrrePEErY1THdb/ZawGuQNQwiJ/iYgDfN0WUTijO3LauoFAp8mrM1Q=="],
 

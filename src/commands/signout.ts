@@ -1,6 +1,6 @@
-import { signOutAuthenticator } from "@proton-cli/authenticator";
-import { clearAllSessions } from "@proton-cli/core";
-import { signOutVpn } from "@proton-cli/vpn";
+import { signOutAuthenticator } from "@bkramer/proton-authenticator";
+import { clearAllSessions } from "@bkramer/proton-core";
+import { signOutVpn } from "@bkramer/proton-vpn";
 import type { Command } from "commander";
 
 export function registerSignout(program: Command): void {
