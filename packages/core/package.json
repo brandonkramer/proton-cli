@@ -1,5 +1,5 @@
 {
-  "name": "@proton-cli/core",
+  "name": "@bkramer/proton-core",
   "version": "0.1.0",
   "description": "Shared account, session, and agent primitives for @bkramer/proton-cli",
   "license": "GPL-3.0-or-later",

@@ -17,12 +17,12 @@
     "noImplicitOverride": true,
     "types": ["bun"],
     "paths": {
-      "@proton-cli/core": ["./packages/core/src/index.ts"],
-      "@proton-cli/core/*": ["./packages/core/src/*"],
-      "@proton-cli/vpn": ["./packages/vpn/src/index.ts"],
-      "@proton-cli/vpn/*": ["./packages/vpn/src/*"],
-      "@proton-cli/authenticator": ["./packages/authenticator/src/index.ts"],
-      "@proton-cli/authenticator/*": ["./packages/authenticator/src/*"]
+      "@bkramer/proton-core": ["./packages/core/src/index.ts"],
+      "@bkramer/proton-core/*": ["./packages/core/src/*"],
+      "@bkramer/proton-vpn": ["./packages/vpn/src/index.ts"],
+      "@bkramer/proton-vpn/*": ["./packages/vpn/src/*"],
+      "@bkramer/proton-authenticator": ["./packages/authenticator/src/index.ts"],
+      "@bkramer/proton-authenticator/*": ["./packages/authenticator/src/*"]
     }
   },
   "include": ["src/**/*", "packages/*/src/**/*", "packages/*/tests/**/*", "tests/**/*"],

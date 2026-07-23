@@ -13,13 +13,13 @@ const source = join(root, "scripts", "captcha-webview.swift");
 
 if (process.platform !== "darwin") {
   console.log(
-    "@proton-cli/authenticator: CAPTCHA helper is macOS-only; skipping build",
+    "@bkramer/proton-authenticator: CAPTCHA helper is macOS-only; skipping build",
   );
   process.exit(0);
 }
 
 if (await Bun.file(bin).exists()) {
-  console.log("@proton-cli/authenticator: CAPTCHA helper already built");
+  console.log("@bkramer/proton-authenticator: CAPTCHA helper already built");
   process.exit(0);
 }
 

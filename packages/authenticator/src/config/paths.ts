@@ -1,4 +1,4 @@
-import { productDataDir } from "@proton-cli/core";
+import { productDataDir } from "@bkramer/proton-core";
 import { join } from "node:path";
 
 /** Authenticator state under ~/.config/proton-cli/authenticator/ */

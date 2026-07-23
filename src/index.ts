@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
-import { registerAuthCommands } from "@proton-cli/authenticator";
-import { registerVpnCommands } from "@proton-cli/vpn";
+import { registerAuthCommands } from "@bkramer/proton-authenticator";
+import { registerVpnCommands } from "@bkramer/proton-vpn";
 import { Command } from "commander";
 import { registerSignin } from "./commands/signin.ts";
 import { registerSignout } from "./commands/signout.ts";

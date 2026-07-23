@@ -48,9 +48,9 @@ bun link
 
 | Path | Package | Owns |
 |---|---|---|
-| `packages/core` | `@proton-cli/core` | Shared config, dual-mint sessions, Pass helpers |
-| `packages/vpn` | `@proton-cli/vpn` | WireGuard + vpn-api (`proton vpn …`) |
-| `packages/authenticator` | `@proton-cli/authenticator` | TOTP sync (`proton auth …`) |
+| `packages/core` | `@bkramer/proton-core` | Shared config, dual-mint sessions, Pass helpers |
+| `packages/vpn` | `@bkramer/proton-vpn` | WireGuard + vpn-api (`proton vpn …`) |
+| `packages/authenticator` | `@bkramer/proton-authenticator` | TOTP sync (`proton auth …`) |
 | `src/` | root bins | `proton` router + legacy wrappers |
 
 Config root: `~/.config/proton-cli/` with per-product sessions under `sessions/`.

@@ -1,5 +1,5 @@
 {
-  "name": "@proton-cli/authenticator",
+  "name": "@bkramer/proton-authenticator",
   "version": "0.1.0",
   "description": "Proton Authenticator product commands for @bkramer/proton-cli",
   "license": "GPL-3.0-or-later",

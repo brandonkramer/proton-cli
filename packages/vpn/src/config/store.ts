@@ -2,7 +2,7 @@ import {
   clearProductSession,
   loadProductSession,
   saveProductSession,
-} from "@proton-cli/core";
+} from "@bkramer/proton-core";
 import { chmod, mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import type {
   ActiveTunnel,

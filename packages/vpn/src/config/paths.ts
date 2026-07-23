@@ -1,4 +1,4 @@
-import { productDataDir } from "@proton-cli/core";
+import { productDataDir } from "@bkramer/proton-core";
 import { join } from "node:path";
 import { TUNNEL_INTERFACE } from "../proton/constants.ts";
 
