@@ -21,19 +21,21 @@ protonauth list            # → proton auth list
 
 ## Install
 
-Requires [Bun](https://bun.sh) ≥ 1.1.
+Requires [Bun](https://bun.sh) ≥ 1.1 at runtime (even when installing via npm).
+
+Package on npm: **`@bkramer/proton-cli`** (unscoped `proton-cli` is taken). Bins: `proton`, `protonvpn`, `protonauth`.
 
 ```bash
 bun add -g @bkramer/proton-cli
+# or
+npm install -g @bkramer/proton-cli
 ```
 
-Or from GitHub:
+From GitHub:
 
 ```bash
 bun install -g github:brandonkramer/proton-cli
 ```
-
-> npm name is **`@bkramer/proton-cli`** (unscoped `proton-cli` is taken on the registry). Bins are still `proton` / `protonvpn` / `protonauth`.
 
 ### From a clone
 
