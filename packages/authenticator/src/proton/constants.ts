@@ -36,4 +36,4 @@ export function appVersionHeader(): string {
 }
 
 export const APP_VERSION = appVersionHeader();
-export const USER_AGENT = `proton-authenticator-cli/${PACKAGE_VERSION}`;
+export const USER_AGENT = `@bkramer/proton-cli/${PACKAGE_VERSION}`;
