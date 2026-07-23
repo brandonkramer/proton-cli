@@ -8,9 +8,18 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "postinstall": "bun run scripts/patch-openpgp.ts && bun run scripts/ensure-wireguard.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
   "dependencies": {
+    "@inkjs/ui": "^2.0.0",
     "@proton-cli/core": "workspace:*",
-    "commander": "^14.0.0"
+    "@protontech/crypto": "^2.1.1",
+    "commander": "^14.0.0",
+    "ink": "^7.1.1",
+    "react": "^19.2.8"
   },
   "engines": {
     "bun": ">=1.1.0"
