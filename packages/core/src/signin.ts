@@ -21,6 +21,14 @@ export interface DualSignInOptions {
   partialOk?: boolean;
   /** Extra cleanup for product-local state when rolling back a failed dual mint. */
   clearers?: Partial<Record<ProductId, () => Promise<void>>>;
+  /**
+   * Called before each product mint. Use to refresh single-use TOTP codes
+   * (VPN and Authenticator each consume a code on their own API host).
+   */
+  prepareCredentials?: (
+    product: ProductId,
+    credentials: SignInCredentials,
+  ) => Promise<SignInCredentials>;
 }
 
 /**
@@ -36,6 +44,7 @@ export async function dualMintSignIn(
     authenticators,
     partialOk = false,
     clearers,
+    prepareCredentials,
   } = options;
   const succeeded: ProductId[] = [];
   const failed: DualSignInResult["failed"] = [];
@@ -52,13 +61,16 @@ export async function dualMintSignIn(
     }
 
     try {
-      const result = await authenticate(credentials);
+      const creds = prepareCredentials
+        ? await prepareCredentials(product, credentials)
+        : credentials;
+      const result = await authenticate(creds);
       if (result.product !== product) {
         throw new Error(
           `Authenticator for ${product} returned session for ${result.product}.`,
         );
       }
-      await saveProductSession(product, result.session, credentials.username);
+      await saveProductSession(product, result.session, creds.username);
       written.push(product);
       succeeded.push(product);
     } catch (error) {

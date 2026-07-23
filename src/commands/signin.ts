@@ -8,29 +8,30 @@ import {
   resolvePassLogin,
   resolvePassRefFromEnv,
   resolvePassTotp,
+  type ProductId,
   type SignInCredentials,
 } from "@bkramer/proton-core";
 import { authenticateVpn, clearVpnSession } from "@bkramer/proton-vpn";
 import type { Command } from "commander";
+import { createInterface } from "node:readline/promises";
 
 async function readCredentials(opts: {
   username?: string;
   password?: string;
   totp?: string;
   pass?: string;
-}): Promise<SignInCredentials> {
+}): Promise<{ credentials: SignInCredentials; passRef?: string }> {
   const passRef = resolvePassRefFromEnv(opts.pass);
   if (passRef) {
     const login = await resolvePassLogin(passRef);
-    const totp =
-      opts.totp ??
-      process.env.PROTON_TOTP ??
-      (await resolvePassTotp(passRef)) ??
-      undefined;
     return {
-      username: opts.username ?? login.username,
-      password: login.password,
-      totp,
+      passRef,
+      credentials: {
+        username: opts.username ?? login.username,
+        password: login.password,
+        // Prefer fresh Pass TOTP per product via prepareCredentials.
+        totp: opts.totp ?? process.env.PROTON_TOTP ?? undefined,
+      },
     };
   }
 
@@ -51,9 +52,63 @@ async function readCredentials(opts: {
   }
 
   return {
-    username,
-    password,
-    totp: opts.totp ?? process.env.PROTON_TOTP ?? process.env.PROTONVPN_TOTP,
+    credentials: {
+      username,
+      password,
+      totp: opts.totp ?? process.env.PROTON_TOTP ?? process.env.PROTONVPN_TOTP,
+    },
+  };
+}
+
+async function promptTotp(product: ProductId): Promise<string | undefined> {
+  if (!process.stdin.isTTY || !process.stdout.isTTY) return undefined;
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const label = product === "vpn" ? "VPN" : "Authenticator";
+    const value = await rl.question(
+      `TOTP for ${label} (fresh code; Enter to skip): `,
+    );
+    return value.trim() || undefined;
+  } finally {
+    rl.close();
+  }
+}
+
+function makePrepareCredentials(options: {
+  passRef?: string;
+  products: ProductId[];
+  staticTotp?: string;
+}): (
+  product: ProductId,
+  credentials: SignInCredentials,
+) => Promise<SignInCredentials> {
+  let index = 0;
+  return async (product, base) => {
+    const isFirst = index === 0;
+    index += 1;
+
+    if (options.passRef && !options.staticTotp) {
+      const totp = (await resolvePassTotp(options.passRef)) ?? undefined;
+      return { ...base, totp };
+    }
+
+    // Single --totp / env code only works for the first product (codes are single-use).
+    if (isFirst && (options.staticTotp || base.totp)) {
+      return { ...base, totp: options.staticTotp ?? base.totp };
+    }
+
+    if (options.products.length > 1) {
+      const totp = await promptTotp(product);
+      if (totp) return { ...base, totp };
+      if (!isFirst && (options.staticTotp || base.totp)) {
+        throw new Error(
+          `TOTP codes are single-use per API host. Provide a fresh code for ${product} ` +
+            `(interactive prompt), or use --pass so Pass can supply a new TOTP.`,
+        );
+      }
+    }
+
+    return base;
   };
 }
 
@@ -69,7 +124,10 @@ export function registerSignin(program: Command): void {
       "--pass <ref>",
       "Proton Pass login item (pass://Vault/Item). Also: PROTON_PASS / PROTONVPN_PASS / PROTONAUTH_PASS",
     )
-    .option("--totp <code>", "TOTP code if required")
+    .option(
+      "--totp <code>",
+      "TOTP for the first product only (codes are single-use; prefer --pass)",
+    )
     .option(
       "--products <list>",
       "Comma list: vpn,auth,all (default: all)",
@@ -92,7 +150,7 @@ export function registerSignin(program: Command): void {
       };
       try {
         const products = parseProductList(opts.products);
-        const credentials = await readCredentials(opts);
+        const { credentials, passRef } = await readCredentials(opts);
         const result = await dualMintSignIn({
           credentials,
           products,
@@ -105,10 +163,21 @@ export function registerSignin(program: Command): void {
             vpn: clearVpnSession,
             authenticator: clearAuthenticatorState,
           },
+          prepareCredentials: makePrepareCredentials({
+            passRef,
+            products,
+            staticTotp: opts.totp ?? process.env.PROTON_TOTP,
+          }),
         });
 
         if (opts.json) {
-          console.log(JSON.stringify({ version: 1, ok: result.failed.length === 0, ...result }, null, 2));
+          console.log(
+            JSON.stringify(
+              { version: 1, ok: result.failed.length === 0, ...result },
+              null,
+              2,
+            ),
+          );
         } else if (result.failed.length && result.succeeded.length === 0) {
           console.error("Sign-in failed:");
           for (const f of result.failed) {

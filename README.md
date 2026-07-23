@@ -33,7 +33,7 @@ bun link
 
 - Bun ≥ 1.1
 - Proton account in [Single Password Mode](https://proton.me/support/single-password)
-- TOTP if you use 2FA (FIDO2/security keys are not supported)
+- TOTP if you use 2FA (FIDO2/security keys are not supported). Shared sign-in mints **two** API sessions — each needs its **own fresh TOTP** (codes are single-use; the same code cannot be reused for VPN then Authenticator)
 - **VPN — WireGuard tools** (install tries this via Homebrew / winget; or `proton vpn setup`)
   - **macOS:** Homebrew → `wireguard-tools` (sudo for connect/disconnect)
   - **Windows:** WireGuard app via winget (Administrator terminal for connect/disconnect)
@@ -48,13 +48,16 @@ CAPTCHA (if Proton requires it on sign-in): solve it in the **native WKWebView w
 
 ## Commands
 
+Run `proton` with no args (TTY) for the interactive menu (VPN / Authenticator / sign-in).
+
 Global options: `--json`, `-y` / `--yes`, `--sudo` (WireGuard on macOS).
 
 ### Shared
 
 ```bash
+proton                            # interactive menu (TTY)
 proton signin
-proton signin --pass "pass://Vault/Item"
+proton signin --pass "pass://Vault/Item"   # recommended with 2FA (fresh TOTP per product)
 proton signin --products vpn          # or auth / all
 proton signin --partial-ok
 proton status --json
@@ -62,6 +65,8 @@ proton signout
 proton update --check
 proton update
 ```
+
+With 2FA, `proton signin` / TUI **Sign in** will ask for **TOTP for VPN**, then a **new** code for Authenticator. One code cannot cover both.
 
 ### VPN (`proton vpn …`)
 
@@ -75,7 +80,6 @@ proton vpn connect US#23
 proton vpn connect --p2p
 proton vpn status --json
 proton vpn disconnect
-proton vpn tui
 ```
 
 | Flag | Meaning |
@@ -96,7 +100,6 @@ proton auth sync
 proton auth list
 proton auth code github
 proton auth status --output json
-proton auth tui
 ```
 
 Product-only `proton vpn signin` / `proton auth signin` exist; prefer shared `proton signin`.
@@ -121,7 +124,7 @@ export PROTON_TOTP='pass://Personal/Proton/totp'   # optional
 pass-cli run -- proton signin
 ```
 
-`Vault/Item` works too (`pass://` prefix optional). Env aliases: `PROTON_PASS`, `PROTONVPN_PASS`, `PROTONAUTH_PASS`, `PROTON_USERNAME`, `PROTON_PASSWORD`, `PROTON_TOTP`. Interactive prompts remain the default when Pass is unset. Never log resolved secrets.
+`Vault/Item` works too (`pass://` prefix optional). Env aliases: `PROTON_PASS`, `PROTONVPN_PASS`, `PROTONAUTH_PASS`, `PROTON_USERNAME`, `PROTON_PASSWORD`, `PROTON_TOTP`. Interactive prompts remain the default when Pass is unset. Never log resolved secrets. With 2FA, `--pass` is ideal because Pass can supply a **new** TOTP for each product mint.
 
 ## Agents / scripting
 

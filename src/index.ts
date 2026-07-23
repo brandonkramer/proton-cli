@@ -6,6 +6,7 @@ import { registerSignin } from "./commands/signin.ts";
 import { registerSignout } from "./commands/signout.ts";
 import { registerStatus } from "./commands/status.ts";
 import { registerUpdate } from "./commands/update.ts";
+import { launchParentTui } from "./tui/launch.ts";
 
 const pkg = (await Bun.file(
   new URL("../package.json", import.meta.url),
@@ -17,7 +18,10 @@ if (argv.length === 0) {
     Boolean(process.stdin.isTTY) && Boolean(process.stdout.isTTY);
   const agent =
     process.env.CI === "1" ||
+    process.env.CI === "true" ||
     process.env.PROTON_AGENT === "1" ||
+    process.env.PROTONVPN_AGENT === "1" ||
+    process.env.PROTONAUTH_AGENT === "1" ||
     process.env.PROTONVPN_JSON === "1";
   if (!isTty || agent) {
     console.error(
@@ -27,8 +31,9 @@ if (argv.length === 0) {
     );
     process.exit(2);
   }
+  await launchParentTui();
+  process.exit(0);
 }
-
 const program = new Command();
 
 program

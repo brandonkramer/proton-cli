@@ -8,14 +8,7 @@ import { registerSignin } from "./commands/signin.ts";
 import { registerSignout } from "./commands/signout.ts";
 import { registerStatus } from "./commands/status.tsx";
 import { registerUpdate } from "./commands/update.ts";
-import { launchTui } from "./tui/launch.ts";
-import {
-  configureAgentFlags,
-  emitError,
-  shouldLaunchTui,
-  wantsJson,
-} from "./util/agent.ts";
-import { ExitCode } from "./util/exit.ts";
+import { configureAgentFlags } from "./util/agent.ts";
 
 /** Register `proton vpn …` (and legacy `protonvpn …`) commands. */
 export function registerVpnCommands(vpn: Command): void {
@@ -52,25 +45,4 @@ export function registerVpnCommands(vpn: Command): void {
   registerConnect(vpn);
   registerDisconnect(vpn);
   registerStatus(vpn);
-
-  vpn
-    .command("tui")
-    .description("Open the interactive VPN TUI")
-    .action(async () => {
-      if (!shouldLaunchTui() && wantsJson()) {
-        emitError(
-          "TUI is not available in JSON/agent mode. Use status, connect, etc.",
-          ExitCode.USAGE,
-        );
-        return;
-      }
-      if (!shouldLaunchTui()) {
-        emitError(
-          "TUI requires an interactive terminal (stdin/stdout TTY).",
-          ExitCode.USAGE,
-        );
-        return;
-      }
-      await launchTui();
-    });
 }

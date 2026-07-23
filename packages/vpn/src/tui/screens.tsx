@@ -12,7 +12,6 @@ import {
 
 export type TuiIntent =
   | { type: "quit" }
-  | { type: "signin" }
   | { type: "signout" }
   | { type: "disconnect" }
   | { type: "connect-fastest" }
@@ -68,13 +67,13 @@ export async function showHome(): Promise<TuiIntent> {
           : []),
         ...(snap?.signedIn
           ? [{ label: "Sign out", value: "signout" }]
-          : [{ label: "Sign in", value: "signin" }]),
-        { label: "Quit", value: "quit" },
+          : []),
+        { label: "Back", value: "quit" },
       ];
 
       return (
         <Box flexDirection="column">
-          <Brand subtitle="Interactive mode · ↑↓ enter · q quit" />
+          <Brand subtitle="VPN · ↑↓ enter · Esc/q back" />
           {loading ? <Spinner label="Loading status" /> : null}
           {error ? (
             <Alert variant="error" title="Error">
@@ -86,7 +85,7 @@ export async function showHome(): Promise<TuiIntent> {
               <StatusMessage variant={snap.signedIn ? "success" : "warning"}>
                 {snap.signedIn
                   ? `Signed in as ${snap.username}`
-                  : "Not signed in"}
+                  : "Not signed in — use proton menu Sign in"}
               </StatusMessage>
               <StatusMessage variant={snap.tunnelUp ? "success" : "warning"}>
                 {snap.tunnelUp
@@ -113,9 +112,6 @@ export async function showHome(): Promise<TuiIntent> {
                   case "disconnect":
                     resolve({ type: "disconnect" });
                     break;
-                  case "signin":
-                    resolve({ type: "signin" });
-                    break;
                   case "signout":
                     resolve({ type: "signout" });
                     break;
@@ -126,7 +122,7 @@ export async function showHome(): Promise<TuiIntent> {
               }}
             />
           ) : null}
-          <Footer text="Tip: run proton vpn connect --country US for scripting" />
+          <Footer text="Sign in from the proton menu · Esc/q back" />
         </Box>
       );
     }

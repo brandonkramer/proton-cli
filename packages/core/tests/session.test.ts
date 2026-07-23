@@ -100,6 +100,41 @@ describe("paths + dual-mint sign-in", () => {
     await rm(root, { recursive: true, force: true });
   });
 
+  test("dualMintSignIn prepareCredentials refreshes TOTP per product", async () => {
+    const root = await mkdtemp(join(tmpdir(), "proton-cli-"));
+    setConfigRootForTests(root);
+
+    const totps: string[] = [];
+    let n = 0;
+    const result = await dualMintSignIn({
+      credentials: { username: "alice", password: "secret", totp: "111111" },
+      products: ["vpn", "authenticator"],
+      prepareCredentials: async (_product, creds) => {
+        n += 1;
+        const totp = n === 1 ? "111111" : "222222";
+        return { ...creds, totp };
+      },
+      authenticators: {
+        vpn: async (creds) => {
+          totps.push(`vpn:${creds.totp}`);
+          return { product: "vpn", session: fakeSession("vpn-uid") };
+        },
+        authenticator: async (creds) => {
+          totps.push(`auth:${creds.totp}`);
+          return {
+            product: "authenticator",
+            session: fakeSession("auth-uid"),
+          };
+        },
+      },
+    });
+
+    expect(result.failed).toEqual([]);
+    expect(totps).toEqual(["vpn:111111", "auth:222222"]);
+
+    await rm(root, { recursive: true, force: true });
+  });
+
   test("dualMintSignIn rolls back on failure by default", async () => {
     const root = await mkdtemp(join(tmpdir(), "proton-cli-"));
     setConfigRootForTests(root);
