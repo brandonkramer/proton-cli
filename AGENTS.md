@@ -14,6 +14,8 @@ Unofficial unified Proton CLI. Bun workspaces under `packages/`.
 | `packages/vpn` | `@bkramer/proton-vpn` | VPN API + WireGuard commands (`proton vpn …`) |
 | `packages/authenticator` | `@bkramer/proton-authenticator` | Authenticator sync/codes (`proton auth …`) |
 | `src/` | root bins | `proton` router, `protonvpn` / `protonauth` wrappers |
+| `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents |
+| `.agents/skills/release/` | local release skill | Publish via GitHub Actions (gitignored) |
 
 ## Rules
 
