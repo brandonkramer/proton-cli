@@ -3,7 +3,6 @@ import { signOut } from "../proton/auth.ts";
 import { showMessage } from "../ui/message.tsx";
 import { handleCommandError } from "../util/command.ts";
 import { connectWithFilter, disconnectActive } from "./actions.ts";
-import { runInteractiveSignin } from "./signin-flow.ts";
 import {
   showCountryPicker,
   showHome,
@@ -44,9 +43,6 @@ async function handleIntent(
         body: "Cached Proton session removed.",
         holdMs: 700,
       });
-      return "home";
-    case "signin":
-      await runInteractiveSignin();
       return "home";
     default:
       return "home";

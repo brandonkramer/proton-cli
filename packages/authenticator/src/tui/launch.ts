@@ -2,7 +2,6 @@ import { handleCommandError } from "../util/command.ts";
 import {
   actionCode,
   actionList,
-  actionSignin,
   actionSignout,
   actionStatus,
   actionSync,
@@ -13,9 +12,6 @@ async function handleIntent(intent: TuiIntent): Promise<"home" | "quit"> {
   switch (intent.type) {
     case "quit":
       return "quit";
-    case "signin":
-      await actionSignin();
-      return "home";
     case "signout":
       await actionSignout();
       return "home";

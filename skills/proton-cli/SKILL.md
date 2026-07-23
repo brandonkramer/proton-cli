@@ -44,6 +44,7 @@ Bins: `proton`, `protonvpn`, `protonauth` (legacy wrappers → `proton vpn` / `p
 ## Quick start
 
 ```bash
+proton                                 # interactive menu (TTY)
 proton signin --pass pass://Vault/Proton   # once → vpn + authenticator sessions
 proton vpn connect --country US
 proton auth sync
@@ -84,6 +85,8 @@ pass-cli run -- proton signin
 
 Env aliases: `PROTON_PASS`, `PROTONVPN_PASS`, `PROTONAUTH_PASS`, `PROTON_USERNAME`, `PROTON_PASSWORD`, `PROTON_TOTP`. Never log resolved secrets.
 
+Dual-mint needs a **fresh TOTP per product** (VPN + Authenticator each consume a code). Prefer `--pass`, or enter a new code when prompted for the second product.
+
 ## VPN (`proton vpn …`)
 
 ```bash
@@ -99,7 +102,6 @@ proton vpn connect --tor
 proton vpn connect --free-only
 proton vpn status --json
 proton vpn disconnect
-proton vpn tui
 ```
 
 | Flag | Meaning |
@@ -121,7 +123,6 @@ proton auth list
 proton auth list --type totp
 proton auth code github
 proton auth status --output json
-proton auth tui
 ```
 
 CAPTCHA (if required) needs a human on macOS; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`.
@@ -151,7 +152,7 @@ proton auth code github --output json
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 
-Prefer subcommands over the TUI. No-args `proton` on a non-TTY exits with usage. Auth CAPTCHA never opens in agent mode (`captcha_required`).
+Prefer subcommands over the TUI when scripting. Bare `proton` opens the parent menu on a TTY; on non-TTY / agent env it exits with usage. Auth CAPTCHA never opens in agent mode (`captcha_required`).
 
 ## Update
 

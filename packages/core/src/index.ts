@@ -25,6 +25,11 @@ export {
 } from "./store.ts";
 export { dualMintSignIn, type DualSignInOptions } from "./signin.ts";
 export {
+  ensureCryptoProxy,
+  getCryptoProxy,
+  type CryptoProxyLike,
+} from "./crypto.ts";
+export {
   normalizePassItemRef,
   PASS_ENV_CANDIDATES,
   resolvePassLogin,

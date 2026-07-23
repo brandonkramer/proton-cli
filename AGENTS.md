@@ -27,6 +27,7 @@ User data: `~/.config/proton-cli/` (or `%APPDATA%\proton-cli\`) with `sessions/*
 - VPN must not import authenticator (or vice versa). Shared code goes in `core`.
 - Sessions are **per product** (`sessions/vpn.json`, `sessions/authenticator.json`). Do not reuse tokens across API hosts.
 - `proton signin` collects credentials once and dual-mints product sessions.
+- `@protontech/crypto` CryptoProxy must be initialized once per process — use `ensureCryptoProxy` / `getCryptoProxy` from `@bkramer/proton-core` (never a second `setEndpoint` in product packages).
 - Prefer `bun` for install/test/typecheck. Do not use npm/yarn locally.
 - Never log secrets or `pass://` resolved values.
 
@@ -70,6 +71,7 @@ Do not commit secrets, session files, or resolved Pass material.
 
 ### Agent / scripting mode
 
+- Bare `proton` (TTY) opens the parent TUI in `src/tui/`; VPN/Auth product menus nest from there (`launchVpnTui` / `launchAuthTui`). No `proton vpn tui` / `proton auth tui`.
 - Global: `--json`, `-y/--yes`, `--sudo` (VPN agent helpers in `packages/vpn/src/util/agent.ts`)
 - Authenticator uses `--output json|plain|ink` / `PROTONAUTH_*` envs
 - Quiet UI skips Ink when JSON, `CI`, agent env, or non-TTY
