@@ -8,20 +8,22 @@ import {
 describe("self-update", () => {
   test("detectInstallChannel prefers bun global paths", () => {
     expect(
-      detectInstallChannel("/Users/x/.bun/install/global/node_modules/proton-cli/src/index.ts"),
+      detectInstallChannel(
+        "/Users/x/.bun/install/global/node_modules/proton-unified-cli/src/index.ts",
+      ),
     ).toBe("bun");
   });
 
-  test("buildUpdatePlan targets proton-cli", () => {
+  test("buildUpdatePlan targets proton-unified-cli", () => {
     expect(buildUpdatePlan("bun", "latest").args).toEqual([
       "add",
       "-g",
-      "proton-cli@latest",
+      "proton-unified-cli@latest",
     ]);
     expect(buildUpdatePlan("npm", "0.2.0").args).toEqual([
       "install",
       "-g",
-      "proton-cli@0.2.0",
+      "proton-unified-cli@0.2.0",
     ]);
   });
 

@@ -50,6 +50,7 @@ export function detectInstallChannel(
   }
   if (
     path.includes("/npm/node_modules/") ||
+    path.includes("/lib/node_modules/proton-unified-cli") ||
     path.includes("/lib/node_modules/proton-cli") ||
     path.includes("/lib/node_modules/proton-vpn-cli") ||
     path.includes("/pnpm-global/")
@@ -58,13 +59,15 @@ export function detectInstallChannel(
   }
   // Bun global packages also live under node_modules; prefer bun when runtime is Bun.
   if (
-    (path.includes("node_modules/proton-cli") ||
+    (path.includes("node_modules/proton-unified-cli") ||
+      path.includes("node_modules/proton-cli") ||
       path.includes("node_modules/proton-vpn-cli")) &&
     hasBunRuntime
   ) {
     return "bun";
   }
   if (
+    path.includes("node_modules/proton-unified-cli") ||
     path.includes("node_modules/proton-cli") ||
     path.includes("node_modules/proton-vpn-cli")
   ) {
@@ -79,7 +82,9 @@ export function buildUpdatePlan(
   target = "latest",
 ): UpdatePlan {
   const spec =
-    target === "latest" ? "proton-cli@latest" : `proton-cli@${target}`;
+    target === "latest"
+      ? "proton-unified-cli@latest"
+      : `proton-unified-cli@${target}`;
   if (channel === "npm") {
     return { channel, command: "npm", args: ["install", "-g", spec] };
   }
@@ -92,9 +97,12 @@ export function buildUpdatePlan(
 }
 
 export async function fetchLatestVersion(): Promise<string> {
-  const response = await fetch("https://registry.npmjs.org/proton-cli/latest", {
-    headers: { Accept: "application/json" },
-  });
+  const response = await fetch(
+    "https://registry.npmjs.org/proton-unified-cli/latest",
+    {
+      headers: { Accept: "application/json" },
+    },
+  );
   if (!response.ok) {
     throw new CliError(
       `Failed to check npm for updates (HTTP ${response.status}).`,

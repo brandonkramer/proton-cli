@@ -1,7 +1,7 @@
 {
   "name": "@proton-cli/vpn",
   "version": "0.1.0",
-  "description": "Proton VPN product commands for proton-cli",
+  "description": "Proton VPN product commands for proton-unified-cli",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "private": true,
@@ -9,17 +9,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "postinstall": "bun run scripts/patch-openpgp.ts && bun run scripts/ensure-wireguard.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test"
-  },
-  "dependencies": {
-    "@inkjs/ui": "^2.0.0",
-    "@proton-cli/core": "workspace:*",
-    "@protontech/crypto": "^2.1.1",
-    "commander": "^14.0.0",
-    "ink": "^7.1.1",
-    "react": "^19.2.8"
   },
   "engines": {
     "bun": ">=1.1.0"
