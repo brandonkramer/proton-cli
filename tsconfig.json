@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": false,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "types": ["bun"],
+    "paths": {
+      "@proton-cli/core": ["./packages/core/src/index.ts"],
+      "@proton-cli/core/*": ["./packages/core/src/*"],
+      "@proton-cli/vpn": ["./packages/vpn/src/index.ts"],
+      "@proton-cli/vpn/*": ["./packages/vpn/src/*"],
+      "@proton-cli/authenticator": ["./packages/authenticator/src/index.ts"],
+      "@proton-cli/authenticator/*": ["./packages/authenticator/src/*"]
+    }
+  },
+  "include": ["src/**/*", "packages/*/src/**/*", "packages/*/tests/**/*", "tests/**/*"],
+  "exclude": ["node_modules"]
+}

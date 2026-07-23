@@ -1,0 +1,53 @@
+{
+  "name": "proton-cli",
+  "version": "0.1.0",
+  "description": "Unofficial unified Proton CLI (VPN, Authenticator, shared sign-in)",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "private": false,
+  "author": "Brandon Kramer",
+  "keywords": [
+    "proton",
+    "protonvpn",
+    "authenticator",
+    "cli",
+    "bun"
+  ],
+  "bin": {
+    "proton": "./src/index.ts",
+    "protonvpn": "./src/bins/protonvpn.ts",
+    "protonauth": "./src/bins/protonauth.ts"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "files": [
+    "src",
+    "packages",
+    "LICENSE",
+    "README.md",
+    "package.json",
+    "tsconfig.json"
+  ],
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "proton": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "lint": "tsc --noEmit"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "dependencies": {
+    "@proton-cli/authenticator": "workspace:*",
+    "@proton-cli/core": "workspace:*",
+    "@proton-cli/vpn": "workspace:*",
+    "commander": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.2.17",
+    "typescript": "^5.9.3"
+  }
+}

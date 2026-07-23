@@ -1,0 +1,18 @@
+{
+  "name": "@proton-cli/vpn",
+  "version": "0.1.0",
+  "description": "Proton VPN product commands for proton-cli",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@proton-cli/core": "workspace:*",
+    "commander": "^14.0.0"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  }
+}
