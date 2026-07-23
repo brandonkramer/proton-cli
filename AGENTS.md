@@ -15,13 +15,12 @@ Unofficial unified Proton CLI. Bun workspaces under `packages/`.
 | `packages/authenticator` | `@bkramer/proton-authenticator` | Authenticator sync/codes (`proton auth …`) |
 | `src/` | root bins | `proton` router, `protonvpn` / `protonauth` wrappers |
 | `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents |
-| `.agents/skills/release/` | local release skill | Publish via GitHub Actions (gitignored) |
 
 ## Rules
 
 - VPN must not import authenticator (or vice versa). Shared code goes in `core`.
-- Sessions are **per product** (`sessions/vpn.json`, `sessions/authenticator.json`). Do not reuse tokens across API hosts unless research upgrades `INV-SESSION-001`.
-- `proton signin` collects credentials once and dual-mints product sessions (Approach A).
+- Sessions are **per product** (`sessions/vpn.json`, `sessions/authenticator.json`). Do not reuse tokens across API hosts.
+- `proton signin` collects credentials once and dual-mints product sessions.
 - Prefer `bun` for install/test/typecheck. Do not use npm/yarn locally.
 - Never log secrets or `pass://` resolved values.
 
@@ -48,10 +47,3 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 Format: `<type>: <imperative summary>` (optional body explaining why). Examples: `feat: add dual-mint sign-in`, `chore: release v0.1.0`.
 
 Do not commit secrets, session files, or resolved Pass material.
-
-## Sibling sources
-
-Initial ports come from:
-
-- `/Users/brandonk/dev/proton-cli/proton-vpn-cli`
-- `/Users/brandonk/dev/proton-cli/proton-authenticator-cli`
