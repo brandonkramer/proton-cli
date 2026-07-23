@@ -28,6 +28,21 @@ bun test
 bun run src/index.ts --help
 ```
 
+## Commits
+
+Use [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` — user-facing capability
+- `fix:` — bug fix
+- `chore:` — release, tooling, deps, non-user plumbing
+- `docs:` — documentation only
+- `refactor:` — behavior-preserving restructure
+- `test:` — tests only
+
+Format: `<type>: <imperative summary>` (optional body explaining why). Examples: `feat: add dual-mint sign-in`, `chore: release v0.1.0`.
+
+Do not commit secrets, session files, or resolved Pass material.
+
 ## Sibling sources
 
 Initial ports come from:

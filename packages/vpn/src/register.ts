@@ -1,45 +1,76 @@
 import type { Command } from "commander";
+import { registerConnect } from "./commands/connect.ts";
+import { registerCountries } from "./commands/countries.tsx";
+import { registerDisconnect } from "./commands/disconnect.ts";
+import { registerServers } from "./commands/servers.tsx";
+import { registerSetup } from "./commands/setup.ts";
+import { registerSignin } from "./commands/signin.ts";
+import { registerSignout } from "./commands/signout.ts";
+import { registerStatus } from "./commands/status.tsx";
+import { registerUpdate } from "./commands/update.ts";
+import { launchTui } from "./tui/launch.ts";
+import {
+  configureAgentFlags,
+  emitError,
+  shouldLaunchTui,
+  wantsJson,
+} from "./util/agent.ts";
+import { ExitCode } from "./util/exit.ts";
 
-/** Register `proton vpn …` subcommands. Full port lands in PH2. */
+/** Register `proton vpn …` (and legacy `protonvpn …`) commands. */
 export function registerVpnCommands(vpn: Command): void {
   vpn
-    .command("status")
-    .description("Show VPN connection / session status (port in progress)")
-    .option("--json", "Machine-readable JSON")
-    .action(async function (this: Command) {
-      const opts = this.optsWithGlobals() as { json?: boolean };
-      const payload = {
-        version: 1,
-        product: "vpn",
-        ported: false,
-        message:
-          "VPN commands are scaffolding in the monorepo; full port from proton-vpn-cli is next.",
-      };
-      if (opts.json) {
-        console.log(JSON.stringify(payload, null, 2));
+    .option("--json", "Machine-readable JSON on stdout (also: PROTONVPN_JSON=1)")
+    .option(
+      "-y, --yes",
+      "Non-interactive confirmations (also implied by --json / CI)",
+    )
+    .option(
+      "--sudo",
+      "Allow interactive sudo password prompt for WireGuard (macOS)",
+    );
+
+  vpn.hook("preAction", (thisCommand) => {
+    const globals = thisCommand.optsWithGlobals() as {
+      json?: boolean;
+      yes?: boolean;
+      sudo?: boolean;
+    };
+    configureAgentFlags({
+      json: Boolean(globals.json),
+      yes: Boolean(globals.yes),
+      interactiveSudo: Boolean(globals.sudo),
+    });
+  });
+
+  registerSetup(vpn);
+  registerUpdate(vpn);
+  registerSignin(vpn);
+  registerSignout(vpn);
+  registerCountries(vpn);
+  registerServers(vpn);
+  registerConnect(vpn);
+  registerDisconnect(vpn);
+  registerStatus(vpn);
+
+  vpn
+    .command("tui")
+    .description("Open the interactive VPN TUI")
+    .action(async () => {
+      if (!shouldLaunchTui() && wantsJson()) {
+        emitError(
+          "TUI is not available in JSON/agent mode. Use status, connect, etc.",
+          ExitCode.USAGE,
+        );
         return;
       }
-      console.log(payload.message);
-    });
-
-  for (const name of [
-    "setup",
-    "connect",
-    "disconnect",
-    "countries",
-    "servers",
-    "signin",
-    "signout",
-  ] as const) {
-    vpn
-      .command(name)
-      .description(`VPN ${name} (port in progress — see proton-vpn-cli)`)
-      .allowUnknownOption(true)
-      .action(async () => {
-        console.error(
-          `proton vpn ${name}: not ported yet. Use proton-vpn-cli meanwhile, or continue the monorepo PH2 port.`,
+      if (!shouldLaunchTui()) {
+        emitError(
+          "TUI requires an interactive terminal (stdin/stdout TTY).",
+          ExitCode.USAGE,
         );
-        process.exitCode = 1;
-      });
-  }
+        return;
+      }
+      await launchTui();
+    });
 }
