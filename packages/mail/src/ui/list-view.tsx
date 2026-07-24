@@ -82,6 +82,14 @@ function MessageDetailApp({ message }: { message: DecryptedMessage }): ReactNode
           Time: {new Date(message.time * 1000).toISOString()}
         </Text>
         <Text dimColor>ID: {message.id}</Text>
+        <Text dimColor>
+          Signed:{" "}
+          {message.verified === true
+            ? "verified"
+            : message.verified === false
+              ? "failed"
+              : "unknown"}
+        </Text>
       </Box>
       <Box flexDirection="column">
         <Text>{message.body || "(empty body)"}</Text>

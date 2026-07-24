@@ -1,6 +1,5 @@
 import { getCalendarCrypto } from "./proxy.ts";
 import {
-  primaryAddressKey,
   unlockCalendarKeys,
   type UnlockedCalendarKeys,
 } from "./unlock.ts";
@@ -35,7 +34,6 @@ export async function unlockCalendarForEvents(
       fetchImpl: options.fetchImpl,
     }));
 
-  const addr = primaryAddressKey(unlocked);
   const members = await calendarApi<{
     Members: { ID: string; AddressID: string; Email: string }[];
   }>(`/calendar/v1/${options.calendarId}/members`, {
@@ -46,6 +44,12 @@ export async function unlockCalendarForEvents(
   const member = members.Members.find((m) => unlocked.addressKeys.has(m.AddressID));
   if (!member) {
     throw new Error(`No matching address key for calendar ${options.calendarId}`);
+  }
+
+  // Prefer the calendar member address key (secondary-address calendars).
+  const addr = unlocked.addressKeys.get(member.AddressID);
+  if (!addr) {
+    throw new Error(`No unlocked address key for member address ${member.AddressID}`);
   }
 
   const passData = await calendarApi<{

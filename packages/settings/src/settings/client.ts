@@ -1,4 +1,9 @@
 import { loadSession } from "../config/store.ts";
+import {
+  persistSession,
+  refreshSession,
+  verifySession,
+} from "../proton/auth.ts";
 import { SETTINGS_ACCOUNT_PATH, SETTINGS_MAIL_PATH } from "../proton/constants.ts";
 import { settingsApi } from "../proton/api.ts";
 import type { Session } from "../proton/types.ts";
@@ -24,8 +29,13 @@ export async function requireSettingsRuntime(
       "Not signed in — use proton signin --products settings",
     );
   }
+  let session = saved.session;
+  if (!(await verifySession(session))) {
+    session = await refreshSession(session);
+    await persistSession(session, saved.username);
+  }
   return {
-    session: saved.session,
+    session,
     username: saved.username,
     fetchImpl,
   };

@@ -14,6 +14,25 @@ const mockSession: Session = {
   ExpiresIn: 3600,
 };
 
+const mockSavedSession = {
+  session: mockSession,
+  username: "alice",
+  savedAt: new Date().toISOString(),
+  expiresAt: new Date(Date.now() + 3600_000).toISOString(),
+};
+
+mock.module("../src/config/store.ts", () => ({
+  loadSession: async () => mockSavedSession,
+  saveSession: async () => {},
+  clearSession: async () => {},
+}));
+
+mock.module("../src/proton/auth.ts", () => ({
+  verifySession: async () => true,
+  refreshSession: async (session: Session) => session,
+  persistSession: async () => {},
+}));
+
 function mockFetch(routes: Record<string, (init?: RequestInit) => unknown>) {
   return (async (input: string | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input.toString();

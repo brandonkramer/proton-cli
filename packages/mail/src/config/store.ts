@@ -68,19 +68,12 @@ export async function loadSession(
     if (expectedUsername && saved.username !== expectedUsername) {
       return null;
     }
-    if (new Date(saved.expiresAt).getTime() <= Date.now()) {
-      await clearSession();
-      return null;
-    }
+    // Access token expired — keep file so refresh can still use RefreshToken.
     return saved;
   }
 
   const shared = await loadProductSession("mail", expectedUsername);
   if (!shared) return null;
-  if (new Date(shared.expiresAt).getTime() <= Date.now()) {
-    await clearSession();
-    return null;
-  }
   const hydrated: SavedSession = {
     session: shared.session,
     username: shared.username,

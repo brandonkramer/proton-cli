@@ -52,6 +52,13 @@ export async function runMailRead(
   }
   process.stdout.write(`Time:    ${new Date(message.time * 1000).toISOString()}\n`);
   process.stdout.write(`ID:      ${message.id}\n`);
+  const verifiedLabel =
+    message.verified === true
+      ? "verified"
+      : message.verified === false
+        ? "failed"
+        : "unknown";
+  process.stdout.write(`Signed:  ${verifiedLabel}\n`);
   process.stdout.write("\n");
   process.stdout.write(`${message.body}\n`);
 }

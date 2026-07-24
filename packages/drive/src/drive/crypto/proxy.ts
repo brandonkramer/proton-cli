@@ -7,6 +7,13 @@ export interface SessionKeyMaterial {
   algorithm: string;
 }
 
+/** Mirrors @protontech/crypto VERIFICATION_STATUS. */
+export const VERIFICATION_STATUS = {
+  NOT_SIGNED: 0,
+  SIGNED_AND_VALID: 1,
+  SIGNED_AND_INVALID: 2,
+} as const;
+
 export interface DriveCryptoProxy {
   importPrivateKey: (options: {
     armoredKey: string;
@@ -19,9 +26,16 @@ export interface DriveCryptoProxy {
     decryptionKeys?: CryptoKey | CryptoKey[];
     verificationKeys?: CryptoKey | CryptoKey[];
     sessionKeys?: SessionKeyMaterial[];
+    armoredSignature?: string;
+    binarySignature?: Uint8Array;
+    armoredEncryptedSignature?: string;
+    binaryEncryptedSignature?: Uint8Array;
     format?: "utf8" | "binary";
     expectSigned?: boolean;
-  }) => Promise<{ data: string | Uint8Array }>;
+  }) => Promise<{
+    data: string | Uint8Array;
+    verificationStatus?: number;
+  }>;
   encryptMessage: (options: {
     textData?: string;
     binaryData?: Uint8Array;
@@ -37,6 +51,14 @@ export interface DriveCryptoProxy {
     detached?: boolean;
     format?: "armored" | "binary";
   }) => Promise<{ signature: string | Uint8Array }>;
+  verifyMessage: (options: {
+    textData?: string;
+    binaryData?: Uint8Array;
+    armoredSignature?: string;
+    binarySignature?: Uint8Array;
+    verificationKeys: CryptoKey | CryptoKey[];
+    format?: "utf8" | "binary";
+  }) => Promise<{ verificationStatus: number }>;
   generateKey: (options: {
     userIDs: { name: string; email: string }[];
     type?: "x25519" | "rsa";

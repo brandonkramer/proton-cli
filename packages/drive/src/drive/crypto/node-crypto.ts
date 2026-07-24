@@ -1,11 +1,14 @@
 import { createHmac, randomBytes } from "node:crypto";
 import type { DriveLink } from "../types.ts";
 import type { CryptoKey, DriveCryptoProxy, SessionKeyMaterial } from "./proxy.ts";
+import { buildRevisionManifest } from "./download-verify.ts";
 import {
   base64ToBytes,
   bytesToBase64,
   getDriveCrypto,
   sha256Base64,
+  sha256Raw,
+  VERIFICATION_STATUS,
 } from "./proxy.ts";
 
 type KeyRing = CryptoKey[];
@@ -239,15 +242,96 @@ export async function decryptBlock(
   return data instanceof Uint8Array ? data : new TextEncoder().encode(String(data));
 }
 
+/**
+ * Decrypt a content block and, when EncSignature is present, verify the
+ * encrypted detached signature over the plaintext (fail closed if invalid).
+ */
+export async function decryptAndVerifyBlock(
+  encrypted: Uint8Array,
+  sessionKey: SessionKeyMaterial,
+  nodeKeys: KeyRing,
+  verificationKeys: KeyRing,
+  encSignature?: string | null,
+): Promise<Uint8Array> {
+  if (!encSignature) {
+    return decryptBlock(encrypted, sessionKey);
+  }
+  if (!verificationKeys.length) {
+    throw new Error(
+      "Block EncSignature present but no verification keys available.",
+    );
+  }
+  const proxy = await crypto();
+  const { data, verificationStatus } = await proxy.decryptMessage({
+    binaryMessage: encrypted,
+    sessionKeys: [sessionKey],
+    armoredEncryptedSignature: encSignature,
+    decryptionKeys: nodeKeys,
+    verificationKeys,
+    expectSigned: true,
+    format: "binary",
+  });
+  if (verificationStatus === VERIFICATION_STATUS.SIGNED_AND_INVALID) {
+    throw new Error("Block EncSignature verification failed.");
+  }
+  if (
+    verificationStatus !== undefined &&
+    verificationStatus !== VERIFICATION_STATUS.SIGNED_AND_VALID
+  ) {
+    throw new Error("Block EncSignature present but not valid.");
+  }
+  return data instanceof Uint8Array ? data : new TextEncoder().encode(String(data));
+}
+
 export async function decryptFileSessionKey(
   contentKeyPacketBase64: string,
   nodeKeys: KeyRing,
+  contentKeyPacketSignature?: string | null,
 ): Promise<SessionKeyMaterial> {
   const proxy = await crypto();
-  return proxy.decryptSessionKey({
+  const sessionKey = await proxy.decryptSessionKey({
     binaryMessage: base64ToBytes(contentKeyPacketBase64),
     decryptionKeys: nodeKeys,
   });
+  if (contentKeyPacketSignature) {
+    const { verificationStatus } = await proxy.verifyMessage({
+      binaryData: sessionKey.data,
+      armoredSignature: contentKeyPacketSignature,
+      verificationKeys: nodeKeys,
+      format: "binary",
+    });
+    if (verificationStatus !== VERIFICATION_STATUS.SIGNED_AND_VALID) {
+      throw new Error("ContentKeyPacketSignature verification failed.");
+    }
+  }
+  return sessionKey;
+}
+
+export async function verifyRevisionManifest(
+  rawHashesByIndex: Map<number, Uint8Array>,
+  manifestSignature: string | undefined | null,
+  verificationKeys: KeyRing,
+): Promise<void> {
+  if (!manifestSignature) {
+    // Older revisions may omit ManifestSignature; cannot authenticate ordering/integrity.
+    return;
+  }
+  if (!verificationKeys.length) {
+    throw new Error(
+      "ManifestSignature present but no verification keys available.",
+    );
+  }
+  const manifest = buildRevisionManifest(rawHashesByIndex);
+  const proxy = await crypto();
+  const { verificationStatus } = await proxy.verifyMessage({
+    binaryData: manifest,
+    armoredSignature: manifestSignature,
+    verificationKeys,
+    format: "binary",
+  });
+  if (verificationStatus !== VERIFICATION_STATUS.SIGNED_AND_VALID) {
+    throw new Error("Revision ManifestSignature verification failed.");
+  }
 }
 
 export function xorVerifier(verCode: Uint8Array, enc: Uint8Array): string {
@@ -256,22 +340,6 @@ export function xorVerifier(verCode: Uint8Array, enc: Uint8Array): string {
     out[i] = i < enc.length ? (verCode[i]! ^ enc[i]!) : verCode[i]!;
   }
   return bytesToBase64(out);
-}
-
-export function buildRevisionManifest(
-  rawHashesByIndex: Map<number, Uint8Array>,
-): Uint8Array {
-  const indices = [...rawHashesByIndex.keys()].sort((a, b) => a - b);
-  let total = 0;
-  for (const idx of indices) total += rawHashesByIndex.get(idx)!.length;
-  const manifest = new Uint8Array(total);
-  let offset = 0;
-  for (const idx of indices) {
-    const hash = rawHashesByIndex.get(idx)!;
-    manifest.set(hash, offset);
-    offset += hash.length;
-  }
-  return manifest;
 }
 
 export async function signManifest(
@@ -330,4 +398,4 @@ export async function reEncryptNodePassphrase(
   };
 }
 
-export { sha256Base64 };
+export { sha256Base64, sha256Raw };

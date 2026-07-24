@@ -200,25 +200,39 @@ export class DriveApiClient {
     shareId: string,
     linkId: string,
     revisionId: string,
-  ): Promise<
-    { index: number; bareUrl: string; token: string; encSignature: string }[]
-  > {
+  ): Promise<{
+    blocks: {
+      index: number;
+      bareUrl: string;
+      token: string;
+      encSignature: string;
+      hash?: string;
+    }[];
+    manifestSignature?: string;
+    signatureEmail?: string;
+  }> {
     const blocks: {
       index: number;
       bareUrl: string;
       token: string;
       encSignature: string;
+      hash?: string;
     }[] = [];
+    let manifestSignature: string | undefined;
+    let signatureEmail: string | undefined;
     const pageSize = 50;
     for (let from = 1; ; from += pageSize) {
       const query = `?FromBlockIndex=${from}&PageSize=${pageSize}`;
       const { status, data } = await this.fetch<{
         Revision: {
+          ManifestSignature?: string;
+          SignatureEmail?: string;
           Blocks: {
             Index: number;
             BareURL: string;
             Token: string;
             EncSignature: string;
+            Hash?: string;
           }[];
         };
       }>(
@@ -227,6 +241,10 @@ export class DriveApiClient {
       if (status !== 200) {
         throw new Error(`Revision fetch failed (HTTP ${status}).`);
       }
+      if (from === 1) {
+        manifestSignature = data.Revision?.ManifestSignature || undefined;
+        signatureEmail = data.Revision?.SignatureEmail || undefined;
+      }
       const page = data.Revision?.Blocks ?? [];
       for (const block of page) {
         blocks.push({
@@ -234,11 +252,16 @@ export class DriveApiClient {
           bareUrl: block.BareURL,
           token: block.Token,
           encSignature: block.EncSignature,
+          hash: block.Hash,
         });
       }
       if (page.length < pageSize) break;
     }
-    return blocks.sort((a, b) => a.index - b.index);
+    return {
+      blocks: blocks.sort((a, b) => a.index - b.index),
+      manifestSignature,
+      signatureEmail,
+    };
   }
 
   async downloadBlock(bareUrl: string, token: string): Promise<Uint8Array> {

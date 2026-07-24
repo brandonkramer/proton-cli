@@ -9,21 +9,51 @@ function canonicalEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+/** Escape TEXT values in iCalendar (RFC 5545). */
+export function escapeIcalText(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r\n|\r|\n/g, "\\n");
+}
+
+/** Unescape TEXT values in iCalendar. */
+export function unescapeIcalText(value: string): string {
+  let out = "";
+  for (let i = 0; i < value.length; i += 1) {
+    if (value[i] === "\\" && i + 1 < value.length) {
+      const next = value[i + 1]!;
+      if (next === "n" || next === "N") {
+        out += "\n";
+      } else if (next === "," || next === ";" || next === "\\") {
+        out += next;
+      } else {
+        out += next;
+      }
+      i += 1;
+      continue;
+    }
+    out += value[i];
+  }
+  return out;
+}
+
 export function icalField(text: string, name: string): string {
   const prefix = `${name}:`;
   const prefixParam = `${name};`;
   for (const line of text.split("\n")) {
     const trimmed = line.trim();
     if (trimmed.startsWith(prefix)) {
-      return trimmed.slice(prefix.length);
+      return unescapeIcalText(trimmed.slice(prefix.length));
     }
     if (trimmed.startsWith(prefixParam)) {
       const colon = trimmed.indexOf(":");
-      if (colon >= 0) return trimmed.slice(colon + 1);
+      if (colon >= 0) return unescapeIcalText(trimmed.slice(colon + 1));
     }
     if (trimmed.includes(`.${name};`) || trimmed.includes(`.${name}:`)) {
       const colon = trimmed.indexOf(":");
-      if (colon >= 0) return trimmed.slice(colon + 1);
+      if (colon >= 0) return unescapeIcalText(trimmed.slice(colon + 1));
     }
   }
   return "";
@@ -56,7 +86,8 @@ function eventDates(
 }
 
 function attendeeLine(attendee: Attendee): string {
-  return `ATTENDEE;CN=${attendee.email};ROLE=REQ-PARTICIPANT;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;X-PM-TOKEN=${attendee.token}:mailto:${attendee.email}`;
+  const cn = escapeIcalText(attendee.email);
+  return `ATTENDEE;CN=${cn};ROLE=REQ-PARTICIPANT;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;X-PM-TOKEN=${attendee.token}:mailto:${attendee.email}`;
 }
 
 export function signedVevent(options: {
@@ -81,7 +112,8 @@ export function signedVevent(options: {
     dtend,
   ];
   if (options.organizer) {
-    lines.push(`ORGANIZER;CN=${options.organizer}:mailto:${options.organizer}`);
+    const cn = escapeIcalText(options.organizer);
+    lines.push(`ORGANIZER;CN=${cn}:mailto:${options.organizer}`);
   }
   if (options.rrule) {
     lines.push(`RRULE:${options.rrule}`);
@@ -100,10 +132,10 @@ export function encryptedVevent(
     "VERSION:2.0",
     "PRODID:-//proton-cli//EN",
     "BEGIN:VEVENT",
-    `SUMMARY:${title}`,
+    `SUMMARY:${escapeIcalText(title)}`,
   ];
-  if (location) lines.push(`LOCATION:${location}`);
-  if (description) lines.push(`DESCRIPTION:${description}`);
+  if (location) lines.push(`LOCATION:${escapeIcalText(location)}`);
+  if (description) lines.push(`DESCRIPTION:${escapeIcalText(description)}`);
   lines.push("END:VEVENT", "END:VCALENDAR");
   return lines.join("\r\n");
 }

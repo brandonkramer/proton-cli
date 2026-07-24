@@ -6,7 +6,11 @@ const mockSignMessage = mock(async () => "-----BEGIN PGP SIGNATURE-----\nsig\n--
 const mockEncryptMessage = mock(async () => ({
   message: "-----BEGIN PGP MESSAGE-----\ncipher\n-----END PGP MESSAGE-----",
 }));
-const mockDecryptMessage = mock(async () => ({ data: new TextEncoder().encode("decrypted") }));
+const mockDecryptMessage = mock(async () => ({
+  data: new TextEncoder().encode("decrypted"),
+  verificationStatus: 1,
+}));
+const mockVerifyMessage = mock(async () => ({ verificationStatus: 1 }));
 
 mock.module("../src/crypto/proxy.ts", () => ({
   getCryptoProxy: async () => ({
@@ -16,6 +20,7 @@ mock.module("../src/crypto/proxy.ts", () => ({
     signMessage: mockSignMessage,
     encryptMessage: mockEncryptMessage,
     decryptMessage: mockDecryptMessage,
+    verifyMessage: mockVerifyMessage,
   }),
 }));
 
@@ -36,6 +41,12 @@ describe("contact card crypto", () => {
     mockSignMessage.mockClear();
     mockEncryptMessage.mockClear();
     mockDecryptMessage.mockClear();
+    mockVerifyMessage.mockClear();
+    mockVerifyMessage.mockImplementation(async () => ({ verificationStatus: 1 }));
+    mockDecryptMessage.mockImplementation(async () => ({
+      data: new TextEncoder().encode("decrypted"),
+      verificationStatus: 1,
+    }));
   });
 
   test("signCard produces signed card type 2", async () => {
@@ -55,14 +66,50 @@ describe("contact card crypto", () => {
     expect(mockSignMessage).toHaveBeenCalledTimes(1);
   });
 
-  test("decryptCards decrypts encrypted cards", async () => {
+  test("decryptCards verifies signed cards and decrypts encrypted cards", async () => {
     const plaintext = await decryptCards(
       [
-        { Type: CardSigned, Data: "plain" },
+        { Type: CardSigned, Data: "plain", Signature: "sig" },
         { Type: CardEncryptedSigned, Data: "cipher", Signature: "sig" },
       ],
       userKey,
     );
     expect(plaintext).toEqual(["plain", "decrypted"]);
+    expect(mockVerifyMessage).toHaveBeenCalled();
+    expect(mockDecryptMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        armoredSignature: "sig",
+        expectSigned: true,
+      }),
+    );
+  });
+
+  test("decryptCards rejects failed signed-card verification", async () => {
+    mockVerifyMessage.mockImplementation(async () => ({ verificationStatus: 2 }));
+    await expect(
+      decryptCards(
+        [{ Type: CardSigned, Data: "plain", Signature: "bad-sig" }],
+        userKey,
+      ),
+    ).rejects.toThrow(/signature verification failed/i);
+  });
+
+  test("decryptCards rejects missing signatures on signed cards", async () => {
+    await expect(
+      decryptCards([{ Type: CardSigned, Data: "plain" }], userKey),
+    ).rejects.toThrow(/signature missing/i);
+  });
+
+  test("decryptCards rejects failed encrypted+signed verification", async () => {
+    mockDecryptMessage.mockImplementation(async () => ({
+      data: new TextEncoder().encode("decrypted"),
+      verificationStatus: 2,
+    }));
+    await expect(
+      decryptCards(
+        [{ Type: CardEncryptedSigned, Data: "cipher", Signature: "bad" }],
+        userKey,
+      ),
+    ).rejects.toThrow(/signature verification failed/i);
   });
 });

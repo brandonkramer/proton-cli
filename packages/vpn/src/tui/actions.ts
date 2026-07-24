@@ -110,11 +110,7 @@ export async function connectWithFilter(filter: ServerFilter): Promise<void> {
   const { username, session } = await requireSession();
   const existing = await loadActiveTunnel();
   if (existing) {
-    try {
-      await bringDown(existing.confPath);
-    } catch {
-      // continue
-    }
+    await bringDown(existing.confPath);
     await clearActiveTunnel();
   }
 

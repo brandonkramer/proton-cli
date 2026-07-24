@@ -14,6 +14,7 @@ import {
 import { LABEL_STARRED, LABEL_TRASH } from "../proton/constants.ts";
 import { emitOk, isDryRun, wantsJson } from "../util/agent.ts";
 import { reportCommandError } from "../util/errors.ts";
+import { assertWriteAllowed, assertYesConfirmed } from "../util/safety.ts";
 
 interface OrganizeActionOptions {
   messageIds: string[];
@@ -65,6 +66,7 @@ async function runOrganizeAction(
     dryRunPayload(action, messageIds, dryExtra);
     return;
   }
+  assertWriteAllowed();
   const runtime = await requireMailRuntime({ passRef });
   await run(runtime.session);
   successPayload(action, messageIds, dryExtra);
@@ -199,6 +201,9 @@ export async function runMailDelete(
   messageIds: string[],
   options: { passRef?: string },
 ): Promise<void> {
+  if (!isDryRun()) {
+    assertYesConfirmed("Permanently delete messages");
+  }
   await runOrganizeAction(
     "delete",
     messageIds,
@@ -321,7 +326,7 @@ export function registerOrganize(mail: Command): void {
   registerMessageIdsCommand(
     organize,
     "delete",
-    "Permanently delete messages",
+    "Permanently delete messages (requires -y/--yes)",
     async (ids, options) => {
       await runMailDelete(ids, { passRef: options.passRef });
     },

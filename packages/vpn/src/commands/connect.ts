@@ -62,9 +62,12 @@ export function registerConnect(program: Command): void {
               ui.updateStep("replace", { status: "running" });
               const existing = await loadActiveTunnel();
               if (existing) {
+                // Tear down before prepareConnection overwrites the WireGuard conf.
+                await bringDown(existing.confPath);
+                await clearActiveTunnel();
                 ui.updateStep("replace", {
-                  status: "skipped",
-                  detail: `will stop ${existing.serverName}`,
+                  status: "done",
+                  detail: `stopped ${existing.serverName}`,
                 });
               } else {
                 ui.updateStep("replace", {
@@ -91,18 +94,9 @@ export function registerConnect(program: Command): void {
                 status: "done",
                 detail: `${server.Name} · ${server.ExitCountry}`,
               });
-              return { server, physical, confPath, existing };
+              return { server, physical, confPath };
             },
           });
-
-          if (prepared.existing) {
-            try {
-              await bringDown(prepared.existing.confPath);
-            } catch {
-              // continue
-            }
-            await clearActiveTunnel();
-          }
 
           await bringUp(prepared.confPath);
 

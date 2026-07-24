@@ -38,13 +38,13 @@ async function withPhotos(
 }
 
 export function registerPhotosCommands(photos: Command): void {
-  photos
+  const list = photos
     .command("list")
     .description("List photos in the library")
-    .option("--json", "Machine-readable JSON output")
-    .action(async (_options, command) => {
+    .option("--json", "Machine-readable JSON output");
+  addDriveAuthOptions(list);
+  list.action(async (_options, command) => {
       const opts = applyDriveGlobals(command);
-      addDriveAuthOptions(command);
       try {
         await withPhotos(opts, async (service, client, photosContext) => {
           const result = await service.listPhotos(
@@ -67,11 +67,13 @@ export function registerPhotosCommands(photos: Command): void {
       } catch (error) {
         await handleCommandError(error);
       }
-    });
+  });
 
   const upload = photos
     .command("upload")
-    .description("Upload a photo file")
+    .description(
+      "Upload a file into the Photos share (MIME from extension; captureTime/tags not wired)",
+    )
     .argument("<file>", "Local photo path")
     .option("--json", "Machine-readable JSON output");
   addDriveMutationOptions(upload);
@@ -186,34 +188,34 @@ export function registerPhotosCommands(photos: Command): void {
   });
 
   const albums = photos.command("albums").description("Photo albums");
-  albums
+  const albumsList = albums
     .command("list")
     .description("List photo albums")
-    .option("--json", "Machine-readable JSON output")
-    .action(async (_options, command) => {
-      const opts = applyDriveGlobals(command);
-      addDriveAuthOptions(command);
-      try {
-        await withPhotos(opts, async (service, client, photosContext) => {
-          const result = await service.listAlbums(
-            client,
-            photosContext,
-            isDryRun(),
-          );
-          if (result && "action" in result) {
-            emitDryRun(result);
-            return;
-          }
-          if (wantsJson()) {
-            emitOk({ albums: result });
-            return;
-          }
-          for (const album of result) {
-            emitPlain(`${album.name}\t${album.photoCount}\t${album.linkId}`);
-          }
-        });
-      } catch (error) {
-        await handleCommandError(error);
-      }
-    });
+    .option("--json", "Machine-readable JSON output");
+  addDriveAuthOptions(albumsList);
+  albumsList.action(async (_options, command) => {
+    const opts = applyDriveGlobals(command);
+    try {
+      await withPhotos(opts, async (service, client, photosContext) => {
+        const result = await service.listAlbums(
+          client,
+          photosContext,
+          isDryRun(),
+        );
+        if (result && "action" in result) {
+          emitDryRun(result);
+          return;
+        }
+        if (wantsJson()) {
+          emitOk({ albums: result });
+          return;
+        }
+        for (const album of result) {
+          emitPlain(`${album.name}\t${album.photoCount}\t${album.linkId}`);
+        }
+      });
+    } catch (error) {
+      await handleCommandError(error);
+    }
+  });
 }

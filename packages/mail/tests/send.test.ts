@@ -90,6 +90,7 @@ describe("encryptForSend / INV-E2EE-001", () => {
       data: new Uint8Array([1, 2, 3, 4]),
       algorithm: "aes256",
     };
+    let encryptSessionKeys: unknown[] | undefined;
     const cryptoProxy = {
       encryptMessage: async (opts: Record<string, unknown>) => {
         if (opts.format === "armored") {
@@ -101,7 +102,10 @@ describe("encryptForSend / INV-E2EE-001", () => {
         return { message: new Uint8Array([9, 9, 9]) };
       },
       generateSessionKey: async () => sessionKey,
-      encryptSessionKey: async () => new Uint8Array([7, 7]),
+      encryptSessionKey: async (opts: Record<string, unknown>) => {
+        encryptSessionKeys = opts.encryptionKeys as unknown[];
+        return new Uint8Array([7, 7]);
+      },
     };
 
     const result = await encryptForSend({
@@ -113,7 +117,10 @@ describe("encryptForSend / INV-E2EE-001", () => {
         publicKey: { kind: "public" },
       },
       recipients: [
-        { email: "bob@proton.me", publicKeys: [{ kind: "bob" }] },
+        {
+          email: "bob@proton.me",
+          publicKeys: [{ kind: "bob-1" }, { kind: "bob-2" }],
+        },
         { email: "ext@example.com", publicKeys: [] },
       ],
       cryptoProxy: cryptoProxy as never,
@@ -127,6 +134,8 @@ describe("encryptForSend / INV-E2EE-001", () => {
     expect(pack.Type & PACKAGE_TYPE.SEND_CLEAR).toBeTruthy();
     expect(pack.Addresses["bob@proton.me"]?.BodyKeyPacket).toBeTruthy();
     expect(pack.BodyKey?.Key).toBeTruthy();
+    // Full active key ring — not only publicKeys[0].
+    expect(encryptSessionKeys).toEqual([{ kind: "bob-1" }, { kind: "bob-2" }]);
   });
 });
 
@@ -294,5 +303,66 @@ describe("CASE-SEND-DRYRUN", () => {
       ),
     ).rejects.toThrow(/ALLOW_SEND/);
     expect(fetchCalls).toBe(0);
+  });
+
+  test("recipient key lookup failure fails closed (no clear BodyKey)", async () => {
+    let fetchCalls = 0;
+    const fetchImpl = (async () => {
+      fetchCalls += 1;
+      throw new Error("should not fetch after lookup failure");
+    }) as unknown as typeof fetch;
+
+    await expect(
+      sendMail(
+        {
+          action: "send",
+          to: ["bob@proton.me"],
+          subject: "Hello",
+          body: "secret",
+        },
+        {
+          session: mockSession,
+          fetchImpl,
+          addressKeys: new Map([
+            [
+              "addr-1",
+              {
+                addressId: "addr-1",
+                email: "me@proton.me",
+                privateKey: {},
+                publicKey: {},
+              },
+            ],
+          ]),
+          addresses: [{ ID: "addr-1", Email: "me@proton.me", Keys: [] }],
+          loadRecipientKeys: async () => {
+            throw new CliError("Public-key lookup failed for bob@proton.me: network down");
+          },
+        },
+      ),
+    ).rejects.toThrow(/Public-key lookup failed/);
+    expect(fetchCalls).toBe(0);
+  });
+
+  test("dry-run still ok when recipient key lookup would fail", async () => {
+    configureAgentFlags({ json: true, yes: true, dryRun: true });
+    let lookupCalls = 0;
+    const plan = await sendMail(
+      {
+        action: "send",
+        to: ["bob@proton.me"],
+        subject: "Hello",
+        body: "x",
+      },
+      {
+        session: mockSession,
+        loadRecipientKeys: async () => {
+          lookupCalls += 1;
+          throw new Error("lookup should not run in dry-run");
+        },
+      },
+    );
+    expect(lookupCalls).toBe(0);
+    expect(plan).toMatchObject({ dryRun: true, encryptBody: true });
   });
 });

@@ -160,7 +160,7 @@ export async function runCalendarsDelete(
     fail(error instanceof Error ? error.message : "Password required for calendar delete.");
   }
 
-  if (!options.yes && !agentFlags().yes && process.stdin.isTTY && !wantsJson()) {
+  if (!options.yes && !agentFlags().yes) {
     process.stderr.write(
       `Deleting calendar ${calendarId}. Re-run with -y/--yes to confirm.\n`,
     );

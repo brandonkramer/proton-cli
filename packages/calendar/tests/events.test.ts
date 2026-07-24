@@ -55,6 +55,8 @@ mock.module("../src/config/store.ts", () => ({
 
 mock.module("../src/proton/auth.ts", () => ({
   verifySession: async () => true,
+  refreshSession: async (session: Session) => session,
+  persistSession: async () => {},
 }));
 
 mock.module("../src/crypto/calendar-unlock.ts", () => ({
@@ -127,6 +129,13 @@ describe("duration + ical helpers", () => {
   test("icalField extracts SUMMARY", () => {
     expect(icalField("SUMMARY:Meeting\r\nLOCATION:Vienna", "SUMMARY")).toBe("Meeting");
   });
+
+  test("escapeIcalText escapes commas semicolons newlines", async () => {
+    const { escapeIcalText, unescapeIcalText } = await import("../src/util/ical.ts");
+    const raw = "Hello, world; line2\nnext";
+    expect(escapeIcalText(raw)).toBe("Hello\\, world\\; line2\\nnext");
+    expect(unescapeIcalText(escapeIcalText(raw))).toBe(raw);
+  });
 });
 
 describe("events service", () => {
@@ -137,6 +146,9 @@ describe("events service", () => {
   afterEach(() => {
     mockUnlockCalendarForEvents.mockClear();
     mockDecryptCards.mockClear();
+    mockDecryptCards.mockImplementation(async () => [
+      "SUMMARY:Meeting\r\nLOCATION:Vienna\r\n",
+    ]);
     mockEncryptAndSignCardSplit.mockClear();
   });
 
@@ -275,6 +287,68 @@ describe("events service", () => {
     );
   });
 
+  test("updateEvent preserves Permissions, IsOrganizer, Notifications, Color, attendees", async () => {
+    mockDecryptCards.mockImplementation(async () => [
+      "BEGIN:VEVENT\r\nUID:uid-1\r\nSEQUENCE:3\r\nRRULE:FREQ=WEEKLY\r\nORGANIZER;CN=alice@proton.me:mailto:alice@proton.me\r\nEND:VEVENT",
+      "SUMMARY:Meeting\r\nLOCATION:Vienna\r\nDESCRIPTION:Notes",
+    ]);
+
+    let synced: Record<string, unknown> | undefined;
+    const fetchImpl = mockFetch({
+      "/calendar/v1/cal-1/events/ev-1": () => ({
+        Code: 1000,
+        Event: {
+          ID: "ev-1",
+          CalendarID: "cal-1",
+          StartTime: 1713276000,
+          EndTime: 1713279600,
+          FullDay: 0,
+          UID: "uid-1",
+          SharedKeyPacket: "existing-packet",
+          SharedEvents: [
+            { Type: 2, Data: "signed", Signature: "sig" },
+            { Type: 3, Data: "enc", Signature: "sig2" },
+          ],
+          Permissions: 42,
+          IsOrganizer: 0,
+          Notifications: [{ Type: 1, Trigger: "-PT15M" }],
+          Color: "#8080FF",
+          AttendeesEvents: [{ Type: 3, Data: "attendees", Signature: "sig3" }],
+          Attendees: [{ Token: "tok", Status: 1 }],
+        },
+      }),
+      "/calendar/v1/cal-1/events/sync": (init) => {
+        synced = JSON.parse(String(init?.body));
+        return { Code: 1000 };
+      },
+    });
+
+    await updateEvent({
+      session: mockSession,
+      calendarId: "cal-1",
+      eventId: "ev-1",
+      password: "secret",
+      title: "Updated",
+      fetchImpl,
+    });
+
+    const event = (synced as { Events: Array<{ Event: Record<string, unknown> }> })
+      .Events[0]?.Event;
+    expect(event?.Permissions).toBe(42);
+    expect(event?.IsOrganizer).toBe(0);
+    expect(event?.Notifications).toEqual([{ Type: 1, Trigger: "-PT15M" }]);
+    expect(event?.Color).toBe("#8080FF");
+    expect(event?.AttendeesEventContent).toEqual([
+      { Type: 3, Data: "attendees", Signature: "sig3" },
+    ]);
+    expect(event?.Attendees).toEqual([{ Token: "tok", Status: 1 }]);
+    const firstCall = mockEncryptAndSignCardSplit.mock.calls[0] as
+      | [string, ...unknown[]]
+      | undefined;
+    const signedPayload = firstCall?.[0];
+    expect(signedPayload).toContain("SEQUENCE:3");
+  });
+
   test("deleteEvent syncs delete payload", async () => {
     const fetchImpl = mockFetch({
       "/calendar/v1/cal-1/events/sync": (init) => {
@@ -327,3 +401,4 @@ describe("events commands dry-run", () => {
     expect(mockEncryptAndSignCardSplit).not.toHaveBeenCalled();
   });
 });
+

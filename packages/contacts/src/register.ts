@@ -29,6 +29,7 @@ export function registerContactsCommands(contacts: Command): void {
       json: Boolean(globals.json),
       yes: Boolean(globals.yes),
       dryRun: Boolean(local.dryRun),
+      pass: globals.pass,
     });
   });
 

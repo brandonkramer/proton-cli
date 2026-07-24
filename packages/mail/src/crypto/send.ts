@@ -157,11 +157,13 @@ export async function encryptForSend(
 
   for (const recipient of uniqueRecipients) {
     const email = recipient.email.trim().toLowerCase();
+    // Empty publicKeys is authoritative external only — callers must fail
+    // closed on lookup/import errors before reaching encryptForSend.
     if (recipient.publicKeys.length > 0) {
       const keyPacket = await encryptSessionKey({
         data: sessionKey.data,
         algorithm: sessionKey.algorithm,
-        encryptionKeys: [recipient.publicKeys[0]],
+        encryptionKeys: recipient.publicKeys,
         format: "binary",
       });
       const keyBytes = asBytes(keyPacket);

@@ -4,14 +4,23 @@ import {
   unlockDriveKeys,
   type UnlockedKeys,
 } from "../keys/unlock.ts";
-import { loadSession } from "../proton/auth.ts";
+import {
+  loadSession,
+  persistSession,
+  refreshSession,
+  verifySession,
+} from "../proton/auth.ts";
 import { NotFoundError, NotSignedInError } from "../util/errors.ts";
 import { baseOf, dirOf, joinDrivePath, normalizeDrivePath } from "../util/paths.ts";
 import { resolveAccountPassword } from "../util/password.ts";
 import { DriveApiClient } from "./client.ts";
 import {
+  assertBlockHash,
+  assertContiguousBlockIndices,
   buildRevisionManifest,
-  decryptBlock,
+} from "./crypto/download-verify.ts";
+import {
+  decryptAndVerifyBlock,
   decryptFileSessionKey,
   decryptName,
   encryptBlock,
@@ -26,6 +35,7 @@ import {
   sha256Base64,
   signManifest,
   unlockNodeKey,
+  verifyRevisionManifest,
   xorVerifier,
 } from "./crypto/node-crypto.ts";
 import { getDriveCrypto, base64ToBytes, sha256Raw, type SessionKeyMaterial } from "./crypto/proxy.ts";
@@ -82,16 +92,22 @@ export class DriveService {
       throw new NotSignedInError();
     }
 
+    let session = saved.session;
+    if (!(await verifySession(session))) {
+      session = await refreshSession(session);
+      await persistSession(session, saved.username);
+    }
+
     const password =
       options.password ??
       (await resolveAccountPassword({ passRef: options.passRef }));
 
     const client = new DriveApiClient({
-      session: saved.session,
+      session,
       fetchImpl: this.fetchImpl,
     });
     const unlocked = await unlockDriveKeys(
-      saved.session,
+      session,
       password,
       this.fetchImpl,
     );
@@ -515,23 +531,65 @@ export class DriveService {
       throw new Error("File has no content key packet.");
     }
 
-    const sessionKey = await decryptFileSessionKey(
-      link.FileProperties.ContentKeyPacket,
-      resolved.nodeKeys,
-    );
-    const revisionId = link.FileProperties.ActiveRevision.ID;
-    const blocks = await client.listRevisionBlocks(
+    // TODO(drive): stream verified blocks to a temp file for large downloads.
+    return this.downloadVerifiedFile(
+      client,
       context.shareId,
       resolved.linkId,
-      revisionId,
+      link,
+      resolved.nodeKeys,
+      context.addressKeys,
     );
+  }
 
+  private async downloadVerifiedFile(
+    client: DriveApiClient,
+    shareId: string,
+    linkId: string,
+    link: DriveLink,
+    nodeKeys: DriveContext["shareKeys"],
+    addressKeys: DriveContext["addressKeys"],
+  ): Promise<Uint8Array> {
+    const fileProps = link.FileProperties;
+    if (!fileProps?.ContentKeyPacket) {
+      throw new Error("File has no content key packet.");
+    }
+
+    const sessionKey = await decryptFileSessionKey(
+      fileProps.ContentKeyPacket,
+      nodeKeys,
+      fileProps.ContentKeyPacketSignature,
+    );
+    const revisionId = fileProps.ActiveRevision.ID;
+    const revision = await client.listRevisionBlocks(shareId, linkId, revisionId);
+    const blocks = revision.blocks;
+    assertContiguousBlockIndices(blocks.map((b) => b.index));
+
+    const verificationKeys = addressKeys.length ? addressKeys : nodeKeys;
+    const rawHashes = new Map<number, Uint8Array>();
     const chunks: Uint8Array[] = [];
+
     for (const block of blocks) {
       const encrypted = await client.downloadBlock(block.bareUrl, block.token);
-      const plain = await decryptBlock(encrypted, sessionKey);
+      assertBlockHash(encrypted, block.hash);
+      rawHashes.set(block.index, sha256Raw(encrypted));
+      const plain = await decryptAndVerifyBlock(
+        encrypted,
+        sessionKey,
+        nodeKeys,
+        verificationKeys,
+        block.encSignature,
+      );
       chunks.push(plain);
     }
+
+    const manifestSignature =
+      revision.manifestSignature ?? fileProps.ActiveRevision.ManifestSignature;
+    await verifyRevisionManifest(
+      rawHashes,
+      manifestSignature,
+      verificationKeys,
+    );
 
     const total = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
     const out = new Uint8Array(total);
@@ -1281,14 +1339,15 @@ export class DriveService {
     photosContext: PhotosContext,
     fileName: string,
     bytes: Uint8Array,
-    captureTime: number,
+    _captureTime: number,
     dryRun = false,
   ): Promise<DryRunAction | { linkId: string; revisionId: string }> {
     const plan = this.planPhotoUpload(fileName);
     if (dryRun) return plan;
 
+    // Photos captureTime/tags protocol is not wired; upload as a file with MIME only.
     return this.upload(client, photosContext, "/", fileName, bytes, {
-      mimeType: "application/octet-stream",
+      mimeType: guessMimeType(fileName),
       dryRun: false,
       sizeHint: bytes.length,
     }) as Promise<{ linkId: string; revisionId: string }>;
@@ -1319,31 +1378,14 @@ export class DriveService {
       throw new Error("Photo has no content key packet.");
     }
 
-    const sessionKey = await decryptFileSessionKey(
-      link.FileProperties.ContentKeyPacket,
-      nodeKeys,
-    );
-    const revisionId = link.FileProperties.ActiveRevision.ID;
-    const blocks = await client.listRevisionBlocks(
+    return this.downloadVerifiedFile(
+      client,
       photosContext.shareId,
       linkId,
-      revisionId,
+      link,
+      nodeKeys,
+      photosContext.addressKeys,
     );
-
-    const chunks: Uint8Array[] = [];
-    for (const block of blocks) {
-      const encrypted = await client.downloadBlock(block.bareUrl, block.token);
-      chunks.push(await decryptBlock(encrypted, sessionKey));
-    }
-
-    const total = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-      out.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return out;
   }
 
   planPhotosTrash(linkIds: string[]): DryRunAction {
@@ -1397,5 +1439,19 @@ export class DriveService {
     }
     return out;
   }
+}
+
+function guessMimeType(fileName: string): string {
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".gif")) return "image/gif";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".heic")) return "image/heic";
+  if (lower.endsWith(".heif")) return "image/heif";
+  if (lower.endsWith(".tif") || lower.endsWith(".tiff")) return "image/tiff";
+  if (lower.endsWith(".mp4")) return "video/mp4";
+  if (lower.endsWith(".mov")) return "video/quicktime";
+  return "application/octet-stream";
 }
 

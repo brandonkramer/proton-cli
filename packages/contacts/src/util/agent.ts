@@ -9,18 +9,25 @@ export interface AgentFlags {
   json: boolean;
   yes: boolean;
   dryRun: boolean;
+  pass?: string;
 }
 
 const flags: AgentFlags = {
   json: false,
   yes: false,
   dryRun: false,
+  pass: undefined,
 };
 
 export function configureAgentFlags(partial: Partial<AgentFlags>): void {
   if (partial.json !== undefined) flags.json = partial.json;
   if (partial.yes !== undefined) flags.yes = partial.yes;
   if (partial.dryRun !== undefined) flags.dryRun = partial.dryRun;
+  if (partial.pass !== undefined) flags.pass = partial.pass;
+}
+
+export function contactsPassRef(): string | undefined {
+  return flags.pass;
 }
 
 export function agentFlags(): Readonly<AgentFlags> {

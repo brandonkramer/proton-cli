@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import type { LocalEntry } from "../src/proton/types.ts";
-import { matchEntries, pickBestMatch, scoreEntry } from "../src/sync/match.ts";
+import {
+  matchEntries,
+  pickBestMatch,
+  resolveEntryMatch,
+  scoreEntry,
+} from "../src/sync/match.ts";
 
 function entry(partial: Partial<LocalEntry> & Pick<LocalEntry, "issuer" | "name">): LocalEntry {
   return {
@@ -44,5 +49,29 @@ describe("matchEntries", () => {
 
   test("empty query returns all active", () => {
     expect(matchEntries(entries, "").length).toBe(3);
+  });
+
+  test("resolveEntryMatch rejects ambiguous ties when requireUnique", () => {
+    const tied = [
+      entry({ entryId: "e1", issuer: "GitHub", name: "work" }),
+      entry({ entryId: "e2", issuer: "GitHub", name: "personal" }),
+    ];
+    const result = resolveEntryMatch(tied, "github", { requireUnique: true });
+    expect(result.kind).toBe("ambiguous");
+    if (result.kind === "ambiguous") {
+      expect(result.candidates).toHaveLength(2);
+    }
+  });
+
+  test("resolveEntryMatch accepts exact entry ID", () => {
+    const tied = [
+      entry({ entryId: "e1", issuer: "GitHub", name: "work" }),
+      entry({ entryId: "e2", issuer: "GitHub", name: "personal" }),
+    ];
+    const result = resolveEntryMatch(tied, "e2", { requireUnique: true });
+    expect(result.kind).toBe("match");
+    if (result.kind === "match") {
+      expect(result.entry.entryId).toBe("e2");
+    }
   });
 });

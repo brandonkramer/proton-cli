@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { emitOk, emitPlain, isDryRun, wantsJson } from "../util/agent.ts";
 import { handleCommandError } from "../util/command.ts";
+import { requireDestructiveConfirm } from "../util/confirm.ts";
 import { DriveService } from "../drive/service.ts";
 import type { DryRunAction } from "../drive/types.ts";
 import {
@@ -30,36 +31,36 @@ async function withOpen(
 }
 
 export function registerTrashCommands(trash: Command): void {
-  trash
+  const list = trash
     .command("list")
     .description("List trashed items")
-    .option("--json", "Machine-readable JSON output")
-    .action(async (_options, command) => {
-      const opts = applyDriveGlobals(command);
-      addDriveAuthOptions(command);
-      try {
-        await withOpen(opts, async (service, client, context) => {
-          const result = await service.listTrash(client, context, isDryRun());
-          if (result && "action" in result) {
-            emitDryRun(result);
-            return;
-          }
-          if (wantsJson()) {
-            emitOk({ items: result });
-            return;
-          }
-          if (result.length === 0) {
-            emitPlain("(trash is empty)");
-            return;
-          }
-          for (const item of result) {
-            emitPlain(`${item.linkId}\t${item.type}\t${item.size}`);
-          }
-        });
-      } catch (error) {
-        await handleCommandError(error);
-      }
-    });
+    .option("--json", "Machine-readable JSON output");
+  addDriveAuthOptions(list);
+  list.action(async (_options, command) => {
+    const opts = applyDriveGlobals(command);
+    try {
+      await withOpen(opts, async (service, client, context) => {
+        const result = await service.listTrash(client, context, isDryRun());
+        if (result && "action" in result) {
+          emitDryRun(result);
+          return;
+        }
+        if (wantsJson()) {
+          emitOk({ items: result });
+          return;
+        }
+        if (result.length === 0) {
+          emitPlain("(trash is empty)");
+          return;
+        }
+        for (const item of result) {
+          emitPlain(`${item.linkId}\t${item.type}\t${item.size}`);
+        }
+      });
+    } catch (error) {
+      await handleCommandError(error);
+    }
+  });
 
   const restore = trash
     .command("restore")
@@ -96,12 +97,16 @@ export function registerTrashCommands(trash: Command): void {
   const empty = trash
     .command("empty")
     .description("Empty trash across all volumes")
+    .option("-y, --yes", "Skip confirmation")
     .option("--dry-run", "Print planned action without mutating Drive")
     .option("--json", "Machine-readable JSON output");
   addDriveAuthOptions(empty);
-  empty.action(async (_options, command) => {
-    const opts = applyDriveGlobals(command);
+  empty.action(async (options, command) => {
+    const opts = applyDriveGlobals(command, options);
     try {
+      if (!isDryRun()) {
+        requireDestructiveConfirm("Emptying trash permanently");
+      }
       await withOpen(opts, async (service, client, context) => {
         const result = await service.emptyTrash(client, context, isDryRun());
         if (result && "action" in result) {
