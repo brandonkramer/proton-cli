@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import type { Session } from "../src/proton/types.ts";
 import { configureAgentFlags } from "../src/util/agent.ts";
 
@@ -50,6 +50,8 @@ const mockGenerateCalendarKeyPayload = mock(async () => ({
 }));
 
 const mockUnlockPasswordScope = mock(async () => {});
+
+mock.restore();
 
 mock.module("../src/config/store.ts", () => ({
   loadSession: async () => mockSavedSession,
@@ -118,6 +120,10 @@ describe("validateAccentColor", () => {
 });
 
 describe("calendar service", () => {
+  afterAll(() => {
+    mock.restore();
+  });
+
   afterEach(() => {
     mockUnlockCalendarKeys.mockClear();
     mockGenerateCalendarKeyPayload.mockClear();
