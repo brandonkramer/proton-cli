@@ -7,7 +7,9 @@ export function Brand({ subtitle }: { subtitle?: string }): ReactNode {
       <Text bold color="cyan">
         proton-cli
       </Text>
-      <Text dimColor>Unofficial · VPN + Authenticator · not affiliated with Proton AG</Text>
+      <Text dimColor>
+        Unofficial · VPN · Authenticator · Contacts · Calendar · Drive · Settings · Mail
+      </Text>
       {subtitle ? <Text color="white">{subtitle}</Text> : null}
     </Box>
   );

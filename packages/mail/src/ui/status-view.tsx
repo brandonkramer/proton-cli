@@ -7,10 +7,14 @@ import { renderUntilExit } from "./render.tsx";
 function StatusApp({
   signedIn,
   username,
+  inboxCount,
+  inboxTotal,
   configDir,
 }: {
   signedIn: boolean;
   username?: string;
+  inboxCount: number | null;
+  inboxTotal: number | null;
   configDir: string;
 }): ReactNode {
   const { exit } = useApp();
@@ -21,6 +25,13 @@ function StatusApp({
     }
   });
 
+  const inboxLabel =
+    inboxTotal === null
+      ? "Inbox count unavailable"
+      : inboxTotal > 0
+        ? `${inboxTotal} message${inboxTotal === 1 ? "" : "s"} in inbox`
+        : "Inbox empty";
+
   return (
     <Box flexDirection="column">
       <Brand subtitle="Status" />
@@ -30,13 +41,19 @@ function StatusApp({
             ? `Signed in as ${username}`
             : "Not signed in — use proton menu Sign in"}
         </StatusMessage>
-        <StatusMessage variant="info">
-          Message list/send not implemented yet (PH0-T02+).
+        <StatusMessage
+          variant={
+            inboxCount !== null && inboxCount > 0 ? "success" : "warning"
+          }
+        >
+          {inboxLabel}
         </StatusMessage>
         <Text dimColor>Config: {configDir}</Text>
       </Box>
       <Box marginTop={1}>
-        <Text dimColor>q / Esc close</Text>
+        <Text dimColor>
+          q / Esc close · CLI: `proton mail list` / `proton mail read ID`
+        </Text>
       </Box>
     </Box>
   );
@@ -45,12 +62,16 @@ function StatusApp({
 export async function showStatus(options: {
   signedIn: boolean;
   username?: string;
+  inboxCount: number | null;
+  inboxTotal: number | null;
   configDir: string;
 }): Promise<void> {
   await renderUntilExit(
     <StatusApp
       signedIn={options.signedIn}
       username={options.username}
+      inboxCount={options.inboxCount}
+      inboxTotal={options.inboxTotal}
       configDir={options.configDir}
     />,
   );

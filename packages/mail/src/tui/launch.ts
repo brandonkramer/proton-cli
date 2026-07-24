@@ -1,5 +1,10 @@
 import { handleCommandError } from "../util/command.ts";
-import { actionSignout, actionStatus } from "./actions.ts";
+import {
+  actionListInbox,
+  actionSearch,
+  actionSignout,
+  actionStatus,
+} from "./actions.ts";
 import { showHome, type TuiIntent } from "./screens.tsx";
 
 async function handleIntent(intent: TuiIntent): Promise<"home" | "quit"> {
@@ -8,6 +13,12 @@ async function handleIntent(intent: TuiIntent): Promise<"home" | "quit"> {
       return "quit";
     case "signout":
       await actionSignout();
+      return "home";
+    case "list":
+      await actionListInbox();
+      return "home";
+    case "search":
+      await actionSearch();
       return "home";
     case "status":
       await actionStatus();

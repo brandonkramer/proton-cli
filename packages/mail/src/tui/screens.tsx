@@ -8,6 +8,8 @@ import { renderPrompt } from "../ui/render.tsx";
 export type TuiIntent =
   | { type: "quit" }
   | { type: "signout" }
+  | { type: "list" }
+  | { type: "search" }
   | { type: "status" };
 
 interface HomeSnapshot {
@@ -60,6 +62,8 @@ export async function showHome(): Promise<TuiIntent> {
 
       const signedIn = Boolean(snap?.signedIn);
       const options = [
+        { label: "List inbox", value: "list" },
+        { label: "Search mail", value: "search" },
         { label: "Status", value: "status" },
         ...(signedIn ? [{ label: "Sign out", value: "signout" }] : []),
         { label: "Back", value: "quit" },
@@ -85,10 +89,16 @@ export async function showHome(): Promise<TuiIntent> {
           ) : null}
           {!loading ? (
             <Select
-              visibleOptionCount={6}
+              visibleOptionCount={8}
               options={options}
               onChange={(value) => {
                 switch (value) {
+                  case "list":
+                    resolve({ type: "list" });
+                    break;
+                  case "search":
+                    resolve({ type: "search" });
+                    break;
                   case "status":
                     resolve({ type: "status" });
                     break;

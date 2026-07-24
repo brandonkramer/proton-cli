@@ -20,6 +20,7 @@ End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
 | `packages/calendar` | `@bkramer/proton-calendar` | Calendar calendars/events (`proton calendar …`) |
 | `packages/drive` | `@bkramer/proton-drive` | Drive files/folders/photos (`proton drive …`) |
 | `packages/settings` | `@bkramer/proton-settings` | Account and mail settings (`proton settings …`) |
+| `packages/mail` | `@bkramer/proton-mail` | E2EE Mail list/read/search/send (`proton mail …`) |
 | `src/` | root bins | `proton` router, `protonvpn` / `protonauth` / `protondrive` / `protoncontacts` / `protoncal` / `protonsettings` wrappers |
 | `scripts/` | install helpers | workspace links, OpenPGP patch, postinstall |
 | `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents |
@@ -31,7 +32,7 @@ User data: `~/.config/proton-cli/` (or `%APPDATA%\proton-cli\`) with `sessions/*
 - VPN must not import authenticator (or vice versa). Shared code goes in `core`.
 - Sessions are **per product** (`sessions/vpn.json`, `sessions/authenticator.json`). Do not reuse tokens across API hosts.
 - `proton signin` collects credentials once and dual-mints product sessions.
-- Future **Mail** will use Proton Mail API with dual-mint like VPN/Authenticator (not shipped yet).
+- **Mail** uses Proton Mail REST API with dual-mint like other products (not Bridge IMAP/SMTP).
 - `@protontech/crypto` CryptoProxy must be initialized once per process — use `ensureCryptoProxy` / `getCryptoProxy` from `@bkramer/proton-core` (never a second `setEndpoint` in product packages).
 - Prefer `bun` for install/test/typecheck. Do not use npm/yarn locally.
 - Never log secrets or `pass://` resolved values.
@@ -76,7 +77,7 @@ Do not commit secrets, session files, or resolved Pass material.
 
 ### Agent / scripting mode
 
-- Bare `proton` (TTY) opens the parent TUI in `src/tui/`; VPN/Auth/Contacts/Calendar/Drive product menus nest from there (`launchVpnTui` / `launchAuthTui` / `launchContactsTui` / `launchCalendarTui` / `launchDriveTui`). No `proton vpn tui` / `proton auth tui` / `proton contacts tui` / `proton calendar tui` / `proton drive tui`.
+- Bare `proton` (TTY) opens the parent TUI in `src/tui/`; VPN/Auth/Contacts/Calendar/Drive/Settings/Mail product menus nest from there (`launchVpnTui` / `launchAuthTui` / `launchContactsTui` / `launchCalendarTui` / `launchDriveTui` / `launchSettingsTui` / `launchMailTui`). No `proton vpn tui` / `proton auth tui` / `proton contacts tui` / `proton calendar tui` / `proton drive tui` / `proton mail tui`.
 - Global: `--json`, `-y/--yes`, `--sudo` (VPN agent helpers in `packages/vpn/src/util/agent.ts`)
 - Authenticator uses `--output json|plain|ink` / `PROTONAUTH_*` envs
 - Quiet UI skips Ink when JSON, `CI`, agent env, or non-TTY
