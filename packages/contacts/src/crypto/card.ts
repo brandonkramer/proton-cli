@@ -1,7 +1,5 @@
-import {
-  getCryptoProxy,
-  type DecryptedUserKey,
-} from "@bkramer/proton-core";
+import type { DecryptedUserKey } from "@bkramer/proton-core";
+import { getCryptoProxy } from "./proxy.ts";
 import { bytesToText, textToBytes } from "./bytes.ts";
 import {
   CardClear,

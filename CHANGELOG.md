@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bridge Mail preview** (`proton mail …`, `protonmail` bin, `packages/mail`): removed pending unified Mail via Proton Mail API + dual-mint sign-in (separate project)
 
 ### Changed
+- Document Authenticator as E2EE TOTP/Steam seed sync (alongside Contacts/Calendar/Drive)
 - README, AGENTS.md, and agent skill reflect VPN + Authenticator only; Mail noted as planned via API
 
 ## [0.2.0] - 2026-07-24

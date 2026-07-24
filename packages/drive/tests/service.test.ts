@@ -207,13 +207,42 @@ mock.module("../src/proton/auth.ts", () => ({
   }),
 }));
 
-mock.module("@bkramer/proton-core", () => ({
-  unlockUserKeys: async () => [
-    { ID: "k1", privateKey: "user-priv", publicKey: "user-pub" },
-  ],
-  PASS_ENV_CANDIDATES: [],
-  resolvePassLogin: async () => ({ username: "alice", password: "pw" }),
-  resolvePassRefFromEnv: () => undefined,
+const unlockedFixture = {
+  userKeys: [{ ID: "k1", privateKey: "user-priv", publicKey: "user-pub" }],
+  addressKeys: new Map([["addr-1", ["addr-key"]]]),
+  addresses: [{ ID: "addr-1", Email: "alice@proton.me", Keys: [] }],
+};
+
+mock.module("../src/keys/unlock.ts", () => ({
+  unlockDriveKeys: async () => unlockedFixture,
+  primaryAddress: (unlocked: typeof unlockedFixture) => {
+    for (const address of unlocked.addresses) {
+      const keys = unlocked.addressKeys.get(address.ID);
+      if (!keys?.length) continue;
+      const email = address.Email.toLowerCase();
+      if (
+        email.endsWith("@proton.me") ||
+        email.endsWith("@pm.me") ||
+        email.endsWith("@protonmail.com")
+      ) {
+        return { addressId: address.ID, email: address.Email, keys };
+      }
+    }
+    for (const address of unlocked.addresses) {
+      const keys = unlocked.addressKeys.get(address.ID);
+      if (keys?.length) {
+        return { addressId: address.ID, email: address.Email, keys };
+      }
+    }
+    throw new Error("No address key ring available.");
+  },
+  addressKeysForId: (unlocked: typeof unlockedFixture, addressId: string) => {
+    const keys = unlocked.addressKeys.get(addressId);
+    if (!keys?.length) {
+      throw new Error(`No key ring for address ${addressId}.`);
+    }
+    return keys;
+  },
 }));
 
 const { DriveService } = await import("../src/drive/service.ts");
