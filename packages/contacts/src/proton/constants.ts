@@ -1,4 +1,4 @@
-/** Proton Contacts API host (roman-16 / go-proton-api reference). */
+/** Proton Contacts API host. */
 export const DEFAULT_API_URL = "https://contacts-api.proton.me";
 
 export const AUTH_INFO_PATH = "/auth/v4/info";

@@ -1,4 +1,4 @@
-/** Proton Drive API host (roman-16 / go-proton-api reference). */
+/** Proton Drive API host. */
 export const DEFAULT_API_URL = "https://drive-api.proton.me";
 
 export const AUTH_INFO_PATH = "/auth/v4/info";

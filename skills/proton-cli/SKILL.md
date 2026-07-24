@@ -139,7 +139,7 @@ CAPTCHA (if required) needs a human on macOS; agents should reuse an existing se
 
 ## Contacts (`proton contacts …`)
 
-E2EE contact cards, groups, and pinned keys. Nested TUI from bare `proton` (list / groups / status). Reference UX: [roman-16/proton-cli](https://github.com/roman-16/proton-cli).
+E2EE contact cards, groups, and pinned keys. Nested TUI from bare `proton` (list / groups / status).
 
 ```bash
 proton contacts list
@@ -154,7 +154,7 @@ Sign in with `proton signin --products ctc` or `--products all`. Unlock uses sha
 
 ## Calendar (`proton calendar …`)
 
-E2EE calendars and events. Nested TUI from bare `proton` (list calendars / list events / status). Reference UX: [roman-16/proton-cli](https://github.com/roman-16/proton-cli).
+E2EE calendars and events. Nested TUI from bare `proton` (list calendars / list events / status).
 
 ```bash
 proton calendar calendars list
@@ -169,7 +169,7 @@ Sign in with `proton signin --products cal` or `--products all`. Encrypted event
 
 ## Drive (`proton drive …`)
 
-E2EE files, folders, sharing, trash, and photos. Nested TUI from bare `proton` (list items / list trash / status). Reference UX: [roman-16/proton-cli](https://github.com/roman-16/proton-cli).
+E2EE files, folders, sharing, trash, and photos. Nested TUI from bare `proton` (list items / list trash / status).
 
 ```bash
 proton drive status

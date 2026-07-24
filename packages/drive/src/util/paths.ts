@@ -1,4 +1,4 @@
-/** Drive path helpers (roman-16 compatible `/`-rooted paths). */
+/** Drive path helpers (`/`-rooted paths). */
 
 export function normalizeDrivePath(raw: string): string {
   const trimmed = raw.trim();

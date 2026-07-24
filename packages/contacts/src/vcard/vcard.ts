@@ -1,4 +1,4 @@
-/** Proton contact card types (roman-16 / go-proton-api). */
+/** Proton contact card types. */
 export const CardClear = 0;
 export const CardEncrypted = 1;
 export const CardSigned = 2;
