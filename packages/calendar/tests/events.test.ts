@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import type { Session } from "../src/proton/types.ts";
 import { configureAgentFlags } from "../src/util/agent.ts";
 
@@ -44,6 +44,8 @@ const mockEncryptPartWithSessionKey = mock(async () => ({
 }));
 
 const mockEncryptSessionKeyForRecipient = mock(async () => "addr-key-packet");
+
+mock.restore();
 
 mock.module("../src/config/store.ts", () => ({
   loadSession: async () => mockSavedSession,
@@ -128,6 +130,10 @@ describe("duration + ical helpers", () => {
 });
 
 describe("events service", () => {
+  afterAll(() => {
+    mock.restore();
+  });
+
   afterEach(() => {
     mockUnlockCalendarForEvents.mockClear();
     mockDecryptCards.mockClear();

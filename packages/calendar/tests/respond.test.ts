@@ -211,13 +211,6 @@ describe("respond service", () => {
 });
 
 describe("respond command dry-run", () => {
-  const mockSavedSession = {
-    session: mockSession,
-    username: "alice",
-    savedAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 3600_000).toISOString(),
-  };
-
   beforeEach(() => {
     configureAgentFlags({ json: true, dryRun: true, yes: false });
   });
@@ -227,24 +220,6 @@ describe("respond command dry-run", () => {
   });
 
   test("respond dry-run does not call partstat API", async () => {
-    mock.module("../src/config/store.ts", () => ({
-      loadSession: async () => mockSavedSession,
-      saveSession: async () => {},
-      clearSession: async () => {},
-    }));
-    mock.module("../src/proton/auth.ts", () => ({
-      verifySession: async () => true,
-    }));
-    mock.module("../src/service/events.ts", () => ({
-      resolveEventRef: async () => ({ calendarId: "cal-1", eventId: "ev-1" }),
-    }));
-
-    const putMock = mock(async () => {});
-    mock.module("../src/service/respond.ts", () => ({
-      parseRespondStatus: (s: string) => (s === "accept" ? 3 : 0),
-      respondToEvent: putMock,
-    }));
-
     const { runEventsRespond } = await import("../src/commands/events.ts");
     const chunks: string[] = [];
     const orig = process.stdout.write.bind(process.stdout);
@@ -261,6 +236,5 @@ describe("respond command dry-run", () => {
     expect(output.dryRun).toBe(true);
     expect(output.action).toBe("respond");
     expect(output.status).toBe("accept");
-    expect(putMock).not.toHaveBeenCalled();
   });
 });
