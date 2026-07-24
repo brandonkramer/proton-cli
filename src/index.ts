@@ -44,9 +44,9 @@ const program = new Command();
 program
   .name("proton")
   .description(
-    "Unofficial unified Proton CLI (VPN + Authenticator).\n" +
+    "Unofficial unified Proton CLI (VPN, Authenticator, Contacts, Calendar, Drive, Settings, Mail).\n" +
       "Not affiliated with Proton AG.\n" +
-      "Shared sign-in mints per-product sessions (vpn-api vs authenticator-api).",
+      "Shared sign-in mints per-product sessions under ~/.config/proton-cli/.",
   )
   .version(pkg.version)
   .option("--json", "Prefer machine-readable JSON where supported")

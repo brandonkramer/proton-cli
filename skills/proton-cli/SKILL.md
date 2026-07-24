@@ -5,22 +5,20 @@ description: >-
   shared Pass-aware sign-in (dual-mint), WireGuard VPN connect/disconnect,
   Authenticator E2EE TOTP/Steam sync and codes, Contacts E2EE cards/groups,
   Calendar E2EE calendars/events, Drive E2EE files/folders/photos,
-  Settings account/mail API preferences,
+  Settings account/mail API preferences, Mail E2EE list/read/search/send/organize,
   status/signout, update, and agent scripting
   with --json / pass:// / pass-cli. Use when the user wants to run proton,
-  protonvpn, protonauth, protoncontacts, protoncal, automate Proton VPN,
-  Authenticator, Contacts, or Calendar from a terminal or AI agent, or set up
+  protonvpn, protonauth, protoncontacts, protoncal, protonmail, automate Proton VPN,
+  Authenticator, Contacts, Calendar, Drive, Settings, or Mail from a terminal or AI agent, or set up
   Pass-based sign-in for the unified package.
   Do not invoke for official Proton apps, FIDO2/security-key auth, or general
   networking troubleshooting unrelated to this CLI.
-short-description: Unified Proton CLI (VPN + Authenticator + Contacts + Calendar + Drive + Settings)
+short-description: Unified Proton CLI (VPN + Authenticator + Contacts + Calendar + Drive + Settings + Mail)
 ---
 
 # proton (@bkramer/proton-cli)
 
-Unofficial unified Proton CLI (**VPN + Authenticator + Contacts + Calendar + Drive + Settings**) with shared sign-in UX. Not an official Proton product.
-
-**Mail** is planned via Proton Mail API with unified `proton signin` (dual-mint). It is not shipped yet.
+Unofficial unified Proton CLI (**VPN + Authenticator + Contacts + Calendar + Drive + Settings + Mail**) with shared sign-in UX. Not an official Proton product.
 
 Requires **Bun** ≥ 1.1 at runtime (even if installed via npm).
 
@@ -59,6 +57,7 @@ proton contacts list
 proton calendar calendars list
 proton drive items list
 proton settings get
+proton mail list
 proton status --json
 proton signout
 ```
@@ -75,6 +74,7 @@ proton signin --products auth
 proton signin --products ctc      # contacts only
 proton signin --products drive    # drive only
 proton signin --products set      # settings only (alias: settings)
+proton signin --products mail     # mail only
 proton signin --partial-ok          # keep successes if one product fails
 export PROTON_PASS="pass://Personal/Proton"
 export PROTON_USERNAME=…            # or PROTON_PASSWORD / PROTON_TOTP
@@ -204,6 +204,26 @@ proton settings get --json
 
 Sign in with `proton signin --products settings|set|all`. Bare `proton settings set` lists writable keys. Parent TUI opens a nested Settings menu (account / mail / list keys / update).
 
+## Mail (`proton mail …`)
+
+E2EE list/read/search/send/organize via Proton Mail REST API (not Bridge). Nested TUI from bare `proton` (list inbox / search / status).
+
+```bash
+proton mail status
+proton mail list
+proton mail list --label sent --unread
+proton mail read MESSAGE_ID
+proton mail search "invoice"
+proton mail send --to alice@example.com --subject "Hi" --body "Hello"
+proton mail organize read MESSAGE_ID
+proton mail organize trash MESSAGE_ID
+proton mail labels list
+proton mail addresses list
+proton mail list --json
+```
+
+Sign in with `proton signin --products mail` or `--products all`. Read/send/decrypt need account password (`--password`, `--pass`, or `PROTON_PASSWORD`).
+
 ## Agent / scripting
 
 ```bash
@@ -214,12 +234,14 @@ export PROTONCONTACTS_AGENT=1
 export PROTONCALENDAR_AGENT=1
 export PROTON_DRIVE_AGENT=1
 export PROTONSETTINGS_AGENT=1
+export PROTONMAIL_AGENT=1
 proton status --json
 proton vpn status --json
 proton contacts list --json
 proton calendar calendars list --json
 proton drive items list --json
 proton settings mail --json
+proton mail list --json
 proton vpn connect --json --country US
 proton auth status --output json
 proton auth code github --output json
@@ -238,6 +260,7 @@ proton auth code github --output json
 | `PROTONCALENDAR_JSON=1` / `PROTONCALENDAR_AGENT=1` | Calendar agent mode (JSON; no TUI) |
 | `PROTON_DRIVE_JSON=1` / `PROTON_DRIVE_AGENT=1` | Drive agent mode (JSON; no TUI) |
 | `PROTONSETTINGS_JSON=1` / `PROTONSETTINGS_AGENT=1` | Settings agent mode (JSON; no TUI) |
+| `PROTONMAIL_JSON=1` / `PROTONMAIL_AGENT=1` | Mail agent mode (JSON; no TUI) |
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 
@@ -263,12 +286,14 @@ bun add -g @bkramer/proton-cli@latest
   sessions/calendar.json
   sessions/drive.json
   sessions/settings.json
+  sessions/mail.json
   vpn/                 # WireGuard conf, caches
   authenticator/       # local entry cache
   contacts/            # contacts session mirror
   calendar/            # calendar session mirror
   drive/               # drive session mirror
   settings/            # settings session mirror
+  mail/                # mail session mirror
 ```
 
 Never log passwords, TOTP codes, or resolved `pass://` secrets.

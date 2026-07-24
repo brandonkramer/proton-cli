@@ -1,6 +1,6 @@
 # proton-cli
 
-Unofficial unified Proton command-line client (**VPN + Authenticator**) with one install and shared sign-in UX.
+Unofficial unified Proton command-line client (**VPN + Authenticator + Contacts + Calendar + Drive + Settings + Mail**) with one install and shared sign-in UX.
 
 > **Not an official Proton product.** Not affiliated with Proton AG.
 
@@ -48,7 +48,7 @@ CAPTCHA (if Proton requires it on sign-in): solve it in the **native WKWebView w
 
 ## Commands
 
-Run `proton` with no args (TTY) for the interactive menu (VPN / Authenticator / Contacts / Calendar / Drive / Settings / sign-in).
+Run `proton` with no args (TTY) for the interactive menu (VPN / Authenticator / Contacts / Calendar / Drive / Settings / Mail / sign-in).
 
 Global options: `--json`, `-y` / `--yes`, `--sudo` (WireGuard on macOS).
 
@@ -167,6 +167,27 @@ Sign in with `proton signin --products settings|set|all`. Writable keys include 
 
 Bare `proton` (TTY) opens a nested Settings menu (account / mail / list keys / update). Prefer `proton settings … --json` for scripting.
 
+### Mail (`proton mail …`)
+
+E2EE list/read/search/send/organize via Proton Mail REST API (not Bridge IMAP/SMTP).
+
+```bash
+proton mail status
+proton mail list
+proton mail list --label sent --unread
+proton mail read MESSAGE_ID
+proton mail search "invoice"
+proton mail send --to alice@example.com --subject "Hi" --body "Hello"
+proton mail organize read MESSAGE_ID
+proton mail organize trash MESSAGE_ID
+proton mail labels list
+proton mail addresses list
+```
+
+Bare `proton` (TTY) opens a nested Mail menu (list inbox / search / status). Prefer `proton mail … --json` for scripting. Read/send/decrypt need account password via `--pass`, `--password`, or `PROTON_PASSWORD`.
+
+Sign in with `proton signin --products mail|all`.
+
 ## Proton Pass (optional)
 
 If you use [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`):
@@ -212,6 +233,7 @@ proton auth code github --output json
 | `PROTONCALENDAR_JSON=1` / `PROTONCALENDAR_AGENT=1` | Calendar agent mode (JSON; no TUI) |
 | `PROTON_DRIVE_JSON=1` / `PROTON_DRIVE_AGENT=1` | Drive agent mode (JSON; no TUI) |
 | `PROTONSETTINGS_JSON=1` / `PROTONSETTINGS_AGENT=1` | Settings agent mode (JSON; no TUI) |
+| `PROTONMAIL_JSON=1` / `PROTONMAIL_AGENT=1` | Mail agent mode (JSON; no TUI) |
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 
@@ -228,13 +250,14 @@ CAPTCHA never opens a window in agent mode (`captcha_required` — sign in inter
 | `packages/calendar` | `@bkramer/proton-calendar` | E2EE calendars/events (`proton calendar …`) |
 | `packages/drive` | `@bkramer/proton-drive` | E2EE Drive files/folders/photos (`proton drive …`) |
 | `packages/settings` | `@bkramer/proton-settings` | Account/mail API preferences (`proton settings …`) |
+| `packages/mail` | `@bkramer/proton-mail` | E2EE Mail list/read/search/send (`proton mail …`) |
 | `src/` | root bins | `proton` router + legacy wrappers |
 
 Config root: `~/.config/proton-cli/` with per-product sessions under `sessions/`.
 
 ## Shared session model
 
-Proton VPN and Authenticator use **different API hosts and app-version headers**, so tokens are not shared across products. `proton signin` still feels like one login: credentials are collected once, then each product mints and stores its own session.
+Each product uses **different API hosts and app-version headers**, so tokens are not shared across products. `proton signin` still feels like one login: credentials are collected once, then each product mints and stores its own session.
 
 ## Agent skill
 

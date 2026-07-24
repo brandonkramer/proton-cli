@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Mail** (`proton mail …`): E2EE list/read/search/send/organize via Proton Mail REST API (PH1 inbox metadata, PH2 send/organize, PH3 parent TUI); nested TUI from parent menu; dual-mint via `proton signin --products mail|all`
+- Parent TUI Mail entry (list inbox / search / status)
 - **Settings** (`proton settings …`): account/mail API get/set; nested TUI from parent menu; dual-mint via `proton signin --products settings|set|all`
 - Parent TUI Settings entry (account / mail / list keys / update)
 - **Drive** (`proton drive …`): E2EE files/folders/share/trash/photos; nested TUI from parent menu; dual-mint via `proton signin --products drive|all`
@@ -18,11 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parent TUI Contacts entry (list / groups / status)
 
 ### Removed
-- **Bridge Mail preview** (`proton mail …`, `protonmail` bin, `packages/mail`): removed pending unified Mail via Proton Mail API + dual-mint sign-in (separate project)
+- **Bridge Mail preview** (`protonmail` bin): replaced by unified Mail via Proton Mail API + dual-mint sign-in
 
 ### Changed
-- Document Authenticator as E2EE TOTP/Steam seed sync (alongside Contacts/Calendar/Drive)
-- README, AGENTS.md, and agent skill reflect VPN + Authenticator only; Mail noted as planned via API
+- Document Authenticator as E2EE TOTP/Steam seed sync (alongside Contacts/Calendar/Drive/Mail)
+- README, AGENTS.md, and agent skill document Mail alongside other products
 
 ## [0.2.0] - 2026-07-24
 
