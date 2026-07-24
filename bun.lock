@@ -38,6 +38,10 @@
       "name": "@bkramer/proton-drive",
       "version": "0.1.0",
     },
+    "packages/settings": {
+      "name": "@bkramer/proton-settings",
+      "version": "0.1.0",
+    },
     "packages/vpn": {
       "name": "@bkramer/proton-vpn",
       "version": "0.1.0",
@@ -55,6 +59,8 @@
     "@bkramer/proton-core": ["@bkramer/proton-core@workspace:packages/core"],
 
     "@bkramer/proton-drive": ["@bkramer/proton-drive@workspace:packages/drive"],
+
+    "@bkramer/proton-settings": ["@bkramer/proton-settings@workspace:packages/settings"],
 
     "@bkramer/proton-vpn": ["@bkramer/proton-vpn@workspace:packages/vpn"],
 

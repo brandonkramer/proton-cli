@@ -4,7 +4,7 @@ Unofficial unified Proton CLI. Bun workspaces under `packages/`.
 
 - **GitHub:** `brandonkramer/proton-cli`
 - **npm:** `@bkramer/proton-cli` (unscoped `proton-cli` is taken on the registry)
-- **Bins:** `proton`, `protonvpn`, `protonauth`, `protondrive`, `protoncontacts`, `protoncal`
+- **Bins:** `proton`, `protonvpn`, `protonauth`, `protondrive`, `protoncontacts`, `protoncal`, `protonsettings`
 - **Runtime:** Bun ≥ 1.1 · Ink/React TUI · GPL-3.0-or-later (required by `@protontech/crypto`)
 
 End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
@@ -19,7 +19,8 @@ End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
 | `packages/contacts` | `@bkramer/proton-contacts` | Contacts cards/groups (`proton contacts …`) |
 | `packages/calendar` | `@bkramer/proton-calendar` | Calendar calendars/events (`proton calendar …`) |
 | `packages/drive` | `@bkramer/proton-drive` | Drive files/folders/photos (`proton drive …`) |
-| `src/` | root bins | `proton` router, `protonvpn` / `protonauth` / `protondrive` / `protoncontacts` / `protoncal` wrappers |
+| `packages/settings` | `@bkramer/proton-settings` | Account and mail settings (`proton settings …`) |
+| `src/` | root bins | `proton` router, `protonvpn` / `protonauth` / `protondrive` / `protoncontacts` / `protoncal` / `protonsettings` wrappers |
 | `scripts/` | install helpers | workspace links, OpenPGP patch, postinstall |
 | `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents |
 
@@ -52,12 +53,12 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 - `feat:` — user-facing capability
 - `fix:` — bug fix
-- `chore:` — release, tooling, deps, non-user plumbing
+- `chore:` — tooling, deps, non-user plumbing
 - `docs:` — documentation only
 - `refactor:` — behavior-preserving restructure
 - `test:` — tests only
 
-Format: `<type>: <imperative summary>` (optional body explaining why). Examples: `feat: add dual-mint sign-in`, `chore: release v0.1.0`.
+Format: `<type>: <imperative summary>` (optional body explaining why). Examples: `feat: add dual-mint sign-in`, `docs: clarify sign-in TOTP`.
 
 Do not commit secrets, session files, or resolved Pass material.
 
@@ -99,11 +100,3 @@ Country/server browsers use `packages/vpn/src/ui/filterable-select.tsx`. Matchin
 - Prefer dependency injection over `mock.module` for `protonFetch` / HTTP — Bun’s `mock.module` can leak across files (CI Linux file order differs from macOS).
 - For `protonFetch` unit tests, pass `fetchImpl` in options.
 - Config-path / session tests should set a temp config root (`setConfigRootForTests` / `XDG_CONFIG_HOME`) and clean up.
-
-## Release
-
-```bash
-gh workflow run Release -f version=X.Y.Z
-```
-
-Keep [CHANGELOG.md](CHANGELOG.md) updated. Prefer the Release workflow over hand-pushed tags.

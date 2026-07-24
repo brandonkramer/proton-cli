@@ -156,7 +156,7 @@ export async function showParentHome(): Promise<ParentIntent> {
           ) : null}
           {!loading ? (
             <Select
-              visibleOptionCount={7}
+              visibleOptionCount={8}
               options={options}
               onChange={(value) => {
                 switch (value) {

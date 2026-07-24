@@ -29,7 +29,8 @@
     "protonauth": "./src/bins/protonauth.ts",
     "protondrive": "./src/bins/protondrive.ts",
     "protoncontacts": "./src/bins/protoncontacts.ts",
-    "protoncal": "./src/bins/protoncal.ts"
+    "protoncal": "./src/bins/protoncal.ts",
+    "protonsettings": "./src/bins/protonsettings.ts"
   },
   "workspaces": [
     "packages/*"
