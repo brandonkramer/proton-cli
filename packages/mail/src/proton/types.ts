@@ -56,3 +56,77 @@ export interface KeySaltsResponse {
   KeySalts?: import("@bkramer/proton-core").KeySalt[];
   Error?: string;
 }
+
+export interface MailRecipient {
+  Name: string;
+  Address: string;
+}
+
+export interface MessageMetadata {
+  ID: string;
+  ConversationID: string;
+  AddressID: string;
+  LabelIDs: string[];
+  ExternalID: string;
+  Subject: string;
+  Sender: MailRecipient;
+  ToList: MailRecipient[];
+  CCList: MailRecipient[];
+  BCCList: MailRecipient[];
+  ReplyTos: MailRecipient[];
+  Time: number;
+  Size: number;
+  Unread: number;
+  IsReplied: number;
+  IsRepliedAll: number;
+  IsForwarded: number;
+  NumAttachments: number;
+  Flags: number;
+}
+
+export interface MailAttachment {
+  ID: string;
+  Name?: string;
+  Size?: number;
+  MIMEType?: string;
+}
+
+export interface Message extends MessageMetadata {
+  Header: string;
+  Body: string;
+  MIMEType: string;
+  Attachments: MailAttachment[];
+  ParsedHeaders?: Record<string, string | string[] | undefined>;
+}
+
+export interface MessagesListResponse {
+  Code?: number;
+  Messages?: MessageMetadata[];
+  Total?: number;
+  Stale?: number;
+  Error?: string;
+}
+
+export interface MessageResponse {
+  Code?: number;
+  Message?: Message;
+  Error?: string;
+}
+
+export interface MessageQuery {
+  Page?: number;
+  PageSize?: number;
+  Limit?: number;
+  LabelID?: string;
+  AddressID?: string;
+  Sort?: string;
+  Desc?: number;
+  Unread?: number;
+  Keyword?: string;
+  From?: string;
+  Recipients?: string;
+  Subject?: string;
+  Begin?: number;
+  End?: number;
+  ID?: string[];
+}

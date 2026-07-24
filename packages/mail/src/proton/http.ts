@@ -8,6 +8,7 @@ import type { Session } from "./types.ts";
 export interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   body?: unknown;
+  query?: Record<string, string | number | boolean | undefined>;
   session?: Session | null;
   apiUrl?: string;
   headers?: Record<string, string>;
@@ -39,8 +40,18 @@ export async function protonFetch<T>(
     headers["x-pm-uid"] = options.session.UID;
   }
 
+  let url = `${apiUrl}${path}`;
+  if (options.query) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(options.query)) {
+      if (value !== undefined) params.set(key, String(value));
+    }
+    const qs = params.toString();
+    if (qs) url += `?${qs}`;
+  }
+
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
-  const response = await fetchImpl(`${apiUrl}${path}`, {
+  const response = await fetchImpl(url, {
     method: options.method ?? (options.body ? "POST" : "GET"),
     headers,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),

@@ -7,9 +7,41 @@ export const AUTH_2FA_PATH = "/auth/v4/2fa";
 export const AUTH_REFRESH_PATH = "/auth/v4/refresh";
 export const USERS_PATH = "/core/v4/users";
 export const KEYS_SALTS_PATH = "/core/v4/keys/salts";
+export const ADDRESSES_PATH = "/core/v4/addresses";
+export const KEYS_ALL_PATH = "/core/v4/keys/all";
 
-/** Mail messages API — not wired yet (PH0-T02+). */
 export const MAIL_MESSAGES_PATH = "/mail/v4/messages";
+export const MAIL_CONVERSATIONS_PATH = "/mail/v4/conversations";
+
+/** System label IDs (Proton Mail API). */
+export const LABEL_INBOX = "0";
+export const LABEL_TRASH = "3";
+export const LABEL_SPAM = "4";
+export const LABEL_ALL = "5";
+export const LABEL_ARCHIVE = "6";
+export const LABEL_SENT = "7";
+export const LABEL_DRAFTS = "8";
+export const LABEL_STARRED = "10";
+
+export const DEFAULT_PAGE_SIZE = 50;
+
+const SYSTEM_LABELS: Record<string, string> = {
+  inbox: LABEL_INBOX,
+  trash: LABEL_TRASH,
+  spam: LABEL_SPAM,
+  all: LABEL_ALL,
+  archive: LABEL_ARCHIVE,
+  sent: LABEL_SENT,
+  drafts: LABEL_DRAFTS,
+  starred: LABEL_STARRED,
+};
+
+/** Resolve a system label name or pass through a numeric/custom label id. */
+export function resolveLabelId(label?: string): string {
+  if (!label) return LABEL_INBOX;
+  const normalized = label.trim().toLowerCase();
+  return SYSTEM_LABELS[normalized] ?? label;
+}
 
 export const PACKAGE_VERSION = "0.1.0";
 
