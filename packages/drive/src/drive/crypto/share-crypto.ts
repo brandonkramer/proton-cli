@@ -2,11 +2,8 @@ import { randomBytes } from "node:crypto";
 import type { CryptoKeyRing } from "../types.ts";
 import type { SessionKeyMaterial } from "./proxy.ts";
 import { getShareSrpModule } from "../../shims/proton-srp-share.ts";
-import {
-  base64ToBytes,
-  bytesToBase64,
-  getDriveCrypto,
-} from "./proxy.ts";
+import { base64ToBytes, bytesToBase64 } from "./hash.ts";
+import { getDriveCrypto } from "./proxy.ts";
 
 const GENERATED_PASSWORD_LEN = 12;
 const PASSWORD_CHARSET =

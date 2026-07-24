@@ -38,7 +38,8 @@ import {
   verifyRevisionManifest,
   xorVerifier,
 } from "./crypto/node-crypto.ts";
-import { getDriveCrypto, base64ToBytes, sha256Raw, type SessionKeyMaterial } from "./crypto/proxy.ts";
+import { base64ToBytes, sha256Raw } from "./crypto/hash.ts";
+import { getDriveCrypto, type SessionKeyMaterial } from "./crypto/proxy.ts";
 import {
   buildShareUrlPasswordFields,
   composeSharePassword,

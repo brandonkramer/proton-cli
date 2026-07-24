@@ -83,10 +83,3 @@ export interface DriveCryptoProxy {
 export async function getDriveCrypto(): Promise<DriveCryptoProxy> {
   return (await getCoreCryptoProxy()) as unknown as DriveCryptoProxy;
 }
-
-export {
-  base64ToBytes,
-  bytesToBase64,
-  sha256Base64,
-  sha256Raw,
-} from "./hash.ts";
