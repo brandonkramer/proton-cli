@@ -34,6 +34,36 @@ export interface SignedContact {
   emails: SignedEmail[];
 }
 
+/** Escape a vCard property value (RFC 6350). */
+export function escapeVCardValue(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\r\n|\r|\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+}
+
+/** Unescape a vCard property value. */
+export function unescapeVCardValue(value: string): string {
+  let out = "";
+  for (let i = 0; i < value.length; i += 1) {
+    if (value[i] === "\\" && i + 1 < value.length) {
+      const next = value[i + 1]!;
+      if (next === "n" || next === "N") {
+        out += "\n";
+      } else if (next === "," || next === ";" || next === "\\") {
+        out += next;
+      } else {
+        out += next;
+      }
+      i += 1;
+      continue;
+    }
+    out += value[i];
+  }
+  return out;
+}
+
 function groupScopedText(text: string, group: string): string {
   return text
     .split("\n")
@@ -65,13 +95,134 @@ function boolStr(value: boolean): string {
   return value ? "true" : "false";
 }
 
+function splitLines(text: string): string[] {
+  return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+}
+
+function joinVCardLines(lines: string[]): string {
+  return lines.filter((line, index, all) => {
+    if (line !== "") return true;
+    return index > 0 && index < all.length - 1;
+  }).join("\r\n");
+}
+
+function propertyName(line: string): string {
+  const trimmed = line.trim();
+  const withoutGroup = trimmed.includes(".")
+    ? trimmed.slice(trimmed.indexOf(".") + 1)
+    : trimmed;
+  const end = withoutGroup.search(/[;:]/);
+  return (end >= 0 ? withoutGroup.slice(0, end) : withoutGroup).toUpperCase();
+}
+
+function isItemGroupLine(line: string): boolean {
+  return /^item\d+\./i.test(line.trim());
+}
+
+export function setSimpleVCardProperty(
+  text: string,
+  name: string,
+  value: string,
+): string {
+  const upper = name.toUpperCase();
+  const lines = splitLines(text);
+  const next: string[] = [];
+  let replaced = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      next.push(line);
+      continue;
+    }
+    if (propertyName(trimmed) === upper && !isItemGroupLine(trimmed)) {
+      if (!replaced && value) {
+        next.push(`${upper}:${escapeVCardValue(value)}`);
+        replaced = true;
+      }
+      continue;
+    }
+    next.push(line);
+  }
+  if (!replaced && value) {
+    const endIdx = next.findIndex((line) => line.trim().toUpperCase() === "END:VCARD");
+    const insertAt = endIdx >= 0 ? endIdx : next.length;
+    next.splice(insertAt, 0, `${upper}:${escapeVCardValue(value)}`);
+  }
+  return joinVCardLines(next);
+}
+
+export function setMultiVCardProperty(
+  text: string,
+  name: string,
+  values: string[],
+): string {
+  const upper = name.toUpperCase();
+  const lines = splitLines(text);
+  const kept: string[] = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      kept.push(line);
+      continue;
+    }
+    if (propertyName(trimmed) === upper && !isItemGroupLine(trimmed)) continue;
+    kept.push(line);
+  }
+  const endIdx = kept.findIndex((line) => line.trim().toUpperCase() === "END:VCARD");
+  const insertAt = endIdx >= 0 ? endIdx : kept.length;
+  const inserted = values
+    .filter(Boolean)
+    .map((value, index) => `${upper};PREF=${index + 1}:${escapeVCardValue(value)}`);
+  kept.splice(insertAt, 0, ...inserted);
+  return joinVCardLines(kept);
+}
+
+export function patchSignedVCardEmails(
+  text: string,
+  emails: SignedEmail[],
+): string {
+  const lines = splitLines(text);
+  const kept = lines.filter((line) => !isItemGroupLine(line));
+  const emailLines: string[] = [];
+  let index = 0;
+  for (const email of emails) {
+    if (!email.address) continue;
+    index += 1;
+    const group = `item${index}`;
+    emailLines.push(
+      `${group}.EMAIL;PREF=${index}:${escapeVCardValue(email.address)}`,
+    );
+    email.keyValues.forEach((keyValue, keyIndex) => {
+      emailLines.push(`${group}.KEY;PREF=${keyIndex + 1}:${keyValue}`);
+    });
+    if (email.encrypt !== undefined) {
+      emailLines.push(`${group}.X-PM-ENCRYPT:${boolStr(email.encrypt)}`);
+    }
+    if (email.sign !== undefined) {
+      emailLines.push(`${group}.X-PM-SIGN:${boolStr(email.sign)}`);
+    }
+    if (email.scheme) {
+      emailLines.push(`${group}.X-PM-SCHEME:${email.scheme}`);
+    }
+  }
+  const endIdx = kept.findIndex((line) => line.trim().toUpperCase() === "END:VCARD");
+  const insertAt = endIdx >= 0 ? endIdx : kept.length;
+  kept.splice(insertAt, 0, ...emailLines);
+  return joinVCardLines(kept);
+}
+
 export function signedVCard(name: string, emails: string[], uid: string): string {
-  const lines = ["BEGIN:VCARD", "VERSION:4.0", `FN:${name}`, `UID:${uid}`];
+  const lines = [
+    "BEGIN:VCARD",
+    "VERSION:4.0",
+    `FN:${escapeVCardValue(name)}`,
+    `UID:${escapeVCardValue(uid)}`,
+  ];
   let index = 0;
   for (const email of emails) {
     if (!email) continue;
     index += 1;
-    lines.push(`item${index}.EMAIL;PREF=${index}:${email}`);
+    lines.push(`item${index}.EMAIL;PREF=${index}:${escapeVCardValue(email)}`);
   }
   lines.push("END:VCARD");
   return lines.join("\r\n");
@@ -81,15 +232,15 @@ export function buildSignedVCard(contact: SignedContact): string {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:4.0",
-    `FN:${contact.name}`,
-    `UID:${contact.uid}`,
+    `FN:${escapeVCardValue(contact.name)}`,
+    `UID:${escapeVCardValue(contact.uid)}`,
   ];
   let index = 0;
   for (const email of contact.emails) {
     if (!email.address) continue;
     index += 1;
     const group = `item${index}`;
-    lines.push(`${group}.EMAIL;PREF=${index}:${email.address}`);
+    lines.push(`${group}.EMAIL;PREF=${index}:${escapeVCardValue(email.address)}`);
     email.keyValues.forEach((keyValue, keyIndex) => {
       lines.push(`${group}.KEY;PREF=${keyIndex + 1}:${keyValue}`);
     });
@@ -113,14 +264,14 @@ export function encryptedVCard(fields: VCardFields): string {
   for (const phone of fields.phones) {
     if (!phone) continue;
     index += 1;
-    lines.push(`TEL;PREF=${index}:${phone}`);
+    lines.push(`TEL;PREF=${index}:${escapeVCardValue(phone)}`);
   }
-  if (fields.note) lines.push(`NOTE:${fields.note}`);
-  if (fields.org) lines.push(`ORG:${fields.org}`);
-  if (fields.title) lines.push(`TITLE:${fields.title}`);
-  if (fields.birthday) lines.push(`BDAY:${fields.birthday}`);
-  if (fields.address) lines.push(`ADR:${fields.address}`);
-  if (fields.url) lines.push(`URL:${fields.url}`);
+  if (fields.note) lines.push(`NOTE:${escapeVCardValue(fields.note)}`);
+  if (fields.org) lines.push(`ORG:${escapeVCardValue(fields.org)}`);
+  if (fields.title) lines.push(`TITLE:${escapeVCardValue(fields.title)}`);
+  if (fields.birthday) lines.push(`BDAY:${escapeVCardValue(fields.birthday)}`);
+  if (fields.address) lines.push(`ADR:${escapeVCardValue(fields.address)}`);
+  if (fields.url) lines.push(`URL:${escapeVCardValue(fields.url)}`);
   lines.push("END:VCARD");
   return lines.join("\r\n");
 }
@@ -132,21 +283,33 @@ export function hasEncryptedFields(fields: VCardFields): boolean {
   );
 }
 
+export function patchEncryptedVCard(text: string, fields: VCardFields): string {
+  let next = text;
+  next = setMultiVCardProperty(next, "TEL", fields.phones);
+  next = setSimpleVCardProperty(next, "NOTE", fields.note);
+  next = setSimpleVCardProperty(next, "ORG", fields.org);
+  next = setSimpleVCardProperty(next, "TITLE", fields.title);
+  next = setSimpleVCardProperty(next, "BDAY", fields.birthday);
+  next = setSimpleVCardProperty(next, "ADR", fields.address);
+  next = setSimpleVCardProperty(next, "URL", fields.url);
+  return next;
+}
+
 export function vcardField(text: string, name: string): string {
   const prefix = `${name}:`;
   const prefixParam = `${name};`;
   for (const rawLine of text.split("\n")) {
     const line = rawLine.trim();
     if (line.startsWith(prefix)) {
-      return line.slice(prefix.length);
+      return unescapeVCardValue(line.slice(prefix.length));
     }
     if (line.startsWith(prefixParam)) {
       const colon = line.indexOf(":");
-      if (colon >= 0) return line.slice(colon + 1);
+      if (colon >= 0) return unescapeVCardValue(line.slice(colon + 1));
     }
     if (line.includes(`.${name};`) || line.includes(`.${name}:`)) {
       const colon = line.indexOf(":");
-      if (colon >= 0) return line.slice(colon + 1);
+      if (colon >= 0) return unescapeVCardValue(line.slice(colon + 1));
     }
   }
   return "";
@@ -159,13 +322,13 @@ export function vcardFields(text: string, name: string): string[] {
   for (const rawLine of text.split("\n")) {
     const line = rawLine.trim();
     if (line.startsWith(prefix)) {
-      values.push(line.slice(prefix.length));
+      values.push(unescapeVCardValue(line.slice(prefix.length)));
     } else if (line.startsWith(prefixParam)) {
       const colon = line.indexOf(":");
-      if (colon >= 0) values.push(line.slice(colon + 1));
+      if (colon >= 0) values.push(unescapeVCardValue(line.slice(colon + 1)));
     } else if (line.includes(`.${name};`) || line.includes(`.${name}:`)) {
       const colon = line.indexOf(":");
-      if (colon >= 0) values.push(line.slice(colon + 1));
+      if (colon >= 0) values.push(unescapeVCardValue(line.slice(colon + 1)));
     }
   }
   return values;
@@ -188,7 +351,7 @@ export function parseSignedVCard(text: string): SignedContact {
     const encryptRaw = groupVcardField(text, group, "X-PM-ENCRYPT");
     const signRaw = groupVcardField(text, group, "X-PM-SIGN");
     contact.emails.push({
-      address: match[2] ?? "",
+      address: unescapeVCardValue(match[2] ?? ""),
       keyValues: groupVcardFields(text, group, "KEY"),
       scheme: groupVcardField(text, group, "X-PM-SCHEME") || undefined,
       encrypt:

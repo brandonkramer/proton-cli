@@ -65,6 +65,13 @@ const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
     });
   }
 
+  if (path === "/core/v4/users" && method === "GET") {
+    return new Response(JSON.stringify({ Code: 1000 }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (path === "/mail/v4/settings" && method === "GET") {
     return new Response(JSON.stringify(mailPayload), {
       status: 200,
@@ -89,6 +96,18 @@ mock.module("../src/config/store.ts", () => ({
   saveSession: async () => {},
   clearSession: async () => {},
   clearSettingsState: async () => {},
+}));
+
+mock.module("../src/proton/auth.ts", () => ({
+  verifySession: async () => true,
+  refreshSession: async (session: Session) => session,
+  persistSession: async () => {},
+}));
+
+mock.module("../src/proton/auth.ts", () => ({
+  verifySession: async () => true,
+  refreshSession: async (session: Session) => session,
+  persistSession: async () => {},
 }));
 
 const {
@@ -156,6 +175,20 @@ describe("settings API client", () => {
     await expect(updateMailSetting(runtime, "view-mode", "abc")).rejects.toThrow(
       /integer value/,
     );
+  });
+});
+
+describe("mail setting value parsing", () => {
+  test("parseMailSettingValue rejects out-of-range view-mode", async () => {
+    const { parseMailSettingValue } = await import("../src/settings/keys.ts");
+    expect(() => parseMailSettingValue("view-mode", "2")).toThrow(
+      /0 \(conversations\) or 1 \(messages\)/,
+    );
+  });
+
+  test("parseMailSettingValue rejects out-of-range delay-send", async () => {
+    const { parseMailSettingValue } = await import("../src/settings/keys.ts");
+    expect(() => parseMailSettingValue("delay-send", "21")).toThrow(/0–20/);
   });
 });
 

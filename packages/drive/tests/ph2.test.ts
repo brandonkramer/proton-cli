@@ -35,14 +35,15 @@ mock.module("../src/drive/crypto/node-crypto.ts", () => ({
     encSignature: "enc-sig",
   }),
   decryptBlock: async (data: Uint8Array) => data,
+  decryptAndVerifyBlock: async (data: Uint8Array) => data,
   decryptFileSessionKey: async () => ({
     data: new Uint8Array(16),
     algorithm: "aes256",
   }),
+  verifyRevisionManifest: async () => {},
   sha256Base64: () => "hash",
   sha256Raw: () => new Uint8Array(32),
   xorVerifier: () => "verifier",
-  buildRevisionManifest: () => new Uint8Array(32),
   signManifest: async () => "manifest-sig",
 }));
 
@@ -85,9 +86,15 @@ mock.module("../src/drive/crypto/proxy.ts", () => ({
     encryptSessionKey: async () => new Uint8Array(8),
     encryptMessage: async () => ({ message: "enc" }),
     signMessage: async () => ({ signature: "sig" }),
+    verifyMessage: async () => ({ verificationStatus: 1 }),
   }),
   base64ToBytes: (v: string) => new Uint8Array(Buffer.from(v, "base64")),
   sha256Raw: () => new Uint8Array(32),
+  VERIFICATION_STATUS: {
+    NOT_SIGNED: 0,
+    SIGNED_AND_VALID: 1,
+    SIGNED_AND_INVALID: 2,
+  },
 }));
 
 const rootLink: DriveLink = {
@@ -385,6 +392,9 @@ mock.module("../src/proton/auth.ts", () => ({
       ExpiresIn: 3600,
     },
   }),
+  verifySession: async () => true,
+  refreshSession: async (session: { AccessToken: string }) => session,
+  persistSession: async () => {},
 }));
 
 const unlockedFixture = {

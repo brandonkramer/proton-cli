@@ -173,16 +173,47 @@ describe("mail message crypto (PH1)", () => {
     ).toBeGreaterThan(0);
   });
 
-  test("fetchSenderPublicKeys returns empty on failure (no throw)", async () => {
+  test("fetchSenderPublicKeys fails closed on network error (no negative cache)", async () => {
     clearSenderKeyCache();
     const fetchImpl = mock(async () => {
       throw new Error("network down");
     }) as unknown as typeof fetch;
 
+    await expect(
+      fetchSenderPublicKeys("missing@example.com", { fetchImpl }),
+    ).rejects.toThrow(/Public-key lookup failed|network down/);
+
+    // Transient failure must not be cached as authoritative empty.
+    const okFetch = mock(async () =>
+      new Response(
+        JSON.stringify({ Code: 1000, Address: { Keys: [] } }),
+        { status: 200 },
+      ),
+    ) as unknown as typeof fetch;
     const keys = await fetchSenderPublicKeys("missing@example.com", {
-      fetchImpl,
+      fetchImpl: okFetch,
     });
     expect(keys).toEqual([]);
+  });
+
+  test("fetchSenderPublicKeys caches authoritative empty keys", async () => {
+    clearSenderKeyCache();
+    let calls = 0;
+    const fetchImpl = mock(async () => {
+      calls += 1;
+      return new Response(
+        JSON.stringify({ Code: 1000, Address: { Keys: [] } }),
+        { status: 200 },
+      );
+    }) as unknown as typeof fetch;
+
+    expect(
+      await fetchSenderPublicKeys("ext@example.com", { fetchImpl }),
+    ).toEqual([]);
+    expect(
+      await fetchSenderPublicKeys("ext@example.com", { fetchImpl }),
+    ).toEqual([]);
+    expect(calls).toBe(1);
   });
 
   test("addressKeyForId resolves map entry", () => {

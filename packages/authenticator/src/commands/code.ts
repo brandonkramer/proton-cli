@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import { loadLocalEntries } from "../config/store.ts";
 import { PASS_ENV } from "../pass/credentials.ts";
-import { pickBestMatch } from "../sync/match.ts";
+import { resolveEntryMatch } from "../sync/match.ts";
 import { decryptLocalEntry, unlockWithPassword } from "../sync/sync.ts";
 import { actionCode } from "../tui/actions.ts";
 import { preferNonInteractive } from "../util/agent.ts";
@@ -57,10 +57,25 @@ export function registerCode(program: Command): void {
         return;
       }
 
-      const match = pickBestMatch(local.entries, q);
-      if (!match) {
+      const resolved = resolveEntryMatch(local.entries, q, {
+        requireUnique: preferNonInteractive(),
+      });
+      if (resolved.kind === "none") {
         throw new CliError(`No entry matched "${q}".`, "not_found");
       }
+      if (resolved.kind === "ambiguous") {
+        const labels = resolved.candidates
+          .map(
+            (e) =>
+              `${e.issuer || "—"}/${e.name || "(unnamed)"} (${e.entryId})`,
+          )
+          .join(", ");
+        throw new CliError(
+          `Multiple entries matched "${q}": ${labels}. Pass entry ID to disambiguate.`,
+          "ambiguous_match",
+        );
+      }
+      const match = resolved.entry;
 
       const password = await resolveAccountPassword({
         passRef: options?.pass,

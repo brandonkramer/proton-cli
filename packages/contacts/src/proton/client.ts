@@ -6,6 +6,8 @@ import {
   signCard,
 } from "../crypto/card.ts";
 import {
+  CardEncrypted,
+  CardEncryptedSigned,
   CardSigned,
   type ContactCard,
   buildSignedVCard,
@@ -15,8 +17,13 @@ import {
   findSignedEmail,
   hasEncryptedFields,
   parseSignedVCard,
+  patchEncryptedVCard,
+  patchSignedVCardEmails,
+  setSimpleVCardProperty,
   signedVCard,
+  vcardField,
   type SignedContact,
+  type SignedEmail,
   type VCardFields,
 } from "../vcard/vcard.ts";
 import { isFullId } from "../util/id.ts";
@@ -228,7 +235,50 @@ export class ContactsClient {
   }
 
   async update(id: string, patch: NewContactInput): Promise<ContactSummary> {
-    const existing = await this.get(id);
+    const rawCards = await this.#rawContactCards(id);
+    const plaintext = await decryptCards(rawCards, this.#userKey);
+    const existing = contactFromCards(id, plaintext);
+
+    const touchesEncrypted =
+      patch.phones.length > 0 ||
+      Boolean(
+        patch.note ||
+          patch.org ||
+          patch.title ||
+          patch.birthday ||
+          patch.address ||
+          patch.url,
+      );
+
+    let signedIndex = -1;
+    let encryptedIndex = -1;
+    for (let i = 0; i < rawCards.length; i += 1) {
+      const card = rawCards[i]!;
+      if (signedIndex < 0 && card.Type === CardSigned) signedIndex = i;
+      if (
+        encryptedIndex < 0 &&
+        (card.Type === CardEncryptedSigned || card.Type === CardEncrypted)
+      ) {
+        encryptedIndex = i;
+      }
+    }
+    if (signedIndex < 0) {
+      throw new CliError("contact has no signed card to update");
+    }
+
+    const signedPlain = plaintext[signedIndex] ?? "";
+    const encryptedPlain =
+      encryptedIndex >= 0 ? (plaintext[encryptedIndex] ?? "") : "";
+
+    if (
+      patch.emails.length > 0 &&
+      /(^|\n)EMAIL[;:]/i.test(signedPlain.replace(/\r\n/g, "\n"))
+    ) {
+      throw new CliError(
+        "Refusing contact update: signed card has ungrouped EMAIL properties that cannot be patched losslessly.",
+      );
+    }
+
     const merged: NewContactInput = {
       name: patch.name || existing.name,
       emails: patch.emails.length > 0 ? patch.emails : existing.emails,
@@ -240,11 +290,21 @@ export class ContactsClient {
       address: patch.address || existing.address,
       url: patch.url || existing.url,
     };
-    const oldSigned = parseSignedVCard((existing.cards ?? []).join("\n"));
-    const model: SignedContact = {
-      name: merged.name || merged.emails[0] || "",
-      uid: oldSigned.uid || contactUid(),
-      emails: merged.emails.map((address) => {
+
+    const oldSigned = parseSignedVCard(signedPlain);
+    let nextSigned = signedPlain;
+    if (patch.name) {
+      nextSigned = setSimpleVCardProperty(nextSigned, "FN", merged.name);
+    }
+    if (!vcardField(nextSigned, "UID")) {
+      nextSigned = setSimpleVCardProperty(
+        nextSigned,
+        "UID",
+        oldSigned.uid || contactUid(),
+      );
+    }
+    if (patch.emails.length > 0) {
+      const emails: SignedEmail[] = merged.emails.map((address) => {
         const prev = oldSigned.emails.find(
           (entry) => entry.address.toLowerCase() === address.toLowerCase(),
         );
@@ -255,16 +315,31 @@ export class ContactsClient {
           sign: prev?.sign,
           scheme: prev?.scheme,
         };
-      }),
-    };
-    const cards: ContactCard[] = [
-      await signCard(buildSignedVCard(model), this.#userKey),
-    ];
-    const fields = toVCardFields(merged);
-    if (hasEncryptedFields(fields)) {
-      cards.push(await encryptAndSignCard(encryptedVCard(fields), this.#userKey));
+      });
+      nextSigned = patchSignedVCardEmails(nextSigned, emails);
     }
-    const body: UpdateContactRequest = { Cards: cardPayload(cards) };
+
+    const outCards = [...rawCards];
+    outCards[signedIndex] = await signCard(nextSigned, this.#userKey);
+
+    const fields = toVCardFields(merged);
+    if (touchesEncrypted || hasEncryptedFields(fields)) {
+      if (encryptedIndex >= 0) {
+        const nextEncrypted = encryptedPlain
+          ? patchEncryptedVCard(encryptedPlain, fields)
+          : encryptedVCard(fields);
+        outCards[encryptedIndex] = await encryptAndSignCard(
+          nextEncrypted,
+          this.#userKey,
+        );
+      } else if (hasEncryptedFields(fields)) {
+        outCards.push(
+          await encryptAndSignCard(encryptedVCard(fields), this.#userKey),
+        );
+      }
+    }
+
+    const body: UpdateContactRequest = { Cards: cardPayload(outCards) };
     const { status, data } = await protonFetch<ContactResponse>(
       `${CONTACTS_PATH}/${id}`,
       {

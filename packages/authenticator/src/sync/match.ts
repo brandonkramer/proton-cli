@@ -5,6 +5,11 @@ export interface MatchResult {
   score: number;
 }
 
+export type EntryMatchResult =
+  | { kind: "match"; entry: LocalEntry }
+  | { kind: "none" }
+  | { kind: "ambiguous"; candidates: LocalEntry[] };
+
 function normalize(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -51,10 +56,40 @@ export function matchEntries(
     });
 }
 
+export function resolveEntryMatch(
+  entries: LocalEntry[],
+  query: string,
+  options?: { requireUnique?: boolean },
+): EntryMatchResult {
+  const q = query.trim();
+  if (!q) return { kind: "none" };
+
+  const active = entries.filter((e) => e.syncState !== "PendingToDelete");
+  const byId = active.find((e) => e.entryId === q);
+  if (byId) return { kind: "match", entry: byId };
+
+  const matches = matchEntries(entries, q);
+  if (matches.length === 0) return { kind: "none" };
+  if (
+    options?.requireUnique &&
+    matches.length > 1 &&
+    matches[0]!.score === matches[1]!.score
+  ) {
+    const topScore = matches[0]!.score;
+    return {
+      kind: "ambiguous",
+      candidates: matches
+        .filter((m) => m.score === topScore)
+        .map((m) => m.entry),
+    };
+  }
+  return { kind: "match", entry: matches[0]!.entry };
+}
+
 export function pickBestMatch(
   entries: LocalEntry[],
   query: string,
 ): LocalEntry | null {
-  const matches = matchEntries(entries, query);
-  return matches[0]?.entry ?? null;
+  const result = resolveEntryMatch(entries, query);
+  return result.kind === "match" ? result.entry : null;
 }

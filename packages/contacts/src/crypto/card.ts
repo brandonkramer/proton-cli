@@ -9,6 +9,8 @@ import {
   type ContactCard,
 } from "../vcard/vcard.ts";
 
+const SIGNED_AND_VALID = 1;
+
 interface CryptoWithSign {
   signMessage: (options: {
     binaryData?: Uint8Array;
@@ -21,10 +23,11 @@ interface CryptoWithSign {
     armoredMessage?: string;
     binaryMessage?: Uint8Array;
     decryptionKeys: unknown[];
-    verificationKeys: unknown[];
+    verificationKeys?: unknown[];
+    armoredSignature?: string;
     format?: "binary" | "armored";
     expectSigned?: boolean;
-  }) => Promise<{ data: Uint8Array | string }>;
+  }) => Promise<{ data: Uint8Array | string; verificationStatus?: number }>;
   encryptMessage: (options: {
     binaryData?: Uint8Array;
     textData?: string;
@@ -32,6 +35,13 @@ interface CryptoWithSign {
     signingKeys?: unknown[];
     format?: "armored" | "binary";
   }) => Promise<{ message: Uint8Array | string }>;
+  verifyMessage: (options: {
+    binaryData?: Uint8Array;
+    textData?: string;
+    armoredSignature: string;
+    verificationKeys: unknown[];
+    format?: "utf8" | "binary";
+  }) => Promise<{ verificationStatus: number }>;
 }
 
 async function crypto(): Promise<CryptoWithSign> {
@@ -41,6 +51,31 @@ async function crypto(): Promise<CryptoWithSign> {
 function armoredSignature(result: string | { signature?: string; message?: string }): string {
   if (typeof result === "string") return result;
   return result.signature ?? result.message ?? "";
+}
+
+function requireSignature(card: ContactCard, label: string): string {
+  const signature = card.Signature?.trim();
+  if (!signature) {
+    throw new Error(`Contact card signature missing (${label}).`);
+  }
+  return signature;
+}
+
+async function verifyDetached(
+  data: string,
+  signature: string,
+  verificationKey: unknown,
+): Promise<void> {
+  const proxy = await crypto();
+  const { verificationStatus } = await proxy.verifyMessage({
+    binaryData: textToBytes(data),
+    armoredSignature: signature,
+    verificationKeys: [verificationKey],
+    format: "binary",
+  });
+  if (verificationStatus !== SIGNED_AND_VALID) {
+    throw new Error("Contact card signature verification failed.");
+  }
 }
 
 export async function signCard(
@@ -98,18 +133,35 @@ export async function decryptCards(
       case CardClear:
         out.push(card.Data);
         break;
-      case CardSigned:
+      case CardSigned: {
+        const signature = requireSignature(card, "signed");
+        await verifyDetached(card.Data, signature, userKey.publicKey);
         out.push(card.Data);
         break;
-      case CardEncrypted:
-      case CardEncryptedSigned: {
+      }
+      case CardEncrypted: {
         const { data } = await proxy.decryptMessage({
           armoredMessage: card.Data,
           decryptionKeys: [userKey.privateKey],
-          verificationKeys: [userKey.publicKey],
           format: "binary",
           expectSigned: false,
         });
+        out.push(typeof data === "string" ? data : bytesToText(data));
+        break;
+      }
+      case CardEncryptedSigned: {
+        const signature = requireSignature(card, "encrypted+signed");
+        const { data, verificationStatus } = await proxy.decryptMessage({
+          armoredMessage: card.Data,
+          decryptionKeys: [userKey.privateKey],
+          verificationKeys: [userKey.publicKey],
+          armoredSignature: signature,
+          format: "binary",
+          expectSigned: true,
+        });
+        if (verificationStatus !== undefined && verificationStatus !== SIGNED_AND_VALID) {
+          throw new Error("Contact card signature verification failed.");
+        }
         out.push(typeof data === "string" ? data : bytesToText(data));
         break;
       }

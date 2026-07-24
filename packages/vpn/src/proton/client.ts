@@ -248,6 +248,11 @@ export async function prepareConnection(
   });
 
   const confPath = wireguardConfPath();
+  // Bring down any existing tunnel before overwriting the conf, so reconnect
+  // cannot leave the old peer up while writing a new peer config.
+  const { bringDown } = await import("../wireguard/manager.ts");
+  await bringDown(confPath);
+
   await mkdir(dirname(confPath), { recursive: true, mode: 0o700 });
   await writeFile(confPath, conf, { mode: 0o600 });
   try {

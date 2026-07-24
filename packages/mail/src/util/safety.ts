@@ -1,13 +1,15 @@
+import { agentFlags } from "./agent.ts";
 import { CliError } from "./errors.ts";
 import { ExitCode } from "./exit.ts";
 
 /**
  * Agent safety gates for Mail mutations.
  *
- *   PROTONMAIL_READ_ONLY=1       — block send/reply/forward (and other writes)
+ *   PROTONMAIL_READ_ONLY=1       — block send/reply/forward and other writes
  *   PROTONMAIL_ALLOW_SEND=false  — block send/reply/forward specifically
  *
  * Unset ALLOW_SEND defaults to allowed (unless read-only).
+ * Destructive deletes require -y/--yes (agentFlags.yes).
  */
 
 function envFlag(name: string): boolean | undefined {
@@ -28,6 +30,16 @@ export function isSendAllowed(): boolean {
   return true;
 }
 
+/** Throw unless Mail writes (organize/labels/send) are permitted. */
+export function assertWriteAllowed(): void {
+  if (isReadOnly()) {
+    throw new CliError(
+      "Write blocked: PROTONMAIL_READ_ONLY is set.",
+      ExitCode.USAGE,
+    );
+  }
+}
+
 /** Throw unless send/reply/forward is permitted by env gates. */
 export function assertSendAllowed(): void {
   if (isReadOnly()) {
@@ -42,4 +54,16 @@ export function assertSendAllowed(): void {
       ExitCode.USAGE,
     );
   }
+}
+
+/**
+ * Require -y/--yes for destructive actions.
+ * Non-interactive callers without --yes are refused.
+ */
+export function assertYesConfirmed(action: string): void {
+  if (agentFlags().yes) return;
+  throw new CliError(
+    `${action} requires -y/--yes confirmation.`,
+    ExitCode.USAGE,
+  );
 }

@@ -17,6 +17,11 @@ const pkg = (await Bun.file(
   new URL("../package.json", import.meta.url),
 ).json()) as { version: string };
 
+function envTruthy(name: string): boolean {
+  const value = process.env[name]?.trim().toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
+}
+
 const argv = process.argv.slice(2);
 if (argv.length === 0) {
   const isTty =
@@ -24,10 +29,21 @@ if (argv.length === 0) {
   const agent =
     process.env.CI === "1" ||
     process.env.CI === "true" ||
-    process.env.PROTON_AGENT === "1" ||
-    process.env.PROTONVPN_AGENT === "1" ||
-    process.env.PROTONAUTH_AGENT === "1" ||
-    process.env.PROTONVPN_JSON === "1";
+    envTruthy("PROTON_AGENT") ||
+    envTruthy("PROTON_JSON") ||
+    envTruthy("PROTONVPN_AGENT") ||
+    envTruthy("PROTONVPN_JSON") ||
+    envTruthy("PROTONAUTH_AGENT") ||
+    envTruthy("PROTONCONTACTS_AGENT") ||
+    envTruthy("PROTONCONTACTS_JSON") ||
+    envTruthy("PROTONCALENDAR_AGENT") ||
+    envTruthy("PROTONCALENDAR_JSON") ||
+    envTruthy("PROTON_DRIVE_AGENT") ||
+    envTruthy("PROTON_DRIVE_JSON") ||
+    envTruthy("PROTONSETTINGS_AGENT") ||
+    envTruthy("PROTONSETTINGS_JSON") ||
+    envTruthy("PROTONMAIL_AGENT") ||
+    envTruthy("PROTONMAIL_JSON");
   if (!isTty || agent) {
     console.error(
       "proton: no command given.\n" +

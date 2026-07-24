@@ -35,6 +35,25 @@ export interface DualSignInOptions {
  * Collect credentials once (caller), mint a session per product via injected
  * authenticators, and persist product-scoped sessions (Approach A).
  */
+/** Best-effort reverse-order rollback so later mints are cleared first. */
+async function rollbackMintAttempt(
+  written: ProductId[],
+  clearers?: Partial<Record<ProductId, () => Promise<void>>>,
+): Promise<void> {
+  for (const product of [...written].reverse()) {
+    try {
+      await clearProductSession(product);
+    } catch {
+      // Continue rolling back remaining products.
+    }
+    try {
+      await clearers?.[product]?.();
+    } catch {
+      // Product clearer is best-effort.
+    }
+  }
+}
+
 export async function dualMintSignIn(
   options: DualSignInOptions,
 ): Promise<DualSignInResult> {
@@ -82,12 +101,7 @@ export async function dualMintSignIn(
   }
 
   if (failed.length > 0 && !partialOk) {
-    await Promise.all(
-      written.map(async (p) => {
-        await clearProductSession(p);
-        await clearers?.[p]?.();
-      }),
-    );
+    await rollbackMintAttempt(written, clearers);
     return {
       username: credentials.username,
       succeeded: [],

@@ -20,7 +20,8 @@ export interface DriveLink {
   AlbumProperties?: { NodeHashKey: string };
   FileProperties?: {
     ContentKeyPacket: string;
-    ActiveRevision: { ID: string };
+    ContentKeyPacketSignature?: string;
+    ActiveRevision: { ID: string; ManifestSignature?: string; SignatureEmail?: string };
   };
   ShareIDs?: string[];
   ShareUrls?: { ShareURLID: string }[];

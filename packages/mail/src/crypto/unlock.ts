@@ -25,6 +25,10 @@ export interface ProtonAddress {
   ID: string;
   Email: string;
   Keys: AddressKey[];
+  /** 1 = enabled (when present). */
+  Status?: number;
+  /** Lower is higher priority (when present). */
+  Order?: number;
 }
 
 export interface UnlockedAddressKey {
@@ -194,17 +198,34 @@ export async function unlockMailKeysWithOptions(
 
 const PRIMARY_SUFFIXES = ["@proton.me", "@pm.me", "@protonmail.com"];
 
-/** Primary @proton.me address key, else first unlockable address. */
+function isEnabledAddress(address: ProtonAddress): boolean {
+  return address.Status === undefined || address.Status === 1;
+}
+
+/**
+ * Prefer enabled @proton.me / @pm.me address (lowest Order), else first
+ * unlockable enabled address.
+ */
 export function primaryAddressKey(
   unlocked: Pick<UnlockedMailKeys, "addresses" | "addressKeys">,
 ): UnlockedAddressKey {
-  for (const address of unlocked.addresses) {
+  const candidates = unlocked.addresses
+    .filter((address) => isEnabledAddress(address) && unlocked.addressKeys.has(address.ID))
+    .sort((a, b) => (a.Order ?? 0) - (b.Order ?? 0));
+
+  for (const address of candidates) {
     const email = address.Email.toLowerCase();
     if (PRIMARY_SUFFIXES.some((suffix) => email.endsWith(suffix))) {
       const key = unlocked.addressKeys.get(address.ID);
       if (key) return key;
     }
   }
+
+  for (const address of candidates) {
+    const key = unlocked.addressKeys.get(address.ID);
+    if (key) return key;
+  }
+
   const first = unlocked.addressKeys.values().next().value;
   if (!first) {
     throw new Error("No address key rings available.");

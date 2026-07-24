@@ -188,11 +188,10 @@ export async function bringUp(confPath: string): Promise<void> {
   const result = await runWgQuick(confPath, "up");
   if (result.code !== 0) {
     const combined = `${result.stderr}\n${result.stdout}`.trim();
-    if (/already exists|already up/i.test(combined)) {
-      return;
-    }
+    // Do not treat "already exists" as success — an old peer may still be up.
     throw new CliError(
       `Failed to start WireGuard tunnel.\n${combined}\n` +
+        "If the interface is stuck, run `proton vpn disconnect` then retry.\n" +
         "If sudo failed, retry with `proton vpn --sudo connect` or `sudo -v` first.",
     );
   }
@@ -208,6 +207,13 @@ export async function bringDown(confPath: string): Promise<void> {
     const result = await run(wireguard, ["/uninstalltunnelservice", tunnelName]);
     if (result.code !== 0) {
       const detail = (result.stderr || result.stdout).trim();
+      if (
+        /cannot find|does not exist|not found|The specified service does not exist/i.test(
+          detail,
+        )
+      ) {
+        return;
+      }
       if (/access is denied|administrator|elevat/i.test(detail)) {
         throw privilegeError(`Failed to stop WireGuard tunnel.\n${detail}`);
       }

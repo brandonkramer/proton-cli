@@ -1,4 +1,5 @@
 import type { Command } from "commander";
+import { addDriveAuthOptions } from "./commands/common.ts";
 import { loadSession } from "./proton/auth.ts";
 import { registerFoldersCommands } from "./commands/folders.ts";
 import { registerInvitationsCommands } from "./commands/invitations.ts";
@@ -11,6 +12,9 @@ import { handleCommandError } from "./util/command.ts";
 
 /** Register `proton drive …` (and legacy `protondrive …`) commands. */
 export function registerDriveCommands(drive: Command): void {
+  // Register auth options on the parent so `--pass`/`--password` parse before actions.
+  addDriveAuthOptions(drive);
+
   drive
     .command("status")
     .description("Drive session status")

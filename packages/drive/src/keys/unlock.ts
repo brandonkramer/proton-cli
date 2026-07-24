@@ -107,7 +107,7 @@ async function fetchAddresses(
 
 async function decryptToken(
   tokenArmored: string,
-  _signatureArmored: string,
+  signatureArmored: string,
   userKeys: DecryptedUserKey[],
 ): Promise<Uint8Array> {
   const crypto = await getDriveCrypto();
@@ -116,10 +116,13 @@ async function decryptToken(
     throw new CliError("No unlocked User Key for address token decryption.");
   }
 
+  // Address-key Token is encrypted to the user key; Signature is a detached
+  // signature over the cleartext token (not an inline signed ciphertext).
   const { data } = await crypto.decryptMessage({
     armoredMessage: tokenArmored,
     decryptionKeys: [primary.privateKey],
     verificationKeys: [primary.publicKey],
+    armoredSignature: signatureArmored,
     format: "binary",
     expectSigned: true,
   });

@@ -12,6 +12,7 @@ import {
 import { DEFAULT_LABEL_COLOR } from "../proton/constants.ts";
 import { emitOk, isDryRun, wantsJson } from "../util/agent.ts";
 import { reportCommandError } from "../util/errors.ts";
+import { assertWriteAllowed, assertYesConfirmed } from "../util/safety.ts";
 
 function printLabels(title: string, labels: LabelSummary[]): void {
   if (labels.length === 0) {
@@ -90,6 +91,7 @@ export function registerLabels(mail: Command): void {
           });
           return;
         }
+        assertWriteAllowed();
         const runtime = await requireMailRuntime({ passRef: globals?.pass });
         const label = await createUserLabel({
           session: runtime.session,
@@ -133,6 +135,7 @@ export function registerLabels(mail: Command): void {
           });
           return;
         }
+        assertWriteAllowed();
         const runtime = await requireMailRuntime({ passRef: globals?.pass });
         const label = await updateUserLabel({
           session: runtime.session,
@@ -153,7 +156,7 @@ export function registerLabels(mail: Command): void {
 
   labels
     .command("delete")
-    .description("Delete a user label")
+    .description("Delete a user label (requires -y/--yes)")
     .argument("<label-id>", "Label ID")
     .option("--dry-run", "Show target without calling the API")
     .action(async function (this: Command, labelId: string) {
@@ -163,6 +166,8 @@ export function registerLabels(mail: Command): void {
           emitOk({ dryRun: true, action: "labels-delete", labelId });
           return;
         }
+        assertWriteAllowed();
+        assertYesConfirmed("Delete label");
         const runtime = await requireMailRuntime({ passRef: globals?.pass });
         await deleteUserLabel({ session: runtime.session, labelId });
         emitOk({
@@ -218,6 +223,7 @@ export function registerLabels(mail: Command): void {
           });
           return;
         }
+        assertWriteAllowed();
         const runtime = await requireMailRuntime({ passRef: globals?.pass });
         const folder = await createFolder({
           session: runtime.session,
@@ -263,6 +269,7 @@ export function registerLabels(mail: Command): void {
           });
           return;
         }
+        assertWriteAllowed();
         const runtime = await requireMailRuntime({ passRef: globals?.pass });
         const folder = await updateUserLabel({
           session: runtime.session,
@@ -283,7 +290,7 @@ export function registerLabels(mail: Command): void {
 
   folders
     .command("delete")
-    .description("Delete a mail folder")
+    .description("Delete a mail folder (requires -y/--yes)")
     .argument("<folder-id>", "Folder ID")
     .option("--dry-run", "Show target without calling the API")
     .action(async function (this: Command, folderId: string) {
@@ -295,6 +302,8 @@ export function registerLabels(mail: Command): void {
           emitOk({ dryRun: true, action: "folders-delete", folderId });
           return;
         }
+        assertWriteAllowed();
+        assertYesConfirmed("Delete folder");
         const runtime = await requireMailRuntime({ passRef: globals?.pass });
         await deleteUserLabel({ session: runtime.session, labelId: folderId });
         emitOk({

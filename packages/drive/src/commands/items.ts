@@ -3,6 +3,7 @@ import { stat } from "node:fs/promises";
 import { basename } from "node:path";
 import { emitOk, emitPlain, isDryRun, wantsJson } from "../util/agent.ts";
 import { handleCommandError } from "../util/command.ts";
+import { requireDestructiveConfirm } from "../util/confirm.ts";
 import { normalizeDrivePath } from "../util/paths.ts";
 import { DriveService } from "../drive/service.ts";
 import type { DryRunAction } from "../drive/types.ts";
@@ -233,44 +234,47 @@ export function registerItemsCommands(items: Command): void {
     return service.trash(client, context, args[0]!, dryRun);
   }, 1);
 
-  items
+  const del = items
     .command("delete")
     .description("Trash or permanently delete an item")
     .argument("<path>", "Drive item path")
     .option("--permanent", "Permanently delete (skip trash restore)")
     .option("-y, --yes", "Skip confirmation")
     .option("--dry-run", "Print planned action without mutating Drive")
-    .option("--json", "Machine-readable JSON output")
-    .action(async (path: string, options, command) => {
-      const opts = applyDriveGlobals(command, options);
-      addDriveAuthOptions(command);
-      try {
-        await withService(opts, async (service) => {
-          const { client, context } = await service.open({
-            password: opts.password,
-            passRef: opts.pass,
-          });
-          const result = await service.deleteItem(
-            client,
-            context,
-            path,
-            Boolean(options.permanent),
-            isDryRun(),
-          );
-          if (result && "action" in result) {
-            emitDryRun(result);
-            return;
-          }
-          if (wantsJson()) {
-            emitOk({ deleted: true, path, permanent: Boolean(options.permanent) });
-            return;
-          }
-          emitPlain(`Deleted ${path}`);
-        });
-      } catch (error) {
-        await handleCommandError(error);
+    .option("--json", "Machine-readable JSON output");
+  addDriveAuthOptions(del);
+  del.action(async (path: string, options, command) => {
+    const opts = applyDriveGlobals(command, options);
+    try {
+      if (options.permanent && !isDryRun()) {
+        requireDestructiveConfirm(`Permanently deleting ${path}`);
       }
-    });
+      await withService(opts, async (service) => {
+        const { client, context } = await service.open({
+          password: opts.password,
+          passRef: opts.pass,
+        });
+        const result = await service.deleteItem(
+          client,
+          context,
+          path,
+          Boolean(options.permanent),
+          isDryRun(),
+        );
+        if (result && "action" in result) {
+          emitDryRun(result);
+          return;
+        }
+        if (wantsJson()) {
+          emitOk({ deleted: true, path, permanent: Boolean(options.permanent) });
+          return;
+        }
+        emitPlain(`Deleted ${path}`);
+      });
+    } catch (error) {
+      await handleCommandError(error);
+    }
+  });
 }
 
 function registerMutatingItemCommand(

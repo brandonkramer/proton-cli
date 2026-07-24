@@ -33,7 +33,7 @@ bun link
 
 - Bun ≥ 1.1
 - Proton account in [Single Password Mode](https://proton.me/support/single-password)
-- TOTP if you use 2FA (FIDO2/security keys are not supported). Shared sign-in mints **two** API sessions — each needs its **own fresh TOTP** (codes are single-use; the same code cannot be reused for VPN then Authenticator)
+- TOTP if you use 2FA (FIDO2/security keys are not supported). Shared sign-in mints **all selected products** (default: all seven) — each product needs its **own fresh TOTP** (codes are single-use; one code cannot cover multiple mints)
 - **VPN — WireGuard tools** (install tries this via Homebrew / winget; or `proton vpn setup`)
   - **macOS:** Homebrew → `wireguard-tools` (sudo for connect/disconnect)
   - **Windows:** WireGuard app via winget (Administrator terminal for connect/disconnect)
@@ -66,7 +66,7 @@ proton update --check
 proton update
 ```
 
-With 2FA, `proton signin` / TUI **Sign in** will ask for **TOTP for VPN**, then a **new** code for Authenticator. One code cannot cover both.
+With 2FA, `proton signin` / TUI **Sign in** prompts for a **fresh TOTP per product** being minted (VPN, Authenticator, Contacts, Calendar, Drive, Settings, Mail). One code cannot cover multiple products — use `--pass` so Pass can supply a new code for each mint.
 
 ### VPN (`proton vpn …`)
 

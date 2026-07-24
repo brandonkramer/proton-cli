@@ -56,7 +56,12 @@ export async function decryptMessageBody(
           session: options.session,
           fetchImpl: options.fetchImpl,
         }));
-    verificationKeys = await loader(options.senderEmail);
+    try {
+      verificationKeys = await loader(options.senderEmail);
+    } catch {
+      // Signature verify is best-effort; lookup errors → unverified (null).
+      verificationKeys = [];
+    }
   }
 
   const CryptoProxy = options.cryptoProxy ?? (await getCryptoProxy());

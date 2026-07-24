@@ -136,13 +136,32 @@ export async function syncEntries(password: string): Promise<SyncResult> {
   }
 
   const remote = await fetchAllEntries(ctx.session);
-  const parsed = (
-    await Promise.all(
-      remote.map((entry) => parseRemoteEntry(entry, ctx.encryptionKeys)),
-    )
-  ).filter((entry): entry is LocalEntry => entry !== null);
+  const existingByEntryId = new Map(
+    local.entries
+      .filter((e) => e.entryId)
+      .map((e) => [e.entryId, e] as const),
+  );
 
-  const skipped = remote.length - parsed.length;
+  const parsed: LocalEntry[] = [];
+  let skipped = 0;
+  for (const remoteEntry of remote) {
+    const entry = await parseRemoteEntry(remoteEntry, ctx.encryptionKeys);
+    if (entry) {
+      parsed.push(entry);
+      continue;
+    }
+    const prior = existingByEntryId.get(remoteEntry.EntryID);
+    if (prior) {
+      parsed.push({
+        ...prior,
+        revision: remoteEntry.Revision,
+        modifyTime: remoteEntry.ModifyTime,
+        flags: remoteEntry.Flags,
+      });
+    } else {
+      skipped += 1;
+    }
+  }
 
   // Preserve local-only PendingSync items that have no remote id yet.
   const pendingLocal = local.entries.filter(

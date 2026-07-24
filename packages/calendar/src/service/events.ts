@@ -66,6 +66,13 @@ interface RawEvent {
   UID: string;
   SharedKeyPacket: string;
   SharedEvents?: Record<string, unknown>[];
+  Permissions?: number;
+  IsOrganizer?: number;
+  Notifications?: unknown;
+  Color?: string | null;
+  AttendeesEvents?: Record<string, unknown>[];
+  AttendeesEventContent?: Record<string, unknown>[];
+  Attendees?: unknown;
 }
 
 function defaultRange(): { start: Date; end: Date } {
@@ -90,6 +97,7 @@ async function decryptEventFields(
   description: string;
   rrule: string;
   organizer: string;
+  sequence: number;
 }> {
   const cards = mapCards(raw.SharedEvents);
   const decrypted = await decryptCards(
@@ -100,12 +108,15 @@ async function decryptEventFields(
   );
   const joined = decrypted.join("\n");
   const organizer = icalField(joined, "ORGANIZER").replace(/^mailto:/i, "");
+  const sequenceRaw = icalField(joined, "SEQUENCE");
+  const sequence = sequenceRaw ? Number.parseInt(sequenceRaw, 10) || 0 : 0;
   return {
     title: icalField(joined, "SUMMARY"),
     location: icalField(joined, "LOCATION"),
     description: icalField(joined, "DESCRIPTION"),
     rrule: icalField(joined, "RRULE"),
     organizer,
+    sequence,
   };
 }
 
@@ -402,13 +413,17 @@ export async function updateEvent(
   const start =
     options.start ?? new Date(current.Event.StartTime * 1000);
   const end = options.end ?? new Date(current.Event.EndTime * 1000);
+  const timeChanged = Boolean(options.start || options.end);
+  const nextSequence = timeChanged
+    ? existing.sequence + 1
+    : existing.sequence;
 
   const signed = signedVevent({
     uid: current.Event.UID,
     start,
     end,
     allDay: current.Event.FullDay === 1,
-    sequence: 1,
+    sequence: nextSequence,
     rrule: existing.rrule,
     organizer: existing.organizer,
   });
@@ -421,18 +436,31 @@ export async function updateEvent(
     current.Event.SharedKeyPacket,
   );
 
+  const attendeeCards =
+    current.Event.AttendeesEventContent ?? current.Event.AttendeesEvents;
+  const event: Record<string, unknown> = {
+    Permissions: current.Event.Permissions ?? 63,
+    IsOrganizer: current.Event.IsOrganizer ?? 1,
+    SharedEventContent: [signedCard, encryptedCard],
+    Notifications:
+      current.Event.Notifications === undefined
+        ? null
+        : current.Event.Notifications,
+    Color: current.Event.Color === undefined ? null : current.Event.Color,
+  };
+  if (attendeeCards && attendeeCards.length > 0) {
+    event.AttendeesEventContent = attendeeCards;
+  }
+  if (current.Event.Attendees !== undefined) {
+    event.Attendees = current.Event.Attendees;
+  }
+
   const body = {
     MemberID: ctx.memberId,
     Events: [
       {
         ID: options.eventId,
-        Event: {
-          Permissions: 63,
-          IsOrganizer: 1,
-          SharedEventContent: [signedCard, encryptedCard],
-          Notifications: null,
-          Color: null,
-        },
+        Event: event,
       },
     ],
   };

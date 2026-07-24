@@ -123,8 +123,22 @@ export function parseMailSettingValue(
     if (Number.isNaN(parsed) || String(parsed) !== value.trim()) {
       throw new Error(`setting ${JSON.stringify(key)} expects an integer value`);
     }
+    validateMailSettingRange(key, parsed);
     return { [spec.field]: parsed };
   }
 
   return { [spec.field]: value };
+}
+
+function validateMailSettingRange(key: string, value: number): void {
+  if (key === "view-mode" && value !== 0 && value !== 1) {
+    throw new Error(
+      `setting ${JSON.stringify(key)} expects 0 (conversations) or 1 (messages)`,
+    );
+  }
+  if (key === "delay-send" && (value < 0 || value > 20)) {
+    throw new Error(
+      `setting ${JSON.stringify(key)} expects seconds in range 0–20`,
+    );
+  }
 }

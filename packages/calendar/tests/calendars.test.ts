@@ -61,6 +61,8 @@ mock.module("../src/config/store.ts", () => ({
 
 mock.module("../src/proton/auth.ts", () => ({
   verifySession: async () => true,
+  refreshSession: async (session: Session) => session,
+  persistSession: async () => {},
 }));
 
 mock.module("../src/crypto/unlock.ts", () => ({

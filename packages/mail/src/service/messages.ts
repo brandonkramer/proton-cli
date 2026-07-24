@@ -37,6 +37,11 @@ export interface MessageSummary {
 export interface DecryptedMessage extends MessageSummary {
   body: string;
   mimeType: string;
+  /**
+   * Signature verification against sender public keys.
+   * true/false when keys were available; null when unverified / unavailable.
+   */
+  verified: boolean | null;
 }
 
 export interface MessagesPageResult {
@@ -177,6 +182,7 @@ export async function getAndDecryptMessage(
 
   const summary = mapSummary(message);
   let body = message.Body;
+  let verified: boolean | null = null;
 
   if (addressKeys && addressKeys.size > 0) {
     const decrypted = await decryptMessageBody({
@@ -188,6 +194,7 @@ export async function getAndDecryptMessage(
       fetchImpl: options.fetchImpl,
     });
     body = decrypted.plaintext;
+    verified = decrypted.verified;
   } else if (message.Body.includes("-----BEGIN PGP MESSAGE-----")) {
     throw new CliError(
       "Message body is encrypted. Pass the account password (--pass) to decrypt.",
@@ -198,6 +205,7 @@ export async function getAndDecryptMessage(
     ...summary,
     body,
     mimeType: message.MIMEType ?? "text/plain",
+    verified,
   };
 }
 

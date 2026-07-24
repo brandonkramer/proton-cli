@@ -33,11 +33,19 @@ const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
         Contacts: [
           {
             ID: "contact-alice-id==" + "x".repeat(44),
-            Cards: [{ Type: CardSigned, Data: "BEGIN:VCARD\r\nFN:Alice\r\nitem1.EMAIL;PREF=1:alice@example.com\r\nEND:VCARD" }],
+            Cards: [{
+              Type: CardSigned,
+              Data: "BEGIN:VCARD\r\nFN:Alice\r\nitem1.EMAIL;PREF=1:alice@example.com\r\nEND:VCARD",
+              Signature: "sig",
+            }],
           },
           {
             ID: "contact-anna-id==" + "y".repeat(44),
-            Cards: [{ Type: CardSigned, Data: "BEGIN:VCARD\r\nFN:Anna\r\nitem1.EMAIL;PREF=1:anna@example.com\r\nEND:VCARD" }],
+            Cards: [{
+              Type: CardSigned,
+              Data: "BEGIN:VCARD\r\nFN:Anna\r\nitem1.EMAIL;PREF=1:anna@example.com\r\nEND:VCARD",
+              Signature: "sig",
+            }],
           },
         ],
       }),
@@ -128,18 +136,32 @@ const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
   return new Response(JSON.stringify({ Error: "not found" }), { status: 404 });
 });
 
+const encryptedPlaintexts: string[] = [];
+
 mock.module("../src/crypto/proxy.ts", () => ({
   getCryptoProxy: async () => ({
     setEndpoint: () => {},
     importPrivateKey: async () => ({}),
     importPublicKey: async () => ({}),
     signMessage: async () => "-----BEGIN PGP SIGNATURE-----\nsig\n-----END PGP SIGNATURE-----",
-    encryptMessage: async () => ({
-      message: "-----BEGIN PGP MESSAGE-----\ncipher\n-----END PGP MESSAGE-----",
-    }),
+    encryptMessage: async (options: { binaryData?: Uint8Array; textData?: string }) => {
+      const plain =
+        options.textData ??
+        (options.binaryData ? new TextDecoder().decode(options.binaryData) : "");
+      encryptedPlaintexts.push(plain);
+      return {
+        message: "-----BEGIN PGP MESSAGE-----\ncipher\n-----END PGP MESSAGE-----",
+      };
+    },
     decryptMessage: async ({ armoredMessage }: { armoredMessage?: string }) => ({
-      data: new TextEncoder().encode(String(armoredMessage ?? "")),
+      data: new TextEncoder().encode(
+        armoredMessage === "ENC" || armoredMessage?.includes("PGP MESSAGE")
+          ? "BEGIN:VCARD\r\nVERSION:4.0\r\nTEL;PREF=1:+123\r\nNOTE:hello\r\nX-CUSTOM:keep-me\r\nEND:VCARD"
+          : String(armoredMessage ?? ""),
+      ),
+      verificationStatus: 1,
     }),
+    verifyMessage: async () => ({ verificationStatus: 1 }),
   }),
 }));
 
@@ -169,6 +191,7 @@ describe("ContactsClient", () => {
 
   beforeEach(() => {
     fetchCalls.length = 0;
+    encryptedPlaintexts.length = 0;
     mockFetch.mockClear();
     aliceSignedData = buildSignedVCard({
       name: "Alice",
@@ -243,6 +266,40 @@ describe("ContactsClient", () => {
     const del = fetchCalls.find((call) => call.path === "/contacts/v4/contacts/delete");
     expect(del?.method).toBe("PUT");
     expect((del?.body as { IDs: string[] }).IDs).toHaveLength(1);
+  });
+
+  test("update preserves unknown encrypted props and extra cards", async () => {
+    const client = new ContactsClient({
+      session,
+      userKey,
+      fetchImpl: mockFetch as unknown as typeof fetch,
+    });
+    const id = "contact-alice-id==" + "x".repeat(44);
+    await client.update(id, {
+      name: "Alice Updated",
+      emails: [],
+      phones: [],
+      note: "new note",
+      org: "",
+      title: "",
+      birthday: "",
+      address: "",
+      url: "",
+    });
+    const put = fetchCalls.find(
+      (call) => call.method === "PUT" && call.path.startsWith("/contacts/v4/contacts/contact-alice"),
+    );
+    expect(put).toBeDefined();
+    const cards = (put?.body as { Cards: Array<{ Type: number; Data: string }> }).Cards;
+    expect(cards.length).toBeGreaterThanOrEqual(2);
+    const signed = cards.find((card) => card.Type === CardSigned);
+    expect(signed?.Data).toContain("FN:Alice Updated");
+    expect(signed?.Data).toContain("alice@example.com");
+    expect(cards.some((card) => card.Type === CardEncryptedSigned)).toBe(true);
+    const encryptedPlain = encryptedPlaintexts.at(-1) ?? "";
+    expect(encryptedPlain).toContain("NOTE:new note");
+    expect(encryptedPlain).toContain("X-CUSTOM:keep-me");
+    expect(encryptedPlain).toContain("TEL;PREF=1:+123");
   });
 
   test("pinKey writes pinned key and preserves other cards", async () => {

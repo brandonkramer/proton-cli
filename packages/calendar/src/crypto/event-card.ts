@@ -8,8 +8,35 @@ import {
   type SessionKeyMaterial,
 } from "./types.ts";
 
+const SIGNED_AND_VALID = 1;
+
 async function crypto() {
   return getCalendarCrypto();
+}
+
+function requireSignature(card: EventCard, label: string): string {
+  const signature = card.Signature?.trim();
+  if (!signature) {
+    throw new Error(`Event card signature missing (${label}).`);
+  }
+  return signature;
+}
+
+async function verifyDetached(
+  data: string,
+  signature: string,
+  verificationKey: unknown,
+): Promise<void> {
+  const proxy = await crypto();
+  const result = await proxy.verifyMessage({
+    textData: data,
+    armoredSignature: signature,
+    verificationKeys: [verificationKey],
+  });
+  const status = (result as { verificationStatus?: number }).verificationStatus;
+  if (status !== SIGNED_AND_VALID) {
+    throw new Error("Event card signature verification failed.");
+  }
 }
 
 export async function signCard(
@@ -30,6 +57,8 @@ async function decryptCardData(
   data: string,
   keyPacket: Uint8Array | null,
   decryptionKey: unknown,
+  signature: string,
+  verificationKey: unknown,
 ): Promise<string> {
   const proxy = await crypto();
   if (keyPacket) {
@@ -37,47 +66,84 @@ async function decryptCardData(
     try {
       dataPacket = base64ToBytes(data);
     } catch {
-      const { data: plain } = await proxy.decryptMessage({
+      const { data: plain, verificationStatus } = (await proxy.decryptMessage({
         armoredMessage: data,
         decryptionKeys: [decryptionKey],
+        verificationKeys: [verificationKey],
+        armoredSignature: signature,
         format: "utf8",
-      });
+        expectSigned: true,
+      })) as { data: string | Uint8Array; verificationStatus?: number };
+      if (
+        verificationStatus !== undefined &&
+        verificationStatus !== SIGNED_AND_VALID
+      ) {
+        throw new Error("Event card signature verification failed.");
+      }
       return String(plain);
     }
     const sessionKey = await proxy.decryptSessionKey({
       binaryMessage: keyPacket,
       decryptionKeys: [decryptionKey],
     });
-    const { data: plain } = await proxy.decryptMessage({
+    const { data: plain, verificationStatus } = (await proxy.decryptMessage({
       binaryMessage: dataPacket,
       sessionKeys: [sessionKey],
+      verificationKeys: [verificationKey],
+      armoredSignature: signature,
       format: "utf8",
-    });
+      expectSigned: true,
+    })) as { data: string | Uint8Array; verificationStatus?: number };
+    if (
+      verificationStatus !== undefined &&
+      verificationStatus !== SIGNED_AND_VALID
+    ) {
+      throw new Error("Event card signature verification failed.");
+    }
     return String(plain);
   }
-  const { data: plain } = await proxy.decryptMessage({
+  const { data: plain, verificationStatus } = (await proxy.decryptMessage({
     armoredMessage: data,
     decryptionKeys: [decryptionKey],
+    verificationKeys: [verificationKey],
+    armoredSignature: signature,
     format: "utf8",
-  });
+    expectSigned: true,
+  })) as { data: string | Uint8Array; verificationStatus?: number };
+  if (
+    verificationStatus !== undefined &&
+    verificationStatus !== SIGNED_AND_VALID
+  ) {
+    throw new Error("Event card signature verification failed.");
+  }
   return String(plain);
 }
 
 export async function decryptCards(
   cards: EventCard[],
   decryptionKey: unknown,
-  _verificationKey: unknown,
+  verificationKey: unknown,
   keyPacketB64: string,
 ): Promise<string[]> {
   const keyPacket = keyPacketB64 ? base64ToBytes(keyPacketB64) : null;
   const out: string[] = [];
   for (const card of cards) {
     switch (card.Type) {
-      case CardSigned:
+      case CardSigned: {
+        const signature = requireSignature(card, "signed");
+        await verifyDetached(card.Data, signature, verificationKey);
         out.push(card.Data);
         break;
+      }
       case CardEncryptedSigned: {
-        const plain = await decryptCardData(card.Data, keyPacket, decryptionKey);
+        const signature = requireSignature(card, "encrypted+signed");
+        const plain = await decryptCardData(
+          card.Data,
+          keyPacket,
+          decryptionKey,
+          signature,
+          verificationKey,
+        );
         out.push(plain);
         break;
       }

@@ -192,5 +192,7 @@ describe("CASE-LIST-READ", () => {
 
     expect(decrypted.body).toBe("Hello plain body");
     expect(decrypted.mimeType).toBe("text/plain");
+    expect(decrypted.verified).toBeNull();
   });
 });
+

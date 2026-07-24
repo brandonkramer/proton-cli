@@ -1,4 +1,4 @@
-import { afterAll, afterEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import type { Session } from "../src/proton/types.ts";
 import {
   ADDRESSES_PATH,
@@ -15,6 +15,12 @@ import {
   MAIL_MESSAGES_UNLABEL_PATH,
   MAIL_MESSAGES_UNREAD_PATH,
 } from "../src/proton/constants.ts";
+import { configureAgentFlags } from "../src/util/agent.ts";
+import {
+  assertWriteAllowed,
+  assertYesConfirmed,
+} from "../src/util/safety.ts";
+import { CliError } from "../src/util/errors.ts";
 
 mock.restore();
 
@@ -80,12 +86,19 @@ const {
 const { listAccountAddresses } = await import("../src/service/addresses.ts");
 
 describe("CASE-ORGANIZE-LABELS", () => {
+  beforeEach(() => {
+    configureAgentFlags({ json: false, yes: false, dryRun: false });
+    delete process.env.PROTONMAIL_READ_ONLY;
+  });
+
   afterAll(() => {
     mock.restore();
   });
 
   afterEach(() => {
     mock.restore();
+    configureAgentFlags({ json: false, yes: false, dryRun: false });
+    delete process.env.PROTONMAIL_READ_ONLY;
   });
 
   test("labelMessages PUTs LabelID and IDs", async () => {
@@ -428,5 +441,21 @@ describe("CASE-ORGANIZE-LABELS", () => {
     });
 
     expect(paths).toEqual(["read", "delete"]);
+  });
+
+  test("PROTONMAIL_READ_ONLY blocks organize writes", () => {
+    process.env.PROTONMAIL_READ_ONLY = "1";
+    expect(() => assertWriteAllowed()).toThrow(CliError);
+    expect(() => assertWriteAllowed()).toThrow(/READ_ONLY/);
+  });
+
+  test("permanent delete / label delete require -y/--yes", () => {
+    expect(() => assertYesConfirmed("Permanently delete messages")).toThrow(
+      /-y\/--yes/,
+    );
+    expect(() => assertYesConfirmed("Delete label")).toThrow(/-y\/--yes/);
+    configureAgentFlags({ yes: true });
+    expect(() => assertYesConfirmed("Permanently delete messages")).not.toThrow();
+    expect(() => assertYesConfirmed("Delete label")).not.toThrow();
   });
 });

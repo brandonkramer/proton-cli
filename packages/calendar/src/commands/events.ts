@@ -217,6 +217,10 @@ export async function runEventsUpdate(
     fail("Nothing to update: pass --title, --location, --description, and/or --start");
   }
 
+  if (options.duration && !options.start) {
+    fail("--duration requires --start when updating event timing");
+  }
+
   if (isDryRun()) {
     if (wantsJson()) {
       emitJson({
@@ -293,12 +297,7 @@ export async function runEventsDelete(
     return;
   }
 
-  if (
-    !options.yes &&
-    !agentFlags().yes &&
-    process.stdin.isTTY &&
-    !wantsJson()
-  ) {
+  if (!options.yes && !agentFlags().yes) {
     process.stderr.write(
       `Deleting event ${ref.eventId}. Re-run with -y/--yes to confirm.\n`,
     );
