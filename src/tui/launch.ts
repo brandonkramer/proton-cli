@@ -3,6 +3,7 @@ import {
   signOutAuthenticator,
 } from "@bkramer/proton-authenticator";
 import { clearAllSessions } from "@bkramer/proton-core";
+import { launchMailTui } from "@bkramer/proton-mail";
 import { launchVpnTui, signOutVpn } from "@bkramer/proton-vpn";
 import { showMessage } from "./message.tsx";
 import { showParentHome, type ParentIntent } from "./screens.tsx";
@@ -19,6 +20,9 @@ async function handleIntent(
       return "home";
     case "auth":
       await launchAuthTui();
+      return "home";
+    case "mail":
+      await launchMailTui();
       return "home";
     case "signin":
       await runParentSignin();

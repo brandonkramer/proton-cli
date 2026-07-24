@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { registerAuthCommands } from "@bkramer/proton-authenticator";
+import { registerMailCommands } from "@bkramer/proton-mail";
 import { registerVpnCommands } from "@bkramer/proton-vpn";
 import { Command } from "commander";
 import { registerSignin } from "./commands/signin.ts";
@@ -62,5 +63,10 @@ const auth = program
   .command("auth")
   .description("Proton Authenticator commands (TOTP sync)");
 registerAuthCommands(auth);
+
+const mail = program
+  .command("mail")
+  .description("Proton Mail commands (Bridge IMAP/SMTP)");
+registerMailCommands(mail);
 
 await program.parseAsync(process.argv);

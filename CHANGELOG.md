@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Mail via Bridge** (`proton mail …`, `protonmail` bin): setup/doctor/status, inbox/read/search, send/reply/forward with `--dry-run`, organize/folders/drafts, agent safety envs (`PROTONMAIL_READ_ONLY`, `PROTONMAIL_ALLOW_SEND`, `PROTONMAIL_CONFIRM_DESTRUCTIVE`)
+- Parent TUI **Mail** menu (nested Bridge setup/doctor/status/inbox; send via CLI). Mail is **not** in dual-mint sign-in — use Bridge password from Bridge → Settings
+
+### Changed
+- README, AGENTS.md, and agent skill document Mail Bridge setup, env vars, and credits (Bridge CLI guide, community Bridge clients, roman-16 patterns)
+
 ## [0.2.0] - 2026-07-24
 
 ### Added

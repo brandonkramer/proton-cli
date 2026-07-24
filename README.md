@@ -1,6 +1,6 @@
 # proton-cli
 
-Unofficial unified Proton command-line client (**VPN + Authenticator**) with one install and shared sign-in UX.
+Unofficial unified Proton command-line client (**VPN + Authenticator + Mail via Bridge**) with one install and shared sign-in UX for VPN/Authenticator.
 
 > **Not an official Proton product.** Not affiliated with Proton AG.
 
@@ -39,6 +39,7 @@ bun link
   - **Windows:** WireGuard app via winget (Administrator terminal for connect/disconnect)
 - **Authenticator — CAPTCHA (macOS):** native WKWebView helper, built on `postinstall` when possible (`bun run build:captcha` to retry; needs Xcode CLT)
 - Optional: [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`) for credential injection
+- **Mail — Proton Mail Bridge** ([install Bridge](https://proton.me/mail/bridge)) running locally for IMAP/SMTP. Mail uses the **Bridge password** from Bridge → Settings — **not** your Proton account password and **not** the VPN/Authenticator dual-mint sign-in.
 
 Close the Proton VPN desktop app before connecting so tunnels do not conflict.
 
@@ -48,7 +49,7 @@ CAPTCHA (if Proton requires it on sign-in): solve it in the **native WKWebView w
 
 ## Commands
 
-Run `proton` with no args (TTY) for the interactive menu (VPN / Authenticator / sign-in).
+Run `proton` with no args (TTY) for the interactive menu (VPN / Authenticator / Mail / sign-in).
 
 Global options: `--json`, `-y` / `--yes`, `--sudo` (WireGuard on macOS).
 
@@ -102,7 +103,34 @@ proton auth code github
 proton auth status --output json
 ```
 
-Product-only `proton vpn signin` / `proton auth signin` exist; prefer shared `proton signin`.
+Product-only `proton vpn signin` / `proton auth signin` exist; prefer shared `proton signin`. Mail does **not** use dual-mint sign-in — configure Bridge via `proton mail setup`.
+
+### Mail (`proton mail …`)
+
+Mail reads and sends through **Proton Mail Bridge** (local IMAP/SMTP). Inspired by community Bridge clients; future direct API Mail may come in a separate project.
+
+```bash
+proton mail setup
+proton mail doctor
+proton mail status --output json
+proton mail inbox
+proton mail get INBOX::25642
+proton mail send --to you@example.com --subject hi --body "Hello" --dry-run
+proton mail move INBOX::25642 --to Archive
+proton mail drafts list
+```
+
+| Env / flag | Meaning |
+|---|---|
+| `PROTONMAIL_PASSWORD` | Bridge password (from Bridge app, not account password) |
+| `PROTONMAIL_PASS` | Pass item ref for Bridge password |
+| `PROTONMAIL_READ_ONLY=1` | Block mutating commands |
+| `PROTONMAIL_ALLOW_SEND=false` | Block send/reply/forward |
+| `PROTONMAIL_CONFIRM_DESTRUCTIVE=1` | Require confirm for delete/trash |
+| `--output json` / `PROTONMAIL_OUTPUT=json` | Machine-readable output |
+| `--dry-run` | Print intended action without mutating (send/organize/batch) |
+
+Bridge setup guide: [proton.me/support/bridge-cli-guide](https://proton.me/support/bridge-cli-guide)
 
 ## Proton Pass (optional)
 
@@ -122,6 +150,7 @@ Also supported:
 export PROTON_PASSWORD='pass://Personal/Proton/password'
 export PROTON_TOTP='pass://Personal/Proton/totp'   # optional
 pass-cli run -- proton signin
+export PROTONMAIL_PASSWORD='pass://Personal/Bridge/password'   # Mail Bridge password
 ```
 
 `Vault/Item` works too (`pass://` prefix optional). Env aliases: `PROTON_PASS`, `PROTONVPN_PASS`, `PROTONAUTH_PASS`, `PROTON_USERNAME`, `PROTON_PASSWORD`, `PROTON_TOTP`. Interactive prompts remain the default when Pass is unset. Never log resolved secrets. With 2FA, `--pass` is ideal because Pass can supply a **new** TOTP for each product mint.
@@ -145,6 +174,8 @@ proton auth code github --output json
 | `PROTON_AGENT=1` | Root `proton` agent-friendly (no accidental TUI) |
 | `PROTONVPN_AGENT=1` | VPN agent mode (JSON-friendly; `sudo -n` only unless `--sudo`) |
 | `PROTONAUTH_AGENT=1` / `CI=1` | Auth agent mode (default JSON; no CAPTCHA window / TUI) |
+| `PROTONMAIL_AGENT=1` / `PROTONMAIL_OUTPUT=json` | Mail agent mode (JSON; no accidental TUI) |
+| `PROTONMAIL_READ_ONLY` / `PROTONMAIL_ALLOW_SEND` | Mail safety gates for agents |
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 
@@ -157,6 +188,7 @@ CAPTCHA never opens a window in agent mode (`captcha_required` — sign in inter
 | `packages/core` | `@bkramer/proton-core` | Shared config, dual-mint sessions, Pass helpers |
 | `packages/vpn` | `@bkramer/proton-vpn` | WireGuard + vpn-api (`proton vpn …`) |
 | `packages/authenticator` | `@bkramer/proton-authenticator` | TOTP sync (`proton auth …`) |
+| `packages/mail` | `@bkramer/proton-mail` | Mail via Bridge IMAP/SMTP (`proton mail …`) |
 | `src/` | root bins | `proton` router + legacy wrappers |
 
 Config root: `~/.config/proton-cli/` with per-product sessions under `sessions/`.

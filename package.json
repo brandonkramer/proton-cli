@@ -26,7 +26,8 @@
   "bin": {
     "proton": "./src/index.ts",
     "protonvpn": "./src/bins/protonvpn.ts",
-    "protonauth": "./src/bins/protonauth.ts"
+    "protonauth": "./src/bins/protonauth.ts",
+    "protonmail": "./src/bins/protonmail.ts"
   },
   "workspaces": [
     "packages/*"
@@ -61,11 +62,15 @@
     "@protontech/authenticator-rust-core": "1.7.2",
     "@protontech/crypto": "^2.1.1",
     "commander": "^14.0.0",
+    "imapflow": "^1.0.193",
+    "mailparser": "^3.7.2",
+    "nodemailer": "^7.0.5",
     "ink": "^7.1.1",
     "react": "^19.2.8"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/nodemailer": "^6.4.17",
     "@types/react": "^19.2.17",
     "typescript": "^5.9.3"
   }

@@ -4,7 +4,7 @@ Unofficial unified Proton CLI. Bun workspaces under `packages/`.
 
 - **GitHub:** `brandonkramer/proton-cli`
 - **npm:** `@bkramer/proton-cli` (unscoped `proton-cli` is taken on the registry)
-- **Bins:** `proton`, `protonvpn`, `protonauth`
+- **Bins:** `proton`, `protonvpn`, `protonauth`, `protonmail`
 - **Runtime:** Bun ≥ 1.1 · Ink/React TUI · GPL-3.0-or-later (required by `@protontech/crypto`)
 
 End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
@@ -16,7 +16,8 @@ End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
 | `packages/core` | `@bkramer/proton-core` | Shared config root, multi-product sessions, dual-mint sign-in, Pass helpers |
 | `packages/vpn` | `@bkramer/proton-vpn` | VPN API + WireGuard commands (`proton vpn …`) |
 | `packages/authenticator` | `@bkramer/proton-authenticator` | Authenticator sync/codes (`proton auth …`) |
-| `src/` | root bins | `proton` router, `protonvpn` / `protonauth` wrappers |
+| `packages/mail` | `@bkramer/proton-mail` | Mail via Bridge IMAP/SMTP (`proton mail …`) |
+| `src/` | root bins | `proton` router, `protonvpn` / `protonauth` / `protonmail` wrappers |
 | `scripts/` | install helpers | workspace links, OpenPGP patch, postinstall |
 | `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents |
 
@@ -25,6 +26,7 @@ User data: `~/.config/proton-cli/` (or `%APPDATA%\proton-cli\`) with `sessions/*
 ## Rules
 
 - VPN must not import authenticator (or vice versa). Shared code goes in `core`.
+- **Mail** is Bridge-based (IMAP/SMTP), separate from dual-mint sign-in for VPN/Authenticator. `packages/mail` must not import `@bkramer/proton-vpn` or `@bkramer/proton-authenticator`.
 - Sessions are **per product** (`sessions/vpn.json`, `sessions/authenticator.json`). Do not reuse tokens across API hosts.
 - `proton signin` collects credentials once and dual-mints product sessions.
 - `@protontech/crypto` CryptoProxy must be initialized once per process — use `ensureCryptoProxy` / `getCryptoProxy` from `@bkramer/proton-core` (never a second `setEndpoint` in product packages).
@@ -71,7 +73,8 @@ Do not commit secrets, session files, or resolved Pass material.
 
 ### Agent / scripting mode
 
-- Bare `proton` (TTY) opens the parent TUI in `src/tui/`; VPN/Auth product menus nest from there (`launchVpnTui` / `launchAuthTui`). No `proton vpn tui` / `proton auth tui`.
+- Bare `proton` (TTY) opens the parent TUI in `src/tui/`; VPN/Auth/Mail product menus nest from there (`launchVpnTui` / `launchAuthTui` / `launchMailTui`). No `proton vpn tui` / `proton auth tui`.
+- Mail nested TUI lives in `packages/mail/src/tui/`; Bridge password via `PROTONMAIL_PASSWORD` / Pass / file — not dual-mint SRP.
 - Global: `--json`, `-y/--yes`, `--sudo` (VPN agent helpers in `packages/vpn/src/util/agent.ts`)
 - Authenticator uses `--output json|plain|ink` / `PROTONAUTH_*` envs
 - Quiet UI skips Ink when JSON, `CI`, agent env, or non-TTY
