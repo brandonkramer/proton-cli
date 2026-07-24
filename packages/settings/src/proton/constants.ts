@@ -1,7 +1,7 @@
 /**
  * Proton Mail/Account API host for settings + auth SRP.
  *
- * roman-16 defaults to `https://mail.proton.me/api`; modern clients use
+ * Older clients used `https://mail.proton.me/api`; modern clients use
  * `mail-api.proton.me` for the same `/core/v4/*` and `/mail/v4/*` paths.
  * Account-only `account-api.proton.me` is not used here — settings get/mail
  * share this host (see RESEARCH.md U1 resolution).

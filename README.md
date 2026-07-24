@@ -107,7 +107,7 @@ Product-only `proton vpn signin` / `proton auth signin` exist; prefer shared `pr
 
 ### Contacts (`proton contacts …`)
 
-E2EE contact cards, groups, and pinned keys. UX inspired by [roman-16/proton-cli](https://github.com/roman-16/proton-cli).
+E2EE contact cards, groups, and pinned keys.
 
 ```bash
 proton contacts list
@@ -121,7 +121,7 @@ Bare `proton` (TTY) opens a nested Contacts menu (list / groups / status). Prefe
 
 ### Calendar (`proton calendar …`)
 
-E2EE calendars and events. UX inspired by [roman-16/proton-cli](https://github.com/roman-16/proton-cli).
+E2EE calendars and events.
 
 ```bash
 proton calendar calendars list
@@ -135,7 +135,7 @@ Bare `proton` (TTY) opens a nested Calendar menu (list calendars / list events /
 
 ### Drive (`proton drive …`)
 
-E2EE files, folders, sharing, trash, and photos. UX inspired by [roman-16/proton-cli](https://github.com/roman-16/proton-cli).
+E2EE files, folders, sharing, trash, and photos.
 
 ```bash
 proton drive status

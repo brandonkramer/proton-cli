@@ -1,4 +1,4 @@
-/** Proton Calendar API host (roman-16 / go-proton-api reference). */
+/** Proton Calendar API host. */
 export const DEFAULT_API_URL = "https://calendar-api.proton.me";
 
 export const AUTH_INFO_PATH = "/auth/v4/info";

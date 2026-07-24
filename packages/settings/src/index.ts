@@ -8,6 +8,15 @@ export {
   sanitizeForOutput,
   stringifySettingsOutput,
 } from "./util/secrets.ts";
+export { configureAgentFlags, wantsJson, isDryRun } from "./util/agent.ts";
+export {
+  getAccountSettings,
+  getMailSettings,
+  updateMailSetting,
+  listWritableMailKeys,
+  requireSettingsRuntime,
+  MAIL_SETTING_SPECS,
+} from "./settings/client.ts";
 export {
   DEFAULT_API_URL,
   APP_VERSION,
