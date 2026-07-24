@@ -3,7 +3,11 @@ import { configureAgentFlags } from "./util/agent.ts";
 import { registerList } from "./commands/list.ts";
 import { registerRead } from "./commands/read.ts";
 import { registerSearch } from "./commands/search.ts";
+import { registerSend } from "./commands/send.ts";
 import { registerStatus } from "./commands/status.ts";
+import { registerOrganize } from "./commands/organize.ts";
+import { registerLabels } from "./commands/labels.ts";
+import { registerAddresses } from "./commands/addresses.ts";
 
 /** Register `proton mail …` (and legacy `protonmail …`) commands. */
 export function registerMailCommands(mail: Command): void {
@@ -33,4 +37,8 @@ export function registerMailCommands(mail: Command): void {
   registerList(mail);
   registerRead(mail);
   registerSearch(mail);
+  registerSend(mail);
+  registerOrganize(mail);
+  registerLabels(mail);
+  registerAddresses(mail);
 }

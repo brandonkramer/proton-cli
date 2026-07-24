@@ -130,3 +130,97 @@ export interface MessageQuery {
   End?: number;
   ID?: string[];
 }
+
+export interface CreateDraftMessage {
+  AddressID: string;
+  Subject: string;
+  Sender: MailRecipient;
+  ToList: MailRecipient[];
+  CCList: MailRecipient[];
+  BCCList: MailRecipient[];
+  Body: string;
+  MIMEType: string;
+  Unread?: number;
+  Flags?: number;
+}
+
+export interface CreateDraftRequest {
+  Message: CreateDraftMessage;
+  ParentID?: string;
+  Action?: number;
+  AttachmentKeyPackets?: Record<string, string>;
+}
+
+export interface SendPackageRecipient {
+  Type: number;
+  Signature: number;
+  BodyKeyPacket?: string;
+  AttachmentKeyPackets?: Record<string, string>;
+}
+
+export interface SendPackage {
+  Addresses: Record<string, SendPackageRecipient>;
+  MIMEType: string;
+  Type: number;
+  Body: string;
+  BodyKey?: { Key: string; Algorithm: string };
+  AttachmentKeys?: Record<string, { Key: string; Algorithm: string }>;
+}
+
+export interface SendPackagesRequest {
+  Packages: SendPackage[];
+  AutoSaveContacts?: number;
+  DelaySeconds?: number;
+  DeliveryTime?: number;
+  ExpirationTime?: number;
+  ExpiresIn?: number;
+}
+
+export interface MessageActionRequest {
+  IDs: string[];
+}
+
+export interface LabelMessagesRequest {
+  LabelID: string;
+  IDs: string[];
+}
+
+export interface ProtonLabel {
+  ID: string;
+  Name: string;
+  Color: string;
+  Type: number;
+  ParentID?: string;
+  Path?: string | string[];
+}
+
+export interface LabelsResponse {
+  Code?: number;
+  Labels?: ProtonLabel[];
+  Error?: string;
+}
+
+export interface LabelResponse {
+  Code?: number;
+  Label?: ProtonLabel;
+  Error?: string;
+}
+
+export interface CreateLabelRequest {
+  Name: string;
+  Color: string;
+  Type: number;
+  ParentID?: string;
+}
+
+export interface UpdateLabelRequest {
+  Name?: string;
+  Color?: string;
+  ParentID?: string;
+}
+
+export interface AddressesResponse {
+  Code?: number;
+  Addresses?: import("../crypto/unlock.ts").ProtonAddress[];
+  Error?: string;
+}
