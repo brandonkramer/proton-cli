@@ -31,11 +31,42 @@ describe("paths + dual-mint sign-in", () => {
     setConfigRootForTests(null);
   });
 
-  test("parseProductList accepts vpn, auth, all", () => {
-    expect(parseProductList(undefined)).toEqual(["vpn", "authenticator"]);
-    expect(parseProductList("all")).toEqual(["vpn", "authenticator"]);
+  test("parseProductList accepts vpn, auth, drive, calendar, contacts, all", () => {
+    expect(parseProductList(undefined)).toEqual([
+      "vpn",
+      "authenticator",
+      "drive",
+      "calendar",
+      "contacts",
+    ]);
+    expect(parseProductList("all")).toEqual([
+      "vpn",
+      "authenticator",
+      "drive",
+      "calendar",
+      "contacts",
+    ]);
     expect(parseProductList("vpn,auth")).toEqual(["vpn", "authenticator"]);
     expect(parseProductList("authenticator")).toEqual(["authenticator"]);
+    expect(parseProductList("drive,cal,ctc")).toEqual([
+      "drive",
+      "calendar",
+      "contacts",
+    ]);
+    expect(parseProductList("calendar,contacts")).toEqual([
+      "calendar",
+      "contacts",
+    ]);
+    expect(() => parseProductList("unknown")).toThrow(/Unknown product/);
+  });
+
+  test("productNamespace maps CLI namespaces", async () => {
+    const { productNamespace } = await import("../src/products.ts");
+    expect(productNamespace("vpn")).toBe("vpn");
+    expect(productNamespace("authenticator")).toBe("auth");
+    expect(productNamespace("drive")).toBe("drive");
+    expect(productNamespace("calendar")).toBe("cal");
+    expect(productNamespace("contacts")).toBe("contacts");
   });
 
   test("session paths are product-scoped under shared root", async () => {

@@ -2,6 +2,18 @@ import {
   launchAuthTui,
   signOutAuthenticator,
 } from "@bkramer/proton-authenticator";
+import {
+  launchContactsTui,
+  signOutContacts,
+} from "@bkramer/proton-contacts";
+import {
+  launchCalendarTui,
+  signOutCalendar,
+} from "@bkramer/proton-calendar";
+import {
+  launchDriveTui,
+  signOutDrive,
+} from "@bkramer/proton-drive";
 import { clearAllSessions } from "@bkramer/proton-core";
 import { launchVpnTui, signOutVpn } from "@bkramer/proton-vpn";
 import { showMessage } from "./message.tsx";
@@ -20,17 +32,29 @@ async function handleIntent(
     case "auth":
       await launchAuthTui();
       return "home";
+    case "contacts":
+      await launchContactsTui();
+      return "home";
+    case "calendar":
+      await launchCalendarTui();
+      return "home";
+    case "drive":
+      await launchDriveTui();
+      return "home";
     case "signin":
       await runParentSignin();
       return "home";
     case "signout":
       await signOutVpn();
       await signOutAuthenticator();
+      await signOutContacts();
+      await signOutCalendar();
+      await signOutDrive();
       await clearAllSessions();
       await showMessage({
         variant: "success",
         title: "Signed out",
-        body: "VPN and Authenticator sessions cleared.",
+        body: "VPN, Authenticator, Contacts, Calendar, and Drive sessions cleared.",
         holdMs: 800,
       });
       return "home";

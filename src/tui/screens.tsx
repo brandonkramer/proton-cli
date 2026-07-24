@@ -14,6 +14,9 @@ export type ParentIntent =
   | { type: "quit" }
   | { type: "vpn" }
   | { type: "auth" }
+  | { type: "contacts" }
+  | { type: "calendar" }
+  | { type: "drive" }
   | { type: "signin" }
   | { type: "signout" };
 
@@ -72,15 +75,22 @@ export async function showParentHome(): Promise<ParentIntent> {
 
       const anySignedIn = Boolean(
         snap &&
-          (snap.products.vpn.signedIn || snap.products.authenticator.signedIn),
+          (snap.products.vpn.signedIn ||
+            snap.products.authenticator.signedIn ||
+            snap.products.contacts.signedIn ||
+            snap.products.calendar.signedIn ||
+            snap.products.drive.signedIn),
       );
 
       const options = [
         { label: "VPN", value: "vpn" },
         { label: "Authenticator", value: "auth" },
+        { label: "Contacts", value: "contacts" },
+        { label: "Calendar", value: "calendar" },
+        { label: "Drive", value: "drive" },
         ...(anySignedIn
           ? [{ label: "Sign out (all products)", value: "signout" }]
-          : [{ label: "Sign in (VPN + Authenticator)", value: "signin" }]),
+          : [{ label: "Sign in (all products)", value: "signin" }]),
         { label: "Quit", value: "quit" },
       ];
 
@@ -118,11 +128,35 @@ export async function showParentHome(): Promise<ParentIntent> {
                   ? `signed in (${snap.products.authenticator.username})`
                   : "not signed in"}
               </StatusMessage>
+              <StatusMessage
+                variant={snap.products.contacts.signedIn ? "success" : "warning"}
+              >
+                Contacts:{" "}
+                {snap.products.contacts.signedIn
+                  ? `signed in (${snap.products.contacts.username})`
+                  : "not signed in"}
+              </StatusMessage>
+              <StatusMessage
+                variant={snap.products.calendar.signedIn ? "success" : "warning"}
+              >
+                Calendar:{" "}
+                {snap.products.calendar.signedIn
+                  ? `signed in (${snap.products.calendar.username})`
+                  : "not signed in"}
+              </StatusMessage>
+              <StatusMessage
+                variant={snap.products.drive.signedIn ? "success" : "warning"}
+              >
+                Drive:{" "}
+                {snap.products.drive.signedIn
+                  ? `signed in (${snap.products.drive.username})`
+                  : "not signed in"}
+              </StatusMessage>
             </Box>
           ) : null}
           {!loading ? (
             <Select
-              visibleOptionCount={6}
+              visibleOptionCount={7}
               options={options}
               onChange={(value) => {
                 switch (value) {
@@ -131,6 +165,15 @@ export async function showParentHome(): Promise<ParentIntent> {
                     break;
                   case "auth":
                     resolve({ type: "auth" });
+                    break;
+                  case "contacts":
+                    resolve({ type: "contacts" });
+                    break;
+                  case "calendar":
+                    resolve({ type: "calendar" });
+                    break;
+                  case "drive":
+                    resolve({ type: "drive" });
                     break;
                   case "signin":
                     resolve({ type: "signin" });
@@ -150,8 +193,8 @@ export async function showParentHome(): Promise<ParentIntent> {
           ) : null}
           <Box marginTop={1}>
             <Text dimColor>
-              Tip: use `proton status --json` / `proton vpn …` / `proton auth …`
-              for scripting
+              Tip: use `proton status --json` / `proton vpn …` / `proton auth …` /
+              `proton contacts …` / `proton calendar …` / `proton drive …` for scripting
             </Text>
           </Box>
         </Box>

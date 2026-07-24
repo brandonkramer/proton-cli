@@ -3,18 +3,21 @@ name: proton-cli
 description: >-
   Use the unofficial unified Proton CLI (proton / @bkramer/proton-cli): install,
   shared Pass-aware sign-in (dual-mint), WireGuard VPN connect/disconnect,
-  Authenticator TOTP/Steam sync and codes, status/signout, update, and agent
-  scripting with --json / pass:// / pass-cli. Use when the user wants to run
-  proton, protonvpn, or protonauth, automate Proton VPN or Authenticator from a
-  terminal or AI agent, or set up Pass-based sign-in for the unified package.
+  Authenticator TOTP/Steam sync and codes, Contacts E2EE cards/groups,
+  Calendar E2EE calendars/events, Drive E2EE files/folders/photos,
+  status/signout, update, and agent scripting
+  with --json / pass:// / pass-cli. Use when the user wants to run proton,
+  protonvpn, protonauth, protoncontacts, protoncal, automate Proton VPN,
+  Authenticator, Contacts, or Calendar from a terminal or AI agent, or set up
+  Pass-based sign-in for the unified package.
   Do not invoke for official Proton apps, FIDO2/security-key auth, or general
   networking troubleshooting unrelated to this CLI.
-short-description: Unified Proton CLI (VPN + Authenticator)
+short-description: Unified Proton CLI (VPN + Authenticator + Contacts + Calendar + Drive)
 ---
 
 # proton (@bkramer/proton-cli)
 
-Unofficial unified Proton CLI (**VPN + Authenticator**) with shared sign-in UX. Not an official Proton product.
+Unofficial unified Proton CLI (**VPN + Authenticator + Contacts + Calendar**) with shared sign-in UX. Not an official Proton product.
 
 **Mail** is planned via Proton Mail API with unified `proton signin` (dual-mint). It is not shipped yet.
 
@@ -34,7 +37,7 @@ From GitHub:
 bun install -g github:brandonkramer/proton-cli
 ```
 
-Bins: `proton`, `protonvpn`, `protonauth` (legacy wrappers → `proton vpn` / `proton auth`).
+Bins: `proton`, `protonvpn`, `protonauth`, `protoncontacts`, `protoncal` (legacy wrappers → `proton vpn` / `proton auth` / `proton contacts` / `proton calendar`).
 
 ## Requirements
 
@@ -51,6 +54,8 @@ proton signin --pass pass://Vault/Proton   # once → vpn + authenticator sessio
 proton vpn connect --country US
 proton auth sync
 proton auth code github
+proton contacts list
+proton calendar calendars list
 proton status --json
 proton signout
 ```
@@ -64,6 +69,7 @@ proton signin
 proton signin --pass "pass://Personal/Proton"
 proton signin --products vpn
 proton signin --products auth
+proton signin --products ctc      # contacts only
 proton signin --partial-ok          # keep successes if one product fails
 export PROTON_PASS="pass://Personal/Proton"
 export PROTON_USERNAME=…            # or PROTON_PASSWORD / PROTON_TOTP
@@ -129,14 +135,48 @@ proton auth status --output json
 
 CAPTCHA (if required) needs a human on macOS; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`.
 
+## Contacts (`proton contacts …`)
+
+E2EE contact cards, groups, and pinned keys. Nested TUI from bare `proton` (list / groups / status). Reference UX: [roman-16/proton-cli](https://github.com/roman-16/proton-cli).
+
+```bash
+proton contacts list
+proton contacts get alice
+proton contacts create --name "Alice" --email alice@example.com
+proton contacts groups list
+proton contacts pin-key <ref> ./key.asc
+proton contacts list --json
+```
+
+Sign in with `proton signin --products ctc` or `--products all`. Unlock uses shared core CryptoProxy (same as other products).
+
+## Calendar (`proton calendar …`)
+
+E2EE calendars and events. Nested TUI from bare `proton` (list calendars / list events / status). Reference UX: [roman-16/proton-cli](https://github.com/roman-16/proton-cli).
+
+```bash
+proton calendar calendars list
+proton calendar calendars create --name "Work" --color "#8080FF"
+proton calendar events list
+proton calendar events create --title "Standup" --start 2026-07-24T09:00 --duration 30m
+proton calendar events respond EVENT_REF --status accept
+proton calendar calendars list --json
+```
+
+Sign in with `proton signin --products cal` or `--products all`. Encrypted event ops need account password (`--password`, `--pass`, or `PROTON_PASSWORD`).
+
 ## Agent / scripting
 
 ```bash
 export PROTON_AGENT=1
 export PROTONVPN_AGENT=1
 export PROTONAUTH_AGENT=1
+export PROTONCONTACTS_AGENT=1
+export PROTONCALENDAR_AGENT=1
 proton status --json
 proton vpn status --json
+proton contacts list --json
+proton calendar calendars list --json
 proton vpn connect --json --country US
 proton auth status --output json
 proton auth code github --output json
@@ -151,6 +191,8 @@ proton auth code github --output json
 | `PROTON_AGENT=1` | Root agent-friendly (no accidental TUI) |
 | `PROTONVPN_AGENT=1` | VPN agent mode |
 | `PROTONAUTH_AGENT=1` / `CI=1` | Auth agent mode (default JSON; no CAPTCHA window / TUI) |
+| `PROTONCONTACTS_JSON=1` / `PROTONCONTACTS_AGENT=1` | Contacts agent mode (JSON; no TUI) |
+| `PROTONCALENDAR_JSON=1` / `PROTONCALENDAR_AGENT=1` | Calendar agent mode (JSON; no TUI) |
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 
@@ -172,8 +214,12 @@ bun add -g @bkramer/proton-cli@latest
   account.json
   sessions/vpn.json
   sessions/authenticator.json
+  sessions/contacts.json
+  sessions/calendar.json
   vpn/                 # WireGuard conf, caches
   authenticator/       # local entry cache
+  contacts/            # contacts session mirror
+  calendar/            # calendar session mirror
 ```
 
 Never log passwords, TOTP codes, or resolved `pass://` secrets.

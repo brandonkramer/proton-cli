@@ -1,27 +1,23 @@
 import {
-  base64ToBytes,
-  bytesToBase64,
-  computeKeyPassword,
   getCryptoProxy,
-} from "../crypto/proxy.ts";
+  unlockUserKeys,
+  type DecryptedUserKey,
+  type KeySalt,
+  type ProtonUser,
+  type ProtonUserKey,
+} from "@bkramer/proton-core";
+import { base64ToBytes, bytesToBase64 } from "../crypto/proxy.ts";
 import { CliError, messageForApiCode } from "../util/errors.ts";
 import { KEYS_SALTS_PATH, USERS_PATH } from "./constants.ts";
 import { protonFetch } from "./http.ts";
 import {
   isSuccessCode,
-  type KeySalt,
   type KeySaltsResponse,
-  type ProtonUser,
-  type ProtonUserKey,
   type Session,
   type UsersResponse,
 } from "./types.ts";
 
-export interface DecryptedUserKey {
-  ID: string;
-  privateKey: unknown;
-  publicKey: unknown;
-}
+export type { DecryptedUserKey, KeySalt, ProtonUser, ProtonUserKey };
 
 export async function fetchUser(session: Session): Promise<ProtonUser> {
   const { status, data } = await protonFetch<UsersResponse>(USERS_PATH, {
@@ -50,34 +46,10 @@ export async function fetchKeySalts(session: Session): Promise<KeySalt[]> {
   return data.KeySalts;
 }
 
-async function passphraseForKey(
-  password: string,
-  keyId: string,
-  salts: KeySalt[],
-): Promise<string> {
-  const salt = salts.find((entry) => entry.ID === keyId)?.KeySalt;
-  // Empty/missing salt: legacy keys encrypted with the raw password.
-  if (!salt) return password;
-  return computeKeyPassword(password, salt);
-}
-
-async function decryptOneUserKey(
-  key: ProtonUserKey,
-  passphrase: string,
-): Promise<DecryptedUserKey | null> {
-  try {
-    const crypto = await getCryptoProxy();
-    const privateKey = await crypto.importPrivateKey({
-      armoredKey: key.PrivateKey,
-      passphrase,
-    });
-    const publicKey = await crypto.importPublicKey({
-      armoredKey: key.PrivateKey,
-    });
-    return { ID: key.ID, privateKey, publicKey };
-  } catch {
-    return null;
-  }
+function toCliError(error: unknown): CliError {
+  if (error instanceof CliError) return error;
+  if (error instanceof Error) return new CliError(error.message);
+  return new CliError(String(error));
 }
 
 /**
@@ -90,38 +62,11 @@ export async function decryptUserKeys(
   password: string,
   salts: KeySalt[],
 ): Promise<DecryptedUserKey[]> {
-  if (user.OrganizationPrivateKey) {
-    throw new CliError(
-      "Organization-managed keys are not supported.",
-    );
+  try {
+    return await unlockUserKeys(user, password, salts);
+  } catch (error) {
+    throw toCliError(error);
   }
-
-  const keys = user.Keys ?? [];
-  if (keys.length === 0) {
-    throw new CliError("Account has no User Keys.");
-  }
-
-  const [primary, ...rest] = keys;
-  if (!primary) {
-    throw new CliError("Account has no primary User Key.");
-  }
-
-  const primaryPassphrase = await passphraseForKey(password, primary.ID, salts);
-  const primaryDecrypted = await decryptOneUserKey(primary, primaryPassphrase);
-  if (!primaryDecrypted) {
-    throw new CliError(
-      "Could not unlock User Keys. Check the password (Single Password Mode required).",
-    );
-  }
-
-  const restDecrypted = await Promise.all(
-    rest.map(async (key) => {
-      const passphrase = await passphraseForKey(password, key.ID, salts);
-      return decryptOneUserKey(key, passphrase);
-    }),
-  );
-
-  return [primaryDecrypted, ...restDecrypted.filter((k): k is DecryptedUserKey => k !== null)];
 }
 
 export async function encryptAuthenticatorKeyBlob(
@@ -152,3 +97,5 @@ export async function decryptAuthenticatorKeyBlob(
   });
   return data;
 }
+
+export { computeKeyPassword } from "@bkramer/proton-core";

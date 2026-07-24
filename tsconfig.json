@@ -22,7 +22,13 @@
       "@bkramer/proton-vpn": ["./packages/vpn/src/index.ts"],
       "@bkramer/proton-vpn/*": ["./packages/vpn/src/*"],
       "@bkramer/proton-authenticator": ["./packages/authenticator/src/index.ts"],
-      "@bkramer/proton-authenticator/*": ["./packages/authenticator/src/*"]
+      "@bkramer/proton-authenticator/*": ["./packages/authenticator/src/*"],
+      "@bkramer/proton-drive": ["./packages/drive/src/index.ts"],
+      "@bkramer/proton-drive/*": ["./packages/drive/src/*"],
+      "@bkramer/proton-contacts": ["./packages/contacts/src/index.ts"],
+      "@bkramer/proton-contacts/*": ["./packages/contacts/src/*"],
+      "@bkramer/proton-calendar": ["./packages/calendar/src/index.ts"],
+      "@bkramer/proton-calendar/*": ["./packages/calendar/src/*"]
     }
   },
   "include": ["src/**/*", "packages/*/src/**/*", "packages/*/tests/**/*", "tests/**/*"],

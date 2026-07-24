@@ -1,0 +1,77 @@
+import {
+  APP_VERSION,
+  DEFAULT_API_URL,
+  USER_AGENT,
+} from "./constants.ts";
+import type { Session } from "./types.ts";
+
+export interface RequestOptions {
+  method?: "GET" | "POST" | "PUT" | "DELETE";
+  body?: unknown;
+  query?: Record<string, string | number | boolean | undefined>;
+  session?: Session | null;
+  apiUrl?: string;
+  headers?: Record<string, string>;
+  fetchImpl?: typeof fetch;
+}
+
+export interface ProtonFetchResult<T> {
+  status: number;
+  data: T;
+  raw: string;
+  etag: string | null;
+}
+
+export async function protonFetch<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<ProtonFetchResult<T>> {
+  const apiUrl = options.apiUrl ?? DEFAULT_API_URL;
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "x-pm-appversion": APP_VERSION,
+    "User-Agent": USER_AGENT,
+    ...options.headers,
+  };
+
+  if (options.session) {
+    headers.Authorization = `Bearer ${options.session.AccessToken}`;
+    headers["x-pm-uid"] = options.session.UID;
+  }
+
+  let url = `${apiUrl}${path}`;
+  if (options.query) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(options.query)) {
+      if (value !== undefined) params.set(key, String(value));
+    }
+    const qs = params.toString();
+    if (qs) url += `?${qs}`;
+  }
+
+  const fetchImpl = options.fetchImpl ?? globalThis.fetch;
+  const response = await fetchImpl(url, {
+    method: options.method ?? (options.body ? "POST" : "GET"),
+    headers,
+    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+  });
+
+  const etag = response.headers.get("ETag");
+  const raw = await response.text();
+
+  if (response.status === 304) {
+    return { status: 304, data: undefined as T, raw, etag };
+  }
+
+  let data: T;
+  try {
+    data = JSON.parse(raw) as T;
+  } catch {
+    throw new Error(
+      `Non-JSON response from Proton API (HTTP ${response.status}): ${raw.slice(0, 200)}`,
+    );
+  }
+
+  return { status: response.status, data, raw, etag };
+}

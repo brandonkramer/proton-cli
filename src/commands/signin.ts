@@ -2,6 +2,8 @@ import {
   authenticateAuthenticator,
   clearAuthenticatorState,
 } from "@bkramer/proton-authenticator";
+import { authenticateCalendar, clearCalendarState } from "@bkramer/proton-calendar";
+import { authenticateContacts, clearContactsState } from "@bkramer/proton-contacts";
 import {
   dualMintSignIn,
   parseProductList,
@@ -11,6 +13,7 @@ import {
   type ProductId,
   type SignInCredentials,
 } from "@bkramer/proton-core";
+import { authenticateDrive, clearDriveState } from "@bkramer/proton-drive";
 import { authenticateVpn, clearVpnSession } from "@bkramer/proton-vpn";
 import type { Command } from "commander";
 import { createInterface } from "node:readline/promises";
@@ -60,11 +63,26 @@ async function readCredentials(opts: {
   };
 }
 
+function productLabel(product: ProductId): string {
+  switch (product) {
+    case "vpn":
+      return "VPN";
+    case "authenticator":
+      return "Authenticator";
+    case "drive":
+      return "Drive";
+    case "calendar":
+      return "Calendar";
+    case "contacts":
+      return "Contacts";
+  }
+}
+
 async function promptTotp(product: ProductId): Promise<string | undefined> {
   if (!process.stdin.isTTY || !process.stdout.isTTY) return undefined;
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   try {
-    const label = product === "vpn" ? "VPN" : "Authenticator";
+    const label = productLabel(product);
     const value = await rl.question(
       `TOTP for ${label} (fresh code; Enter to skip): `,
     );
@@ -116,7 +134,7 @@ export function registerSignin(program: Command): void {
   program
     .command("signin")
     .description(
-      "Sign in once; mint per-product sessions (vpn + authenticator by default)",
+      "Sign in once; mint per-product sessions (all products by default)",
     )
     .option("-u, --username <username>", "Proton username / email")
     .option("-p, --password <password>", "Proton password (prefer env / Pass)")
@@ -130,7 +148,7 @@ export function registerSignin(program: Command): void {
     )
     .option(
       "--products <list>",
-      "Comma list: vpn,auth,all (default: all)",
+      "Comma list: vpn,auth,drive,cal,ctc,all (default: all)",
       "all",
     )
     .option(
@@ -158,10 +176,16 @@ export function registerSignin(program: Command): void {
           authenticators: {
             vpn: authenticateVpn,
             authenticator: authenticateAuthenticator,
+            drive: authenticateDrive,
+            calendar: authenticateCalendar,
+            contacts: authenticateContacts,
           },
           clearers: {
             vpn: clearVpnSession,
             authenticator: clearAuthenticatorState,
+            drive: clearDriveState,
+            calendar: clearCalendarState,
+            contacts: clearContactsState,
           },
           prepareCredentials: makePrepareCredentials({
             passRef,
