@@ -64,7 +64,7 @@ registerVpnCommands(vpn);
 
 const auth = program
   .command("auth")
-  .description("Proton Authenticator commands (TOTP sync)");
+  .description("Proton Authenticator commands (E2EE TOTP sync)");
 registerAuthCommands(auth);
 
 const contacts = program

@@ -3,7 +3,7 @@ name: proton-cli
 description: >-
   Use the unofficial unified Proton CLI (proton / @bkramer/proton-cli): install,
   shared Pass-aware sign-in (dual-mint), WireGuard VPN connect/disconnect,
-  Authenticator TOTP/Steam sync and codes, Contacts E2EE cards/groups,
+  Authenticator E2EE TOTP/Steam sync and codes, Contacts E2EE cards/groups,
   Calendar E2EE calendars/events, Drive E2EE files/folders/photos,
   Settings account/mail API preferences,
   status/signout, update, and agent scripting
@@ -130,6 +130,8 @@ On macOS, connect/disconnect may need sudo. In agent mode use `--sudo` only when
 
 ## Authenticator (`proton auth …`)
 
+E2EE TOTP/Steam seed sync and codes (Authenticator Key). Nested TUI from bare `proton`.
+
 ```bash
 proton auth sync
 proton auth list
@@ -138,7 +140,7 @@ proton auth code github
 proton auth status --output json
 ```
 
-CAPTCHA (if required) needs a human on macOS; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`.
+CAPTCHA (if required) needs a human on macOS; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`. Encrypted sync/code ops need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
 
 ## Contacts (`proton contacts …`)
 

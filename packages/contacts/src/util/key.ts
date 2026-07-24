@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { getCryptoProxy } from "@bkramer/proton-core";
+import { getCryptoProxy } from "../crypto/proxy.ts";
 import { CliError } from "./errors.ts";
 
 function armoredPublicKeyBytes(armored: string): Uint8Array {

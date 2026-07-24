@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import type { DecryptedUserKey } from "@bkramer/proton-core";
 import { CardEncryptedSigned, CardSigned } from "../src/vcard/vcard.ts";
 
@@ -8,7 +8,7 @@ const mockEncryptMessage = mock(async () => ({
 }));
 const mockDecryptMessage = mock(async () => ({ data: new TextEncoder().encode("decrypted") }));
 
-mock.module("@bkramer/proton-core", () => ({
+mock.module("../src/crypto/proxy.ts", () => ({
   getCryptoProxy: async () => ({
     setEndpoint: () => {},
     importPrivateKey: async () => ({}),
@@ -17,7 +17,6 @@ mock.module("@bkramer/proton-core", () => ({
     encryptMessage: mockEncryptMessage,
     decryptMessage: mockDecryptMessage,
   }),
-  unlockUserKeys: async () => [],
 }));
 
 const { signCard, encryptAndSignCard, decryptCards } = await import("../src/crypto/card.ts");
@@ -29,6 +28,10 @@ const userKey: DecryptedUserKey = {
 };
 
 describe("contact card crypto", () => {
+  afterAll(() => {
+    mock.restore();
+  });
+
   beforeEach(() => {
     mockSignMessage.mockClear();
     mockEncryptMessage.mockClear();

@@ -95,12 +95,13 @@ Country / feature availability depends on your Proton plan.
 
 ### Authenticator (`proton auth …`)
 
+E2EE TOTP/Steam seed sync and codes (Authenticator Key; client-side encrypt/decrypt).
+
 ```bash
 proton auth sync
 proton auth list
 proton auth code github
 proton auth status --output json
-proton contacts list --json
 ```
 
 Product-only `proton vpn signin` / `proton auth signin` exist; prefer shared `proton signin`.
@@ -222,7 +223,7 @@ CAPTCHA never opens a window in agent mode (`captcha_required` — sign in inter
 |---|---|---|
 | `packages/core` | `@bkramer/proton-core` | Shared config, dual-mint sessions, Pass helpers |
 | `packages/vpn` | `@bkramer/proton-vpn` | WireGuard + vpn-api (`proton vpn …`) |
-| `packages/authenticator` | `@bkramer/proton-authenticator` | TOTP sync (`proton auth …`) |
+| `packages/authenticator` | `@bkramer/proton-authenticator` | E2EE TOTP/Steam sync (`proton auth …`) |
 | `packages/contacts` | `@bkramer/proton-contacts` | E2EE contacts/groups (`proton contacts …`) |
 | `packages/calendar` | `@bkramer/proton-calendar` | E2EE calendars/events (`proton calendar …`) |
 | `packages/drive` | `@bkramer/proton-drive` | E2EE Drive files/folders/photos (`proton drive …`) |

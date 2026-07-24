@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import type { DecryptedUserKey } from "@bkramer/proton-core";
 import { CardEncryptedSigned, CardSigned } from "../src/vcard/vcard.ts";
 import { buildSignedVCard } from "../src/vcard/vcard.ts";
@@ -128,7 +128,7 @@ const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
   return new Response(JSON.stringify({ Error: "not found" }), { status: 404 });
 });
 
-mock.module("@bkramer/proton-core", () => ({
+mock.module("../src/crypto/proxy.ts", () => ({
   getCryptoProxy: async () => ({
     setEndpoint: () => {},
     importPrivateKey: async () => ({}),
@@ -141,7 +141,6 @@ mock.module("@bkramer/proton-core", () => ({
       data: new TextEncoder().encode(String(armoredMessage ?? "")),
     }),
   }),
-  unlockUserKeys: async () => [],
 }));
 
 const { ContactsClient } = await import("../src/proton/client.ts");
@@ -164,6 +163,10 @@ const userKey: DecryptedUserKey = {
 };
 
 describe("ContactsClient", () => {
+  afterAll(() => {
+    mock.restore();
+  });
+
   beforeEach(() => {
     fetchCalls.length = 0;
     mockFetch.mockClear();

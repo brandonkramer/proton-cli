@@ -15,7 +15,7 @@ End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
 |---|---|---|
 | `packages/core` | `@bkramer/proton-core` | Shared config root, multi-product sessions, dual-mint sign-in, Pass helpers |
 | `packages/vpn` | `@bkramer/proton-vpn` | VPN API + WireGuard commands (`proton vpn …`) |
-| `packages/authenticator` | `@bkramer/proton-authenticator` | Authenticator sync/codes (`proton auth …`) |
+| `packages/authenticator` | `@bkramer/proton-authenticator` | E2EE Authenticator sync/codes (`proton auth …`) |
 | `packages/contacts` | `@bkramer/proton-contacts` | Contacts cards/groups (`proton contacts …`) |
 | `packages/calendar` | `@bkramer/proton-calendar` | Calendar calendars/events (`proton calendar …`) |
 | `packages/drive` | `@bkramer/proton-drive` | Drive files/folders/photos (`proton drive …`) |
