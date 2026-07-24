@@ -1,6 +1,8 @@
 import type { Command } from "commander";
 import { configureAgentFlags } from "./util/agent.ts";
 import { registerList } from "./commands/list.ts";
+import { registerRead } from "./commands/read.ts";
+import { registerSearch } from "./commands/search.ts";
 import { registerStatus } from "./commands/status.ts";
 
 /** Register `proton mail …` (and legacy `protonmail …`) commands. */
@@ -29,4 +31,6 @@ export function registerMailCommands(mail: Command): void {
 
   registerStatus(mail);
   registerList(mail);
+  registerRead(mail);
+  registerSearch(mail);
 }

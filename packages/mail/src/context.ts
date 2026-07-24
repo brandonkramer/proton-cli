@@ -1,7 +1,11 @@
 import type { DecryptedUserKey } from "@bkramer/proton-core";
+import {
+  unlockMailKeys,
+  type ProtonAddress,
+  type UnlockedAddressKey,
+} from "./crypto/unlock.ts";
 import { loadSession, persistSession, refreshSession, verifySession } from "./proton/auth.ts";
 import type { Session } from "./proton/types.ts";
-import { decryptUserKeys, fetchKeySalts, fetchUser } from "./proton/users.ts";
 import { resolveAccountPassword } from "./util/password.ts";
 import { CliError } from "./util/errors.ts";
 import { ExitCode } from "./util/exit.ts";
@@ -9,8 +13,13 @@ import { ExitCode } from "./util/exit.ts";
 export interface MailRuntime {
   session: Session;
   username: string;
-  /** Unlocked user key — required for E2EE mail (PH0-T02+). */
+  /** Unlocked user keys (PH1+). */
+  userKeys?: DecryptedUserKey[];
+  /** Primary unlocked user key — convenience for callers. */
   userKey?: DecryptedUserKey;
+  /** Unlocked address key rings keyed by AddressID (INV-E2EE-001). */
+  addressKeys?: Map<string, UnlockedAddressKey>;
+  addresses?: ProtonAddress[];
 }
 
 export async function requireMailRuntime(options: {
@@ -39,16 +48,19 @@ export async function requireMailRuntime(options: {
 
   if (options.unlockKeys) {
     const password = await resolveAccountPassword({ passRef: options.passRef });
-    const [user, salts] = await Promise.all([
-      fetchUser(session, options.fetchImpl),
-      fetchKeySalts(session, options.fetchImpl),
-    ]);
-    const userKeys = await decryptUserKeys(user, password, salts);
-    const userKey = userKeys[0];
+    const unlocked = await unlockMailKeys(
+      session,
+      password,
+      options.fetchImpl,
+    );
+    const userKey = unlocked.userKeys[0];
     if (!userKey) {
       throw new CliError("Could not unlock User Key for mail.");
     }
+    runtime.userKeys = unlocked.userKeys;
     runtime.userKey = userKey;
+    runtime.addressKeys = unlocked.addressKeys;
+    runtime.addresses = unlocked.addresses;
   }
 
   return runtime;
