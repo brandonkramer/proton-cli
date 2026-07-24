@@ -65,7 +65,13 @@ export async function updateMailSetting(
     );
   }
 
-  const body = parseMailSettingValue(key, value);
+  let body: Record<string, string | number>;
+  try {
+    body = parseMailSettingValue(key, value);
+  } catch (error) {
+    throw new CliError(error instanceof Error ? error.message : String(error));
+  }
+
   await settingsApi(spec.path, {
     method: "PUT",
     body,
