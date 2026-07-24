@@ -5,6 +5,7 @@ export const PRODUCTS = [
   "drive",
   "calendar",
   "contacts",
+  "settings",
 ] as const;
 
 export type ProductId = (typeof PRODUCTS)[number];
@@ -14,7 +15,8 @@ export type ProductNamespace =
   | "auth"
   | "drive"
   | "cal"
-  | "contacts";
+  | "contacts"
+  | "settings";
 
 export function isProductId(value: string): value is ProductId {
   return (PRODUCTS as readonly string[]).includes(value);
@@ -31,6 +33,8 @@ export function productNamespace(product: ProductId): ProductNamespace {
       return "cal";
     case "contacts":
       return "contacts";
+    case "settings":
+      return "settings";
     default:
       return "vpn";
   }
@@ -45,6 +49,8 @@ const PRODUCT_ALIASES: Record<string, ProductId> = {
   calendar: "calendar",
   ctc: "contacts",
   contacts: "contacts",
+  set: "settings",
+  settings: "settings",
 };
 
 const KNOWN_PRODUCT_NAMES = [
@@ -53,6 +59,7 @@ const KNOWN_PRODUCT_NAMES = [
   "drive",
   "cal (calendar)",
   "ctc (contacts)",
+  "settings (set)",
   "all",
 ] as const;
 

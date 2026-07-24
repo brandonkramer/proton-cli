@@ -31,13 +31,14 @@ describe("paths + dual-mint sign-in", () => {
     setConfigRootForTests(null);
   });
 
-  test("parseProductList accepts vpn, auth, drive, calendar, contacts, all", () => {
+  test("parseProductList accepts vpn, auth, drive, calendar, contacts, settings, all", () => {
     expect(parseProductList(undefined)).toEqual([
       "vpn",
       "authenticator",
       "drive",
       "calendar",
       "contacts",
+      "settings",
     ]);
     expect(parseProductList("all")).toEqual([
       "vpn",
@@ -45,6 +46,7 @@ describe("paths + dual-mint sign-in", () => {
       "drive",
       "calendar",
       "contacts",
+      "settings",
     ]);
     expect(parseProductList("vpn,auth")).toEqual(["vpn", "authenticator"]);
     expect(parseProductList("authenticator")).toEqual(["authenticator"]);
@@ -57,6 +59,8 @@ describe("paths + dual-mint sign-in", () => {
       "calendar",
       "contacts",
     ]);
+    expect(parseProductList("settings")).toEqual(["settings"]);
+    expect(parseProductList("set")).toEqual(["settings"]);
     expect(() => parseProductList("unknown")).toThrow(/Unknown product/);
   });
 
@@ -67,6 +71,7 @@ describe("paths + dual-mint sign-in", () => {
     expect(productNamespace("drive")).toBe("drive");
     expect(productNamespace("calendar")).toBe("cal");
     expect(productNamespace("contacts")).toBe("contacts");
+    expect(productNamespace("settings")).toBe("settings");
   });
 
   test("session paths are product-scoped under shared root", async () => {

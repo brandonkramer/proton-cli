@@ -4,8 +4,6 @@ Unofficial unified Proton command-line client (**VPN + Authenticator**) with one
 
 > **Not an official Proton product.** Not affiliated with Proton AG.
 
-**Mail** is planned via Proton Mail API with unified `proton signin` (dual-mint like VPN/Authenticator). It is not shipped yet.
-
 ## Install
 
 Requires [Bun](https://bun.sh) ≥ 1.1 at runtime (even when installing via npm).
@@ -217,8 +215,6 @@ Config root: `~/.config/proton-cli/` with per-product sessions under `sessions/`
 ## Shared session model
 
 Proton VPN and Authenticator use **different API hosts and app-version headers**, so tokens are not shared across products. `proton signin` still feels like one login: credentials are collected once, then each product mints and stores its own session.
-
-Future Mail will follow the same dual-mint pattern via Proton Mail API (not shipped yet).
 
 ## Agent skill
 

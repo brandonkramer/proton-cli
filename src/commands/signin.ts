@@ -13,6 +13,7 @@ import {
   type ProductId,
   type SignInCredentials,
 } from "@bkramer/proton-core";
+import { authenticateSettings, clearSettingsState } from "@bkramer/proton-settings";
 import { authenticateDrive, clearDriveState } from "@bkramer/proton-drive";
 import { authenticateVpn, clearVpnSession } from "@bkramer/proton-vpn";
 import type { Command } from "commander";
@@ -75,6 +76,8 @@ function productLabel(product: ProductId): string {
       return "Calendar";
     case "contacts":
       return "Contacts";
+    case "settings":
+      return "Settings";
   }
 }
 
@@ -148,7 +151,7 @@ export function registerSignin(program: Command): void {
     )
     .option(
       "--products <list>",
-      "Comma list: vpn,auth,drive,cal,ctc,all (default: all)",
+      "Comma list: vpn,auth,drive,cal,ctc,settings,set,all (default: all)",
       "all",
     )
     .option(
@@ -179,6 +182,7 @@ export function registerSignin(program: Command): void {
             drive: authenticateDrive,
             calendar: authenticateCalendar,
             contacts: authenticateContacts,
+            settings: authenticateSettings,
           },
           clearers: {
             vpn: clearVpnSession,
@@ -186,6 +190,7 @@ export function registerSignin(program: Command): void {
             drive: clearDriveState,
             calendar: clearCalendarState,
             contacts: clearContactsState,
+            settings: clearSettingsState,
           },
           prepareCredentials: makePrepareCredentials({
             passRef,
