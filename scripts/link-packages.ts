@@ -12,6 +12,7 @@ const packages: Array<[string, string]> = [
   ["@bkramer/proton-core", "packages/core"],
   ["@bkramer/proton-vpn", "packages/vpn"],
   ["@bkramer/proton-authenticator", "packages/authenticator"],
+  ["@bkramer/proton-mail", "packages/mail"],
 ];
 
 async function linkOne(name: string, rel: string): Promise<void> {

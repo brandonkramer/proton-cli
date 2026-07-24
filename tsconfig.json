@@ -22,7 +22,9 @@
       "@bkramer/proton-vpn": ["./packages/vpn/src/index.ts"],
       "@bkramer/proton-vpn/*": ["./packages/vpn/src/*"],
       "@bkramer/proton-authenticator": ["./packages/authenticator/src/index.ts"],
-      "@bkramer/proton-authenticator/*": ["./packages/authenticator/src/*"]
+      "@bkramer/proton-authenticator/*": ["./packages/authenticator/src/*"],
+      "@bkramer/proton-mail": ["./packages/mail/src/index.ts"],
+      "@bkramer/proton-mail/*": ["./packages/mail/src/*"]
     }
   },
   "include": ["src/**/*", "packages/*/src/**/*", "packages/*/tests/**/*", "tests/**/*"],
