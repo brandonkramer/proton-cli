@@ -64,13 +64,13 @@
     "@inkjs/ui": "^2.0.0",
     "@protontech/authenticator-rust-core": "1.7.2",
     "@protontech/crypto": "^2.1.1",
-    "commander": "^14.0.0",
+    "commander": "^15.0.0",
     "ink": "^7.1.1",
     "react": "^19.2.8"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/react": "^19.2.17",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }
