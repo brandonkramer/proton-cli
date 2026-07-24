@@ -38,6 +38,10 @@
       "name": "@bkramer/proton-drive",
       "version": "0.1.0",
     },
+    "packages/mail": {
+      "name": "@bkramer/proton-mail",
+      "version": "0.1.0",
+    },
     "packages/settings": {
       "name": "@bkramer/proton-settings",
       "version": "0.1.0",
@@ -59,6 +63,8 @@
     "@bkramer/proton-core": ["@bkramer/proton-core@workspace:packages/core"],
 
     "@bkramer/proton-drive": ["@bkramer/proton-drive@workspace:packages/drive"],
+
+    "@bkramer/proton-mail": ["@bkramer/proton-mail@workspace:packages/mail"],
 
     "@bkramer/proton-settings": ["@bkramer/proton-settings@workspace:packages/settings"],
 

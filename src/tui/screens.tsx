@@ -18,6 +18,7 @@ export type ParentIntent =
   | { type: "calendar" }
   | { type: "drive" }
   | { type: "settings" }
+  | { type: "mail" }
   | { type: "signin" }
   | { type: "signout" };
 
@@ -81,7 +82,8 @@ export async function showParentHome(): Promise<ParentIntent> {
             snap.products.contacts.signedIn ||
             snap.products.calendar.signedIn ||
             snap.products.drive.signedIn ||
-            snap.products.settings.signedIn),
+            snap.products.settings.signedIn ||
+            snap.products.mail.signedIn),
       );
 
       const options = [
@@ -91,6 +93,7 @@ export async function showParentHome(): Promise<ParentIntent> {
         { label: "Calendar", value: "calendar" },
         { label: "Drive", value: "drive" },
         { label: "Settings", value: "settings" },
+        { label: "Mail", value: "mail" },
         ...(anySignedIn
           ? [{ label: "Sign out (all products)", value: "signout" }]
           : [{ label: "Sign in (all products)", value: "signin" }]),
@@ -163,11 +166,19 @@ export async function showParentHome(): Promise<ParentIntent> {
                   ? `signed in (${snap.products.settings.username})`
                   : "not signed in"}
               </StatusMessage>
+              <StatusMessage
+                variant={snap.products.mail.signedIn ? "success" : "warning"}
+              >
+                Mail:{" "}
+                {snap.products.mail.signedIn
+                  ? `signed in (${snap.products.mail.username})`
+                  : "not signed in"}
+              </StatusMessage>
             </Box>
           ) : null}
           {!loading ? (
             <Select
-              visibleOptionCount={8}
+              visibleOptionCount={10}
               options={options}
               onChange={(value) => {
                 switch (value) {
@@ -189,6 +200,9 @@ export async function showParentHome(): Promise<ParentIntent> {
                   case "settings":
                     resolve({ type: "settings" });
                     break;
+                  case "mail":
+                    resolve({ type: "mail" });
+                    break;
                   case "signin":
                     resolve({ type: "signin" });
                     break;
@@ -209,7 +223,7 @@ export async function showParentHome(): Promise<ParentIntent> {
             <Text dimColor>
               Tip: use `proton status --json` / `proton vpn …` / `proton auth …` /
               `proton contacts …` / `proton calendar …` / `proton drive …` /
-              `proton settings …` for scripting
+              `proton settings …` / `proton mail …` for scripting
             </Text>
           </Box>
         </Box>

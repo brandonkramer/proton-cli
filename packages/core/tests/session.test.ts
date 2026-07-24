@@ -31,7 +31,7 @@ describe("paths + dual-mint sign-in", () => {
     setConfigRootForTests(null);
   });
 
-  test("parseProductList accepts vpn, auth, drive, calendar, contacts, settings, all", () => {
+  test("parseProductList accepts vpn, auth, drive, calendar, contacts, settings, mail, all", () => {
     expect(parseProductList(undefined)).toEqual([
       "vpn",
       "authenticator",
@@ -39,6 +39,7 @@ describe("paths + dual-mint sign-in", () => {
       "calendar",
       "contacts",
       "settings",
+      "mail",
     ]);
     expect(parseProductList("all")).toEqual([
       "vpn",
@@ -47,6 +48,7 @@ describe("paths + dual-mint sign-in", () => {
       "calendar",
       "contacts",
       "settings",
+      "mail",
     ]);
     expect(parseProductList("vpn,auth")).toEqual(["vpn", "authenticator"]);
     expect(parseProductList("authenticator")).toEqual(["authenticator"]);
@@ -61,6 +63,7 @@ describe("paths + dual-mint sign-in", () => {
     ]);
     expect(parseProductList("settings")).toEqual(["settings"]);
     expect(parseProductList("set")).toEqual(["settings"]);
+    expect(parseProductList("mail")).toEqual(["mail"]);
     expect(() => parseProductList("unknown")).toThrow(/Unknown product/);
   });
 
@@ -72,6 +75,7 @@ describe("paths + dual-mint sign-in", () => {
     expect(productNamespace("calendar")).toBe("cal");
     expect(productNamespace("contacts")).toBe("contacts");
     expect(productNamespace("settings")).toBe("settings");
+    expect(productNamespace("mail")).toBe("mail");
   });
 
   test("session paths are product-scoped under shared root", async () => {
@@ -132,6 +136,32 @@ describe("paths + dual-mint sign-in", () => {
     expect(await loadProductSession("vpn")).toBeNull();
     expect(await loadProductSession("authenticator")).toBeNull();
     expect(await loadAccount()).toBeNull();
+
+    await rm(root, { recursive: true, force: true });
+  });
+
+  test("dualMintSignIn includes mail in multi-mint", async () => {
+    const root = await mkdtemp(join(tmpdir(), "proton-cli-"));
+    setConfigRootForTests(root);
+
+    const result = await dualMintSignIn({
+      credentials: { username: "alice", password: "secret" },
+      products: ["mail", "settings"],
+      authenticators: {
+        mail: async () => ({ product: "mail", session: fakeSession("mail-uid") }),
+        settings: async () => ({
+          product: "settings",
+          session: fakeSession("settings-uid"),
+        }),
+      },
+    });
+
+    expect(result.failed).toEqual([]);
+    expect(result.succeeded).toEqual(["mail", "settings"]);
+    expect((await loadProductSession("mail"))?.session.UID).toBe("mail-uid");
+    expect((await loadProductSession("settings"))?.session.UID).toBe(
+      "settings-uid",
+    );
 
     await rm(root, { recursive: true, force: true });
   });

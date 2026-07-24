@@ -30,7 +30,8 @@
     "protondrive": "./src/bins/protondrive.ts",
     "protoncontacts": "./src/bins/protoncontacts.ts",
     "protoncal": "./src/bins/protoncal.ts",
-    "protonsettings": "./src/bins/protonsettings.ts"
+    "protonsettings": "./src/bins/protonsettings.ts",
+    "protonmail": "./src/bins/protonmail.ts"
   },
   "workspaces": [
     "packages/*"

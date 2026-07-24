@@ -15,6 +15,10 @@ import {
   signOutDrive,
 } from "@bkramer/proton-drive";
 import {
+  launchMailTui,
+  signOutMail,
+} from "@bkramer/proton-mail";
+import {
   launchSettingsTui,
   signOutSettings,
 } from "@bkramer/proton-settings";
@@ -48,6 +52,9 @@ async function handleIntent(
     case "settings":
       await launchSettingsTui();
       return "home";
+    case "mail":
+      await launchMailTui();
+      return "home";
     case "signin":
       await runParentSignin();
       return "home";
@@ -58,11 +65,12 @@ async function handleIntent(
       await signOutCalendar();
       await signOutDrive();
       await signOutSettings();
+      await signOutMail();
       await clearAllSessions();
       await showMessage({
         variant: "success",
         title: "Signed out",
-        body: "VPN, Authenticator, Contacts, Calendar, Drive, and Settings sessions cleared.",
+        body: "VPN, Authenticator, Contacts, Calendar, Drive, Settings, and Mail sessions cleared.",
         holdMs: 800,
       });
       return "home";

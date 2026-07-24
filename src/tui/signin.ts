@@ -14,6 +14,7 @@ import {
   type ProductId,
   type SignInCredentials,
 } from "@bkramer/proton-core";
+import { authenticateMail, clearMailState } from "@bkramer/proton-mail";
 import { authenticateSettings, clearSettingsState } from "@bkramer/proton-settings";
 import { authenticateDrive, clearDriveState } from "@bkramer/proton-drive";
 import { authenticateVpn, clearVpnSession } from "@bkramer/proton-vpn";
@@ -39,6 +40,8 @@ function productLabel(product: ProductId): string {
       return "Contacts";
     case "settings":
       return "Settings";
+    case "mail":
+      return "Mail";
   }
 }
 
@@ -134,6 +137,7 @@ async function mintProduct(
             calendar: authenticateCalendar,
             contacts: authenticateContacts,
             settings: authenticateSettings,
+            mail: authenticateMail,
           },
           clearers: {
             vpn: clearVpnSession,
@@ -142,6 +146,7 @@ async function mintProduct(
             calendar: clearCalendarState,
             contacts: clearContactsState,
             settings: clearSettingsState,
+            mail: clearMailState,
           },
           partialOk: false,
         });
@@ -184,6 +189,7 @@ export async function runParentSignin(): Promise<void> {
       await clearCalendarState();
       await clearContactsState();
       await clearSettingsState();
+      await clearMailState();
       await clearAllSessions();
       break;
     }

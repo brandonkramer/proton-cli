@@ -30,7 +30,9 @@
       "@bkramer/proton-calendar": ["./packages/calendar/src/index.ts"],
       "@bkramer/proton-calendar/*": ["./packages/calendar/src/*"],
       "@bkramer/proton-settings": ["./packages/settings/src/index.ts"],
-      "@bkramer/proton-settings/*": ["./packages/settings/src/*"]
+      "@bkramer/proton-settings/*": ["./packages/settings/src/*"],
+      "@bkramer/proton-mail": ["./packages/mail/src/index.ts"],
+      "@bkramer/proton-mail/*": ["./packages/mail/src/*"]
     }
   },
   "include": ["src/**/*", "packages/*/src/**/*", "packages/*/tests/**/*", "tests/**/*"],
