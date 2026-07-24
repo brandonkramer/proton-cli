@@ -22,8 +22,20 @@
       "name": "@bkramer/proton-authenticator",
       "version": "0.1.0",
     },
+    "packages/calendar": {
+      "name": "@bkramer/proton-calendar",
+      "version": "0.1.0",
+    },
+    "packages/contacts": {
+      "name": "@bkramer/proton-contacts",
+      "version": "0.1.0",
+    },
     "packages/core": {
       "name": "@bkramer/proton-core",
+      "version": "0.1.0",
+    },
+    "packages/drive": {
+      "name": "@bkramer/proton-drive",
       "version": "0.1.0",
     },
     "packages/vpn": {
@@ -36,7 +48,13 @@
 
     "@bkramer/proton-authenticator": ["@bkramer/proton-authenticator@workspace:packages/authenticator"],
 
+    "@bkramer/proton-calendar": ["@bkramer/proton-calendar@workspace:packages/calendar"],
+
+    "@bkramer/proton-contacts": ["@bkramer/proton-contacts@workspace:packages/contacts"],
+
     "@bkramer/proton-core": ["@bkramer/proton-core@workspace:packages/core"],
+
+    "@bkramer/proton-drive": ["@bkramer/proton-drive@workspace:packages/drive"],
 
     "@bkramer/proton-vpn": ["@bkramer/proton-vpn@workspace:packages/vpn"],
 

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Drive** (`proton drive …`): E2EE files/folders/share/trash/photos; nested TUI from parent menu; dual-mint via `proton signin --products drive|all`
+- Parent TUI Drive entry (list items / list trash / status); UX reference [roman-16/proton-cli](https://github.com/roman-16/proton-cli)
+- **Calendar** (`proton calendar …`): E2EE calendars/events CRUD, invitation respond; nested TUI from parent menu; dual-mint via `proton signin --products cal|all`
+- Parent TUI Calendar entry (list calendars / list events / status); UX reference [roman-16/proton-cli](https://github.com/roman-16/proton-cli)
+- **Contacts** (`proton contacts …`): E2EE CRUD, groups, pin-key; nested TUI from parent menu; dual-mint via `proton signin --products ctc|all`
+- Parent TUI Contacts entry (list / groups / status); UX reference [roman-16/proton-cli](https://github.com/roman-16/proton-cli)
+
 ### Removed
 - **Bridge Mail preview** (`proton mail …`, `protonmail` bin, `packages/mail`): removed pending unified Mail via Proton Mail API + dual-mint sign-in (separate project)
 

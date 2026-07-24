@@ -4,7 +4,7 @@ Unofficial unified Proton CLI. Bun workspaces under `packages/`.
 
 - **GitHub:** `brandonkramer/proton-cli`
 - **npm:** `@bkramer/proton-cli` (unscoped `proton-cli` is taken on the registry)
-- **Bins:** `proton`, `protonvpn`, `protonauth`
+- **Bins:** `proton`, `protonvpn`, `protonauth`, `protondrive`, `protoncontacts`, `protoncal`
 - **Runtime:** Bun ≥ 1.1 · Ink/React TUI · GPL-3.0-or-later (required by `@protontech/crypto`)
 
 End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
@@ -16,7 +16,10 @@ End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
 | `packages/core` | `@bkramer/proton-core` | Shared config root, multi-product sessions, dual-mint sign-in, Pass helpers |
 | `packages/vpn` | `@bkramer/proton-vpn` | VPN API + WireGuard commands (`proton vpn …`) |
 | `packages/authenticator` | `@bkramer/proton-authenticator` | Authenticator sync/codes (`proton auth …`) |
-| `src/` | root bins | `proton` router, `protonvpn` / `protonauth` wrappers |
+| `packages/contacts` | `@bkramer/proton-contacts` | Contacts cards/groups (`proton contacts …`) |
+| `packages/calendar` | `@bkramer/proton-calendar` | Calendar calendars/events (`proton calendar …`) |
+| `packages/drive` | `@bkramer/proton-drive` | Drive files/folders/photos (`proton drive …`) |
+| `src/` | root bins | `proton` router, `protonvpn` / `protonauth` / `protondrive` / `protoncontacts` / `protoncal` wrappers |
 | `scripts/` | install helpers | workspace links, OpenPGP patch, postinstall |
 | `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents |
 
@@ -72,7 +75,7 @@ Do not commit secrets, session files, or resolved Pass material.
 
 ### Agent / scripting mode
 
-- Bare `proton` (TTY) opens the parent TUI in `src/tui/`; VPN/Auth product menus nest from there (`launchVpnTui` / `launchAuthTui`). No `proton vpn tui` / `proton auth tui`.
+- Bare `proton` (TTY) opens the parent TUI in `src/tui/`; VPN/Auth/Contacts/Calendar/Drive product menus nest from there (`launchVpnTui` / `launchAuthTui` / `launchContactsTui` / `launchCalendarTui` / `launchDriveTui`). No `proton vpn tui` / `proton auth tui` / `proton contacts tui` / `proton calendar tui` / `proton drive tui`.
 - Global: `--json`, `-y/--yes`, `--sudo` (VPN agent helpers in `packages/vpn/src/util/agent.ts`)
 - Authenticator uses `--output json|plain|ink` / `PROTONAUTH_*` envs
 - Quiet UI skips Ink when JSON, `CI`, agent env, or non-TTY

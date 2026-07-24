@@ -4,7 +4,7 @@
  */
 import { getCryptoProxy } from "@bkramer/proton-core";
 
-export { getCryptoProxy } from "@bkramer/proton-core";
+export { computeKeyPassword, getCryptoProxy } from "@bkramer/proton-core";
 
 export interface AuthInfo {
   Version: number;
@@ -41,24 +41,6 @@ export async function getSrp(
   const srpId = "@protontech/" + "crypto/srp";
   const mod = (await import(srpId)) as { getSrp: GetSrp };
   return mod.getSrp(info, credentials, authVersion);
-}
-
-type ComputeKeyPassword = (password: string, salt: string) => Promise<string>;
-
-/**
- * Derive the User Key passphrase (bcrypt) from the account password + KeySalt.
- * Required in Single Password Mode — keys are not encrypted with the raw password.
- */
-export async function computeKeyPassword(
-  password: string,
-  salt: string,
-): Promise<string> {
-  await getCryptoProxy();
-  const srpId = "@protontech/" + "crypto/srp";
-  const mod = (await import(srpId)) as {
-    computeKeyPassword: ComputeKeyPassword;
-  };
-  return mod.computeKeyPassword(password, salt);
 }
 
 export function bytesToBase64(bytes: Uint8Array): string {

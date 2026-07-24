@@ -4,6 +4,7 @@ export {
   parseProductList,
   productNamespace,
   type ProductId,
+  type ProductNamespace,
 } from "./products.ts";
 export {
   accountPath,
@@ -29,6 +30,16 @@ export {
   getCryptoProxy,
   type CryptoProxyLike,
 } from "./crypto.ts";
+export {
+  computeKeyPassword,
+  unlockUserKeys,
+  unlockUserKeysWithFetch,
+  type DecryptedUserKey,
+  type KeySalt,
+  type ProtonUser,
+  type ProtonUserKey,
+  type UnlockUserKeysWithFetchOptions,
+} from "./unlock.ts";
 export {
   normalizePassItemRef,
   PASS_ENV_CANDIDATES,

@@ -2,15 +2,19 @@ import {
   authenticateAuthenticator,
   clearAuthenticatorState,
 } from "@bkramer/proton-authenticator";
+import { authenticateCalendar, clearCalendarState } from "@bkramer/proton-calendar";
+import { authenticateContacts, clearContactsState } from "@bkramer/proton-contacts";
 import {
   clearAllSessions,
   dualMintSignIn,
+  PRODUCTS,
   resolvePassLogin,
   resolvePassRefFromEnv,
   resolvePassTotp,
   type ProductId,
   type SignInCredentials,
 } from "@bkramer/proton-core";
+import { authenticateDrive, clearDriveState } from "@bkramer/proton-drive";
 import { authenticateVpn, clearVpnSession } from "@bkramer/proton-vpn";
 import { showMessage } from "./message.tsx";
 import {
@@ -20,10 +24,19 @@ import {
 } from "./prompts.tsx";
 import { runTask } from "./task.tsx";
 
-const PRODUCTS: ProductId[] = ["vpn", "authenticator"];
-
 function productLabel(product: ProductId): string {
-  return product === "vpn" ? "VPN" : "Authenticator";
+  switch (product) {
+    case "vpn":
+      return "VPN";
+    case "authenticator":
+      return "Authenticator";
+    case "drive":
+      return "Drive";
+    case "calendar":
+      return "Calendar";
+    case "contacts":
+      return "Contacts";
+  }
 }
 
 async function collectBaseCredentials(): Promise<{
@@ -114,10 +127,16 @@ async function mintProduct(
           authenticators: {
             vpn: authenticateVpn,
             authenticator: authenticateAuthenticator,
+            drive: authenticateDrive,
+            calendar: authenticateCalendar,
+            contacts: authenticateContacts,
           },
           clearers: {
             vpn: clearVpnSession,
             authenticator: clearAuthenticatorState,
+            drive: clearDriveState,
+            calendar: clearCalendarState,
+            contacts: clearContactsState,
           },
           partialOk: false,
         });
@@ -156,6 +175,9 @@ export async function runParentSignin(): Promise<void> {
       // Match dual-mint default: roll back earlier successes.
       await clearVpnSession();
       await clearAuthenticatorState();
+      await clearDriveState();
+      await clearCalendarState();
+      await clearContactsState();
       await clearAllSessions();
       break;
     }

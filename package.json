@@ -26,7 +26,10 @@
   "bin": {
     "proton": "./src/index.ts",
     "protonvpn": "./src/bins/protonvpn.ts",
-    "protonauth": "./src/bins/protonauth.ts"
+    "protonauth": "./src/bins/protonauth.ts",
+    "protondrive": "./src/bins/protondrive.ts",
+    "protoncontacts": "./src/bins/protoncontacts.ts",
+    "protoncal": "./src/bins/protoncal.ts"
   },
   "workspaces": [
     "packages/*"

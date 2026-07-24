@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
 import { registerAuthCommands } from "@bkramer/proton-authenticator";
+import { registerCalendarCommands } from "@bkramer/proton-calendar";
+import { registerContactsCommands } from "@bkramer/proton-contacts";
+import { registerDriveCommands } from "@bkramer/proton-drive";
 import { registerVpnCommands } from "@bkramer/proton-vpn";
 import { Command } from "commander";
 import { registerSignin } from "./commands/signin.ts";
@@ -62,5 +65,20 @@ const auth = program
   .command("auth")
   .description("Proton Authenticator commands (TOTP sync)");
 registerAuthCommands(auth);
+
+const contacts = program
+  .command("contacts")
+  .description("Proton Contacts commands (E2EE cards, groups)");
+registerContactsCommands(contacts);
+
+const calendar = program
+  .command("calendar")
+  .description("Proton Calendar commands (E2EE events)");
+registerCalendarCommands(calendar);
+
+const drive = program
+  .command("drive")
+  .description("Proton Drive commands (files, folders, photos)");
+registerDriveCommands(drive);
 
 await program.parseAsync(process.argv);
