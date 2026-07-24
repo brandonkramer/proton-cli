@@ -8,10 +8,24 @@ export const AUTH_REFRESH_PATH = "/auth/v4/refresh";
 export const USERS_PATH = "/core/v4/users";
 export const KEYS_SALTS_PATH = "/core/v4/keys/salts";
 export const ADDRESSES_PATH = "/core/v4/addresses";
+export const LABELS_PATH = "/core/v4/labels";
 export const KEYS_ALL_PATH = "/core/v4/keys/all";
 
 export const MAIL_MESSAGES_PATH = "/mail/v4/messages";
 export const MAIL_CONVERSATIONS_PATH = "/mail/v4/conversations";
+export const MAIL_MESSAGES_LABEL_PATH = `${MAIL_MESSAGES_PATH}/label`;
+export const MAIL_MESSAGES_UNLABEL_PATH = `${MAIL_MESSAGES_PATH}/unlabel`;
+export const MAIL_MESSAGES_READ_PATH = `${MAIL_MESSAGES_PATH}/read`;
+export const MAIL_MESSAGES_UNREAD_PATH = `${MAIL_MESSAGES_PATH}/unread`;
+export const MAIL_MESSAGES_DELETE_PATH = `${MAIL_MESSAGES_PATH}/delete`;
+
+/** User label (Type=1). */
+export const LABEL_TYPE_LABEL = 1;
+/** Mail folder (Type=3). */
+export const LABEL_TYPE_FOLDER = 3;
+
+/** Default accent for new labels/folders (Proton palette). */
+export const DEFAULT_LABEL_COLOR = "#7272a1";
 
 /** System label IDs (Proton Mail API). */
 export const LABEL_INBOX = "0";
