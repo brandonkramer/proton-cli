@@ -17,6 +17,7 @@ export type ParentIntent =
   | { type: "contacts" }
   | { type: "calendar" }
   | { type: "drive" }
+  | { type: "settings" }
   | { type: "signin" }
   | { type: "signout" };
 
@@ -79,7 +80,8 @@ export async function showParentHome(): Promise<ParentIntent> {
             snap.products.authenticator.signedIn ||
             snap.products.contacts.signedIn ||
             snap.products.calendar.signedIn ||
-            snap.products.drive.signedIn),
+            snap.products.drive.signedIn ||
+            snap.products.settings.signedIn),
       );
 
       const options = [
@@ -88,6 +90,7 @@ export async function showParentHome(): Promise<ParentIntent> {
         { label: "Contacts", value: "contacts" },
         { label: "Calendar", value: "calendar" },
         { label: "Drive", value: "drive" },
+        { label: "Settings", value: "settings" },
         ...(anySignedIn
           ? [{ label: "Sign out (all products)", value: "signout" }]
           : [{ label: "Sign in (all products)", value: "signin" }]),
@@ -152,6 +155,14 @@ export async function showParentHome(): Promise<ParentIntent> {
                   ? `signed in (${snap.products.drive.username})`
                   : "not signed in"}
               </StatusMessage>
+              <StatusMessage
+                variant={snap.products.settings.signedIn ? "success" : "warning"}
+              >
+                Settings:{" "}
+                {snap.products.settings.signedIn
+                  ? `signed in (${snap.products.settings.username})`
+                  : "not signed in"}
+              </StatusMessage>
             </Box>
           ) : null}
           {!loading ? (
@@ -175,6 +186,9 @@ export async function showParentHome(): Promise<ParentIntent> {
                   case "drive":
                     resolve({ type: "drive" });
                     break;
+                  case "settings":
+                    resolve({ type: "settings" });
+                    break;
                   case "signin":
                     resolve({ type: "signin" });
                     break;
@@ -194,7 +208,8 @@ export async function showParentHome(): Promise<ParentIntent> {
           <Box marginTop={1}>
             <Text dimColor>
               Tip: use `proton status --json` / `proton vpn …` / `proton auth …` /
-              `proton contacts …` / `proton calendar …` / `proton drive …` for scripting
+              `proton contacts …` / `proton calendar …` / `proton drive …` /
+              `proton settings …` for scripting
             </Text>
           </Box>
         </Box>

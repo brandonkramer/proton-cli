@@ -55,6 +55,10 @@ export function isNonInteractive(): boolean {
   return flags.yes || wantsJson() || isAgentEnv() || !process.stdin.isTTY;
 }
 
+export function preferNonInteractive(): boolean {
+  return isNonInteractive();
+}
+
 export function isDryRun(): boolean {
   return flags.dryRun;
 }
