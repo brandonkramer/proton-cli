@@ -3,6 +3,7 @@ import { registerAuthCommands } from "@bkramer/proton-authenticator";
 import { registerCalendarCommands } from "@bkramer/proton-calendar";
 import { registerContactsCommands } from "@bkramer/proton-contacts";
 import { registerDriveCommands } from "@bkramer/proton-drive";
+import { registerMailCommands } from "@bkramer/proton-mail";
 import { registerSettingsCommands } from "@bkramer/proton-settings";
 import { registerVpnCommands } from "@bkramer/proton-vpn";
 import { Command } from "commander";
@@ -86,5 +87,10 @@ const settings = program
   .command("settings")
   .description("Proton Settings commands (account and mail preferences)");
 registerSettingsCommands(settings);
+
+const mail = program
+  .command("mail")
+  .description("Proton Mail commands (REST API; no Bridge/IMAP/SMTP)");
+registerMailCommands(mail);
 
 await program.parseAsync(process.argv);

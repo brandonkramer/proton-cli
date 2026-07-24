@@ -1,0 +1,18 @@
+{
+  "name": "@bkramer/proton-mail",
+  "version": "0.1.0",
+  "description": "Proton Mail product commands for @bkramer/proton-cli",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  }
+}
