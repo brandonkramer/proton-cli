@@ -102,6 +102,8 @@ const { formatAccountSettings, formatMailSettings } = await import(
   "../src/settings/format.ts"
 );
 
+const mockFetchImpl = mockFetch as unknown as typeof fetch;
+
 describe("settings API client", () => {
   beforeEach(() => {
     fetchCalls.length = 0;
@@ -109,7 +111,7 @@ describe("settings API client", () => {
   });
 
   test("getAccountSettings fetches /core/v4/settings", async () => {
-    const runtime = await requireSettingsRuntime(mockFetch);
+    const runtime = await requireSettingsRuntime(mockFetchImpl);
     const data = await getAccountSettings(runtime);
     expect(data.UserSettings).toBeDefined();
     expect(fetchCalls).toEqual([
@@ -118,14 +120,14 @@ describe("settings API client", () => {
   });
 
   test("getMailSettings fetches /mail/v4/settings", async () => {
-    const runtime = await requireSettingsRuntime(mockFetch);
+    const runtime = await requireSettingsRuntime(mockFetchImpl);
     const data = await getMailSettings(runtime);
     expect(data.MailSettings).toBeDefined();
     expect(fetchCalls[0]?.path).toBe("/mail/v4/settings");
   });
 
   test("updateMailSetting PUTs view-mode to /mail/v4/settings/viewmode", async () => {
-    const runtime = await requireSettingsRuntime(mockFetch);
+    const runtime = await requireSettingsRuntime(mockFetchImpl);
     const result = await updateMailSetting(runtime, "view-mode", "0");
     expect(result).toEqual({
       key: "view-mode",
@@ -142,7 +144,7 @@ describe("settings API client", () => {
   });
 
   test("updateMailSetting rejects unknown key", async () => {
-    const runtime = await requireSettingsRuntime(mockFetch);
+    const runtime = await requireSettingsRuntime(mockFetchImpl);
     await expect(updateMailSetting(runtime, "not-a-key", "1")).rejects.toThrow(
       /unknown setting/,
     );
@@ -150,7 +152,7 @@ describe("settings API client", () => {
   });
 
   test("updateMailSetting rejects non-integer for integer keys", async () => {
-    const runtime = await requireSettingsRuntime(mockFetch);
+    const runtime = await requireSettingsRuntime(mockFetchImpl);
     await expect(updateMailSetting(runtime, "view-mode", "abc")).rejects.toThrow(
       /integer value/,
     );
@@ -182,7 +184,7 @@ describe("settings commands (agent output)", () => {
 
   test("stringifySettingsOutput strips tokens from JSON get payload", async () => {
     const { stringifySettingsOutput } = await import("../src/util/secrets.ts");
-    const runtime = await requireSettingsRuntime(mockFetch);
+    const runtime = await requireSettingsRuntime(mockFetchImpl);
     const data = await getAccountSettings(runtime);
     const output = stringifySettingsOutput({ ...data, session: mockSession });
     expect(output).not.toContain("access-token-secret");
