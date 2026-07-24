@@ -14,7 +14,6 @@ export type ParentIntent =
   | { type: "quit" }
   | { type: "vpn" }
   | { type: "auth" }
-  | { type: "mail" }
   | { type: "signin" }
   | { type: "signout" };
 
@@ -79,7 +78,6 @@ export async function showParentHome(): Promise<ParentIntent> {
       const options = [
         { label: "VPN", value: "vpn" },
         { label: "Authenticator", value: "auth" },
-        { label: "Mail", value: "mail" },
         ...(anySignedIn
           ? [{ label: "Sign out (all products)", value: "signout" }]
           : [{ label: "Sign in (VPN + Authenticator)", value: "signin" }]),
@@ -134,9 +132,6 @@ export async function showParentHome(): Promise<ParentIntent> {
                   case "auth":
                     resolve({ type: "auth" });
                     break;
-                  case "mail":
-                    resolve({ type: "mail" });
-                    break;
                   case "signin":
                     resolve({ type: "signin" });
                     break;
@@ -156,7 +151,7 @@ export async function showParentHome(): Promise<ParentIntent> {
           <Box marginTop={1}>
             <Text dimColor>
               Tip: use `proton status --json` / `proton vpn …` / `proton auth …`
-              / `proton mail …` for scripting
+              for scripting
             </Text>
           </Box>
         </Box>
