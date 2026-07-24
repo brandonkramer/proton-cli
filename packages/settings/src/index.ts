@@ -1,5 +1,6 @@
 export { registerSettingsCommands } from "./register.ts";
 export { authenticateSettings } from "./authenticate.ts";
+export { launchTui as launchSettingsTui } from "./tui/launch.ts";
 export { signOut as signOutSettings } from "./proton/auth.ts";
 export { clearSettingsState } from "./config/store.ts";
 export {

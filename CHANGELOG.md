@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Settings** (`proton settings …`): account/mail API get/set; nested TUI from parent menu; dual-mint via `proton signin --products settings|set|all`
+- Parent TUI Settings entry (account / mail / list keys / update)
 - **Drive** (`proton drive …`): E2EE files/folders/share/trash/photos; nested TUI from parent menu; dual-mint via `proton signin --products drive|all`
 - Parent TUI Drive entry (list items / list trash / status)
 - **Calendar** (`proton calendar …`): E2EE calendars/events CRUD, invitation respond; nested TUI from parent menu; dual-mint via `proton signin --products cal|all`

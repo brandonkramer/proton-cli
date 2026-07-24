@@ -48,7 +48,7 @@ CAPTCHA (if Proton requires it on sign-in): solve it in the **native WKWebView w
 
 ## Commands
 
-Run `proton` with no args (TTY) for the interactive menu (VPN / Authenticator / Contacts / Calendar / sign-in).
+Run `proton` with no args (TTY) for the interactive menu (VPN / Authenticator / Contacts / Calendar / Drive / Settings / sign-in).
 
 Global options: `--json`, `-y` / `--yes`, `--sudo` (WireGuard on macOS).
 
@@ -149,6 +149,23 @@ proton drive photos list
 
 Bare `proton` (TTY) opens a nested Drive menu (list items / list trash / status). Prefer `proton drive … --json` for scripting. Encrypted operations need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
 
+### Settings (`proton settings …`)
+
+Account and mail preference settings via Proton’s account/mail API (not Bridge IMAP/SMTP).
+
+```bash
+proton settings get
+proton settings mail
+proton settings set
+proton settings set view-mode 1
+proton settings set hide-remote-images 1 --dry-run
+proton settings get --json
+```
+
+Sign in with `proton signin --products settings|set|all`. Writable keys include `view-mode`, `draft-type`, `hide-remote-images`, and others listed by bare `proton settings set`.
+
+Bare `proton` (TTY) opens a nested Settings menu (account / mail / list keys / update). Prefer `proton settings … --json` for scripting.
+
 ## Proton Pass (optional)
 
 If you use [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`):
@@ -193,6 +210,7 @@ proton auth code github --output json
 | `PROTONCONTACTS_JSON=1` / `PROTONCONTACTS_AGENT=1` | Contacts agent mode (JSON; no TUI) |
 | `PROTONCALENDAR_JSON=1` / `PROTONCALENDAR_AGENT=1` | Calendar agent mode (JSON; no TUI) |
 | `PROTON_DRIVE_JSON=1` / `PROTON_DRIVE_AGENT=1` | Drive agent mode (JSON; no TUI) |
+| `PROTONSETTINGS_JSON=1` / `PROTONSETTINGS_AGENT=1` | Settings agent mode (JSON; no TUI) |
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 
@@ -208,6 +226,7 @@ CAPTCHA never opens a window in agent mode (`captcha_required` — sign in inter
 | `packages/contacts` | `@bkramer/proton-contacts` | E2EE contacts/groups (`proton contacts …`) |
 | `packages/calendar` | `@bkramer/proton-calendar` | E2EE calendars/events (`proton calendar …`) |
 | `packages/drive` | `@bkramer/proton-drive` | E2EE Drive files/folders/photos (`proton drive …`) |
+| `packages/settings` | `@bkramer/proton-settings` | Account/mail API preferences (`proton settings …`) |
 | `src/` | root bins | `proton` router + legacy wrappers |
 
 Config root: `~/.config/proton-cli/` with per-product sessions under `sessions/`.
