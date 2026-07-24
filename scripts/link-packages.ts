@@ -15,6 +15,7 @@ const packages: Array<[string, string]> = [
   ["@bkramer/proton-contacts", "packages/contacts"],
   ["@bkramer/proton-calendar", "packages/calendar"],
   ["@bkramer/proton-drive", "packages/drive"],
+  ["@bkramer/proton-settings", "packages/settings"],
 ];
 
 async function linkOne(name: string, rel: string): Promise<void> {

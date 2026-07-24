@@ -28,7 +28,9 @@
       "@bkramer/proton-contacts": ["./packages/contacts/src/index.ts"],
       "@bkramer/proton-contacts/*": ["./packages/contacts/src/*"],
       "@bkramer/proton-calendar": ["./packages/calendar/src/index.ts"],
-      "@bkramer/proton-calendar/*": ["./packages/calendar/src/*"]
+      "@bkramer/proton-calendar/*": ["./packages/calendar/src/*"],
+      "@bkramer/proton-settings": ["./packages/settings/src/index.ts"],
+      "@bkramer/proton-settings/*": ["./packages/settings/src/*"]
     }
   },
   "include": ["src/**/*", "packages/*/src/**/*", "packages/*/tests/**/*", "tests/**/*"],
