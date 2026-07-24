@@ -5,11 +5,10 @@ import { buildRevisionManifest } from "./download-verify.ts";
 import {
   base64ToBytes,
   bytesToBase64,
-  getDriveCrypto,
   sha256Base64,
   sha256Raw,
-  VERIFICATION_STATUS,
-} from "./proxy.ts";
+} from "./hash.ts";
+import { getDriveCrypto, VERIFICATION_STATUS } from "./proxy.ts";
 
 type KeyRing = CryptoKey[];
 

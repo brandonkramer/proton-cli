@@ -1,4 +1,4 @@
-import { sha256Base64 } from "./proxy.ts";
+import { sha256Base64 } from "./hash.ts";
 
 /** Reject omitted, replayed, or reordered block indices (must be 1..n contiguous). */
 export function assertContiguousBlockIndices(indices: number[]): void {

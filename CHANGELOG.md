@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-24
+
 ### Added
-- **Mail** (`proton mail …`): E2EE list/read/search/send/organize via Proton Mail REST API (PH1 inbox metadata, PH2 send/organize, PH3 parent TUI); nested TUI from parent menu; dual-mint via `proton signin --products mail|all`
+- **Mail** (`proton mail …`): E2EE list/read/search/send/organize via Proton Mail REST API; nested TUI from parent menu; dual-mint via `proton signin --products mail|all`
 - Parent TUI Mail entry (list inbox / search / status)
 - **Settings** (`proton settings …`): account/mail API get/set; nested TUI from parent menu; dual-mint via `proton signin --products settings|set|all`
 - Parent TUI Settings entry (account / mail / list keys / update)
@@ -22,9 +24,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - **Bridge Mail preview** (`protonmail` bin): replaced by unified Mail via Proton Mail API + dual-mint sign-in
 
+### Fixed
+- Mail send fails closed when recipient key lookup errors (no silent clear-text downgrade)
+- Product sessions retain refresh tokens past access-token expiry; Drive/Settings/Calendar refresh on require
+- Contacts/Calendar/Drive verify signatures on read/download; Mail exposes verification status
+- Contacts/Calendar updates preserve unrelated cards/metadata; vCard/iCal text escaping
+- Destructive deletes require `--yes`; Mail `PROTONMAIL_READ_ONLY` blocks organize/label writes
+- VPN brings down the previous tunnel before replacing WireGuard config
+- Authenticator sync keeps local ciphertext when remote decrypt fails; ambiguous OTP matches rejected non-interactively
+
 ### Changed
 - Document Authenticator as E2EE TOTP/Steam seed sync (alongside Contacts/Calendar/Drive/Mail)
 - README, AGENTS.md, and agent skill document Mail alongside other products
+- Shared sign-in defaults to all shipped products (seven API mints)
 
 ## [0.2.0] - 2026-07-24
 
@@ -64,7 +76,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI + Release workflows; migration guide from standalone CLIs
 - Publish as **`@bkramer/proton-cli`** (npm); GitHub repo `brandonkramer/proton-cli`
 
-[Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/brandonkramer/proton-cli/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/brandonkramer/proton-cli/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/brandonkramer/proton-cli/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/brandonkramer/proton-cli/releases/tag/v0.1.0

@@ -4,7 +4,7 @@ import {
   assertContiguousBlockIndices,
   buildRevisionManifest,
 } from "../src/drive/crypto/download-verify.ts";
-import { sha256Base64 } from "../src/drive/crypto/proxy.ts";
+import { sha256Base64 } from "../src/drive/crypto/hash.ts";
 import { configureAgentFlags } from "../src/util/agent.ts";
 import { requireDestructiveConfirm } from "../src/util/confirm.ts";
 
