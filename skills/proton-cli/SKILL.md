@@ -3,19 +3,20 @@ name: proton-cli
 description: >-
   Use the unofficial unified Proton CLI (proton / @bkramer/proton-cli): install,
   shared Pass-aware sign-in (dual-mint), WireGuard VPN connect/disconnect,
-  Authenticator TOTP/Steam sync and codes, Mail via Bridge IMAP/SMTP,
-  status/signout, update, and agent scripting with --json / pass:// / pass-cli.
-  Use when the user wants to run proton, protonvpn, protonauth, or protonmail,
-  automate Proton VPN, Authenticator, or Mail from a terminal or AI agent, or
-  set up Pass-based sign-in for the unified package. Do not invoke for official
-  Proton apps, FIDO2/security-key auth, or general networking troubleshooting
-  unrelated to this CLI.
-short-description: Unified Proton CLI (VPN + Authenticator + Mail)
+  Authenticator TOTP/Steam sync and codes, status/signout, update, and agent
+  scripting with --json / pass:// / pass-cli. Use when the user wants to run
+  proton, protonvpn, or protonauth, automate Proton VPN or Authenticator from a
+  terminal or AI agent, or set up Pass-based sign-in for the unified package.
+  Do not invoke for official Proton apps, FIDO2/security-key auth, or general
+  networking troubleshooting unrelated to this CLI.
+short-description: Unified Proton CLI (VPN + Authenticator)
 ---
 
 # proton (@bkramer/proton-cli)
 
-Unofficial unified Proton CLI (**VPN + Authenticator + Mail via Bridge**) with shared sign-in UX for VPN/Authenticator. Not an official Proton product.
+Unofficial unified Proton CLI (**VPN + Authenticator**) with shared sign-in UX. Not an official Proton product.
+
+**Mail** is planned via Proton Mail API with unified `proton signin` (dual-mint). It is not shipped yet.
 
 Requires **Bun** ≥ 1.1 at runtime (even if installed via npm).
 
@@ -33,7 +34,7 @@ From GitHub:
 bun install -g github:brandonkramer/proton-cli
 ```
 
-Bins: `proton`, `protonvpn`, `protonauth`, `protonmail` (legacy wrappers → `proton vpn` / `proton auth` / `proton mail`).
+Bins: `proton`, `protonvpn`, `protonauth` (legacy wrappers → `proton vpn` / `proton auth`).
 
 ## Requirements
 
@@ -41,7 +42,6 @@ Bins: `proton`, `protonvpn`, `protonauth`, `protonmail` (legacy wrappers → `pr
 - **VPN:** WireGuard tools (`proton vpn setup`; macOS Homebrew `wireguard-tools` + sudo; Windows winget WireGuard + Admin). Close the Proton VPN desktop app before connect.
 - **Authenticator CAPTCHA (macOS):** native WKWebView helper (`bun run build:captcha` if postinstall skipped; needs Xcode CLT). Solve CAPTCHA in that window, not Safari.
 - Optional: [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`)
-- **Mail:** [Proton Mail Bridge](https://proton.me/mail/bridge) running locally; Bridge password from Bridge → Settings (not account password; not dual-mint sign-in)
 
 ## Quick start
 
@@ -129,32 +129,6 @@ proton auth status --output json
 
 CAPTCHA (if required) needs a human on macOS; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`.
 
-## Mail (`proton mail …`)
-
-Mail uses Bridge IMAP/SMTP — **not** Proton Mail API crypto or dual-mint sign-in.
-
-```bash
-proton mail setup
-proton mail doctor
-proton mail status --output json
-proton mail inbox
-proton mail get INBOX::25642
-proton mail send --to a@b.com --subject hi --body test --dry-run
-proton mail move INBOX::25642 --to Archive
-proton mail drafts list
-```
-
-| Env / flag | Meaning |
-|---|---|
-| `PROTONMAIL_PASSWORD` | Bridge password |
-| `PROTONMAIL_PASS` | Pass ref for Bridge password |
-| `PROTONMAIL_READ_ONLY=1` | Block mutating commands |
-| `PROTONMAIL_ALLOW_SEND=false` | Block send/reply/forward |
-| `PROTONMAIL_CONFIRM_DESTRUCTIVE=1` | Require confirm for destructive ops |
-| `--output json` / `PROTONMAIL_AGENT=1` | Agent/scripting mode |
-
-Bare `proton` TUI includes a **Mail** menu (setup/doctor/status/inbox). Send/organize from CLI with `--dry-run` first.
-
 ## Agent / scripting
 
 ```bash
@@ -177,8 +151,6 @@ proton auth code github --output json
 | `PROTON_AGENT=1` | Root agent-friendly (no accidental TUI) |
 | `PROTONVPN_AGENT=1` | VPN agent mode |
 | `PROTONAUTH_AGENT=1` / `CI=1` | Auth agent mode (default JSON; no CAPTCHA window / TUI) |
-| `PROTONMAIL_AGENT=1` / `PROTONMAIL_OUTPUT=json` | Mail agent mode |
-| `PROTONMAIL_READ_ONLY` / `PROTONMAIL_ALLOW_SEND` | Mail safety gates |
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 
@@ -202,7 +174,6 @@ bun add -g @bkramer/proton-cli@latest
   sessions/authenticator.json
   vpn/                 # WireGuard conf, caches
   authenticator/       # local entry cache
-  mail/                  # Bridge IMAP/SMTP settings
 ```
 
 Never log passwords, TOTP codes, or resolved `pass://` secrets.
