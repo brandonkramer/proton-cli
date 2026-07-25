@@ -8,24 +8,18 @@ import { CliError } from "../src/util/errors.ts";
 
 describe("normalizePassItemRef", () => {
   test("accepts pass://Vault/Item", () => {
-    expect(normalizePassItemRef("pass://Personal/Proton")).toBe(
-      "pass://Personal/Proton",
-    );
+    expect(normalizePassItemRef("pass://Vault/Item")).toBe("pass://Vault/Item");
   });
 
   test("adds pass:// when missing", () => {
-    expect(normalizePassItemRef("Personal/Proton")).toBe(
-      "pass://Personal/Proton",
-    );
+    expect(normalizePassItemRef("Vault/Item")).toBe("pass://Vault/Item");
   });
 
   test("strips trailing field segment", () => {
-    expect(normalizePassItemRef("pass://Personal/Proton/password")).toBe(
-      "pass://Personal/Proton",
+    expect(normalizePassItemRef("pass://Vault/Item/password")).toBe(
+      "pass://Vault/Item",
     );
-    expect(normalizePassItemRef("Personal/Proton/totp")).toBe(
-      "pass://Personal/Proton",
-    );
+    expect(normalizePassItemRef("Vault/Item/totp")).toBe("pass://Vault/Item");
   });
 
   test("keeps vault names that contain spaces", () => {
@@ -35,7 +29,7 @@ describe("normalizePassItemRef", () => {
   });
 
   test("rejects incomplete refs", () => {
-    expect(() => normalizePassItemRef("pass://Personal")).toThrow(CliError);
+    expect(() => normalizePassItemRef("pass://Vault")).toThrow(CliError);
     expect(() => normalizePassItemRef("")).toThrow(CliError);
   });
 });

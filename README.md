@@ -203,18 +203,18 @@ If you use [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`
 
 ```bash
 pass-cli login   # once, if needed
-proton account pass://Personal/Proton   # recommended: persist default login + TOTP
+proton account pass://Vault/Item   # recommended: persist default login + TOTP
 proton signin                           # uses saved account ref
 # or one-shot / env:
-proton signin --pass "pass://Personal/Proton"
-export PROTON_PASS="pass://Personal/Proton"
+proton signin --pass "pass://Vault/Item"
+export PROTON_PASS="pass://Vault/Item"
 ```
 
 Also supported:
 
 ```bash
-export PROTON_PASSWORD='pass://Personal/Proton/password'
-export PROTON_TOTP='pass://Personal/Proton/totp'   # optional
+export PROTON_PASSWORD='pass://Vault/Item/password'
+export PROTON_TOTP='pass://Vault/Item/totp'   # optional
 pass-cli run -- proton signin
 ```
 

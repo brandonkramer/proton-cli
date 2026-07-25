@@ -148,12 +148,12 @@ describe("paths + dual-mint sign-in", () => {
     const root = await mkdtemp(join(tmpdir(), "proton-cli-"));
     setConfigRootForTests(root);
 
-    await saveAccountPassRef("pass://Personal/Proton");
+    await saveAccountPassRef("pass://Vault/Item");
     await saveProductSession("vpn", fakeSession("vpn-uid"), "alice");
     await clearAllSessions();
 
     const account = await loadAccount();
-    expect(account?.passRef).toBe("pass://Personal/Proton");
+    expect(account?.passRef).toBe("pass://Vault/Item");
     expect(account?.username).toBe("");
     expect(await loadProductSession("vpn")).toBeNull();
 

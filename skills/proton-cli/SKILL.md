@@ -68,7 +68,7 @@ VPN and Authenticator use **different API hosts**, so tokens are not shared. `pr
 
 ```bash
 proton signin
-proton signin --pass "pass://Personal/Proton"
+proton signin --pass "pass://Vault/Item"
 proton signin --products vpn
 proton signin --products auth
 proton signin --products ctc      # contacts only
@@ -76,7 +76,7 @@ proton signin --products drive    # drive only
 proton signin --products set      # settings only (alias: settings)
 proton signin --products mail     # mail only
 proton signin --partial-ok          # keep successes if one product fails
-export PROTON_PASS="pass://Personal/Proton"
+export PROTON_PASS="pass://Vault/Item"
 export PROTON_USERNAME=…            # or PROTON_PASSWORD / PROTON_TOTP
 proton status
 proton signout
@@ -86,13 +86,13 @@ proton signout
 
 ```bash
 pass-cli login   # once, if needed
-proton signin --pass "pass://Personal/Proton"
+proton signin --pass "pass://Vault/Item"
 # or:
-export PROTON_PASS="pass://Personal/Proton"
+export PROTON_PASS="pass://Vault/Item"
 proton signin
 # or field refs:
-export PROTON_PASSWORD='pass://Personal/Proton/password'
-export PROTON_TOTP='pass://Personal/Proton/totp'
+export PROTON_PASSWORD='pass://Vault/Item/password'
+export PROTON_TOTP='pass://Vault/Item/totp'
 pass-cli run -- proton signin
 ```
 

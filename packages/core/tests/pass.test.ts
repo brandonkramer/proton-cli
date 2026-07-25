@@ -14,11 +14,11 @@ import { saveAccountPassRef } from "../src/store.ts";
 
 describe("pass helpers", () => {
   test("normalizePassItemRef accepts pass:// and bare refs", () => {
-    expect(normalizePassItemRef("pass://Personal/Proton")).toBe(
-      "pass://Personal/Proton",
+    expect(normalizePassItemRef("pass://Vault/Item")).toBe(
+      "pass://Vault/Item",
     );
-    expect(normalizePassItemRef("Personal/Proton/password")).toBe(
-      "pass://Personal/Proton",
+    expect(normalizePassItemRef("Vault/Item/password")).toBe(
+      "pass://Vault/Item",
     );
   });
 
@@ -68,8 +68,8 @@ describe("pass helpers", () => {
       delete process.env.PROTON_PASS;
       delete process.env.PROTONVPN_PASS;
       delete process.env.PROTONAUTH_PASS;
-      await saveAccountPassRef("pass://Personal/Proton");
-      expect(await resolvePassRef()).toBe("pass://Personal/Proton");
+      await saveAccountPassRef("pass://Vault/Item");
+      expect(await resolvePassRef()).toBe("pass://Vault/Item");
       expect(await resolvePassRef("pass://Other/Item")).toBe("pass://Other/Item");
     } finally {
       setConfigRootForTests(null);
