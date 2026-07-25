@@ -4,10 +4,11 @@ import {
   loginWithPassword,
   normalizeUsername,
   persistSession,
+  sessionNeedsTotpUpgrade,
 } from "./proton/auth.ts";
 
 /**
- * Dual-mint authenticator for Contacts (mail-api.proton.me /contacts/v4).
+ * Dual-mint authenticator for Contacts API (mail-api.proton.me).
  * Persists product-local + shared session via store.saveSession.
  */
 export const authenticateContacts: ProductAuthenticator = async (credentials) => {
@@ -17,15 +18,16 @@ export const authenticateContacts: ProductAuthenticator = async (credentials) =>
     username,
     password: credentials.password,
     totp,
-    refreshTotp: credentials.refreshTotp
-      ? async () => {
-          totp = await credentials.refreshTotp!(totp);
-          return totp;
-        }
-      : undefined,
+    refreshTotp: credentials.refreshTotp,
   });
 
-  if (totp) {
+  if (sessionNeedsTotpUpgrade(session)) {
+    if (credentials.refreshTotp) {
+      totp = await credentials.refreshTotp(totp);
+    }
+    if (!totp) {
+      throw new Error("2FA code required.");
+    }
     session = await ensureFullScope(session, totp);
   }
 

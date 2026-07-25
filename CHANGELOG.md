@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mail live send supports `--attach` (encrypt + multipart upload to draft, then send packages)
 
 ### Fixed
+- After CAPTCHA, complete password login first, then unlock 2FA with a fresh Pass TOTP via `/auth/v4/2fa` (avoids burning codes / HV token expiry)
 - After CAPTCHA, TUI sign-in refreshes TOTP from Pass (waits for next 30s window if needed) instead of prompting
 - Pass refs with duplicate item titles prefer the login that has TOTP (and save a stable share/item ID ref)
 - Sign-in prompts for TOTP when the configured Pass item has no totp field (instead of failing with "2FA code required")

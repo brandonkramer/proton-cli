@@ -137,7 +137,7 @@ async function mintProduct(
             ...credentials,
             refreshTotp: async (previous?: string) => {
               if (passRef) {
-                ui.setNote("CAPTCHA done — fetching fresh TOTP from Pass…");
+                ui.setNote("Unlocking 2FA — fetching fresh TOTP from Pass…");
                 const fromPass = await resolveFreshPassTotp(passRef, {
                   avoidCode: previous ?? credentials.totp,
                 });
@@ -145,8 +145,8 @@ async function mintProduct(
               }
               return (
                 (await inkPromptTotp(
-                  `Fresh TOTP for ${productLabel(product)}`,
-                  "CAPTCHA done — enter a new code (the previous one expired)",
+                  `TOTP for ${productLabel(product)}`,
+                  "Enter a fresh authenticator code to finish sign-in",
                 )) || undefined
               );
             },

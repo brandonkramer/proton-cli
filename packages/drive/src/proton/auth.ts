@@ -117,9 +117,6 @@ async function srpAuthAttempt(options: {
   humanVerification?: HumanVerificationResult;
 }): Promise<AuthAttemptResult> {
   const info = await getAuthInfo(options.username);
-  if (authInfoRequiresTotp(info) && !options.totp) {
-    throw new CliError("2FA code required.");
-  }
 
   const proofs = await getSrp(
     {
@@ -184,17 +181,11 @@ export async function loginWithPassword(options: {
       throw error;
     }
 
-    // Fresh SRP + CAPTCHA token. Re-prompt TOTP — the pre-CAPTCHA code is stale.
-    let totp = options.totp;
-    if (options.refreshTotp) {
-      totp = await options.refreshTotp(totp);
-    } else {
-      // Do not replay a burned TOTP (maps to misleading "wrong password").
-      totp = undefined;
-    }
+    // Retry password + CAPTCHA without TOTP. Complete 2FA after login via
+    // /auth/v4/2fa with a fresh code (TOTP must not wait while HV token ages).
     ({ status, data, expectedServerProof } = await srpAuthAttempt({
       ...options,
-      totp,
+      totp: undefined,
       humanVerification: hv,
     }));
   }
@@ -211,8 +202,7 @@ export async function loginWithPassword(options: {
       );
     }
     const afterCaptcha =
-      "Authentication failed after CAPTCHA. If you use 2FA, enter a fresh TOTP and retry — " +
-      "codes expire while solving CAPTCHA.";
+      "Authentication failed after CAPTCHA. Retry sign-in; complete the challenge again if prompted.";
     const detail = messageForApiCode(
       data.Code,
       data.Error ?? `Authentication failed (HTTP ${status}).`,
@@ -238,6 +228,10 @@ export async function ensureFullScope(
   }
   session.Scopes = await submit2fa(session, totp);
   return session;
+}
+
+export function sessionNeedsTotpUpgrade(session: Session): boolean {
+  return hasScope(session, "twofactor") && !hasScope(session, "full");
 }
 
 export function normalizeUsername(raw: string): string {

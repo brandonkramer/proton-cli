@@ -18,15 +18,13 @@ export const authenticateVpn: ProductAuthenticator = async (credentials) => {
     username,
     password: credentials.password,
     totp,
-    refreshTotp: credentials.refreshTotp
-      ? async () => {
-          totp = await credentials.refreshTotp!(totp);
-          return totp;
-        }
-      : undefined,
+    refreshTotp: credentials.refreshTotp,
   });
 
   if (sessionNeedsVpnTotp(session)) {
+    if (credentials.refreshTotp) {
+      totp = await credentials.refreshTotp(totp);
+    }
     if (!totp) {
       throw new Error("2FA code required to unlock VPN scope.");
     }
