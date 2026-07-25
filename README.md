@@ -178,18 +178,23 @@ E2EE list/read/search/send/organize via Proton Mail REST API (not Bridge IMAP/SM
 proton mail status
 proton mail list
 proton mail list --label sent --unread
-proton mail read MESSAGE_ID
+proton mail read MESSAGE_ID              # HTML → plain text in the terminal
+proton mail read MESSAGE_ID --raw        # keep original HTML
 proton mail search "invoice"
 proton mail send --to alice@example.com --subject "Hi" --body "Hello"
+proton mail send --to alice@example.com --subject "Hi" --body "Hello" \
+  --attach ./file.pdf --attach ./notes.txt
 proton mail organize read MESSAGE_ID
 proton mail organize trash MESSAGE_ID
 proton mail labels list
 proton mail addresses list
 ```
 
-Bare `proton` (TTY) opens a nested Mail menu (list inbox / search / status). Prefer `proton mail … --json` for scripting. Read/send/decrypt need account password via `--pass`, `--password`, or `PROTON_PASSWORD`.
+Bare `proton` (TTY) opens a nested Mail menu (list inbox / search / compose / status). From a message you can reply / reply-all / forward. Compose can pick **To** from Contacts or type an address, and accept optional local attachment paths. Prefer `proton mail … --json` for scripting.
 
-Sign in with `proton signin --products mail|all`.
+Read/send/decrypt need the account password via saved `proton account` / `PROTON_PASS` / `--pass`, or `--password` / `PROTON_PASSWORD`.
+
+Sign in with `proton signin --products mail|all` (or full `proton signin`; Mail shares its session with Contacts/Settings).
 
 ## Proton Pass (optional)
 
@@ -197,10 +202,11 @@ If you use [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`
 
 ```bash
 pass-cli login   # once, if needed
+proton account pass://Personal/Proton   # recommended: persist default login + TOTP
+proton signin                           # uses saved account ref
+# or one-shot / env:
 proton signin --pass "pass://Personal/Proton"
-# or:
 export PROTON_PASS="pass://Personal/Proton"
-proton signin
 ```
 
 Also supported:
@@ -211,7 +217,7 @@ export PROTON_TOTP='pass://Personal/Proton/totp'   # optional
 pass-cli run -- proton signin
 ```
 
-`Vault/Item` works too (`pass://` prefix optional). Env aliases: `PROTON_PASS`, `PROTONVPN_PASS`, `PROTONAUTH_PASS`, `PROTON_USERNAME`, `PROTON_PASSWORD`, `PROTON_TOTP`. Interactive prompts remain the default when Pass is unset. Never log resolved secrets. With 2FA, `--pass` is ideal because Pass can supply a **new** TOTP for each product mint.
+`Vault/Item` works too (`pass://` prefix optional). If several items share a title, the CLI prefers the one that has TOTP and stores a stable share/item ID. Env aliases: `PROTON_PASS`, `PROTONVPN_PASS`, `PROTONAUTH_PASS`, `PROTON_USERNAME`, `PROTON_PASSWORD`, `PROTON_TOTP`. Interactive prompts remain the default when Pass is unset. Never log resolved secrets. With 2FA, Pass (via `proton account` / `--pass`) supplies a **new** TOTP for each product mint.
 
 ## Agents / scripting
 
@@ -256,11 +262,11 @@ CAPTCHA never opens a window in agent mode (`captcha_required` — sign in inter
 | `packages/mail` | `@bkramer/proton-mail` | E2EE Mail list/read/search/send (`proton mail …`) |
 | `src/` | root bins | `proton` router + legacy wrappers |
 
-Config root: `~/.config/proton-cli/` with per-product sessions under `sessions/`.
+Config root: `~/.config/proton-cli/` (`account.json` for the saved Pass ref; per-product sessions under `sessions/`).
 
 ## Shared session model
 
-Each product uses **different API hosts and app-version headers**, so tokens are not shared across products. `proton signin` still feels like one login: credentials are collected once, then each product mints and stores its own session.
+Most products use **different API hosts**, so they mint separate sessions. Exception: **Contacts, Settings, and Mail** all use `mail-api.proton.me` and share one session after a successful mint for any of them. `proton signin` still feels like one login: credentials (and Pass TOTP) are collected once, CAPTCHA is solved in the native window when required, then each remaining host is minted (with a fresh TOTP per mint).
 
 ## Agent skill
 
