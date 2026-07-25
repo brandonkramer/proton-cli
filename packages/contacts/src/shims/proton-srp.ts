@@ -1,4 +1,4 @@
-import { ensureCryptoProxy } from "@bkramer/proton-core";
+import { bootstrapCryptoProxy, ensureCryptoProxy } from "@bkramer/proton-core";
 
 export interface AuthInfo {
   Version: number;
@@ -31,6 +31,7 @@ export async function getSrp(
   credentials: AuthCredentials,
   authVersion?: number,
 ): Promise<SrpProofs> {
+  await bootstrapCryptoProxy((id) => import(id));
   await ensureCryptoProxy();
   const srpId = "@protontech/" + "crypto/srp";
   const mod = (await import(srpId)) as { getSrp: GetSrp };

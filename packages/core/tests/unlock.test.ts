@@ -13,14 +13,17 @@ const mockComputeKeyPassword = mock(
   async (password: string, salt: string) => `${password}:${salt}`,
 );
 
+const mockCryptoProxy = (): CryptoProxyLike => ({
+  setEndpoint: () => {},
+  importPrivateKey: mockImportPrivateKey,
+  importPublicKey: mockImportPublicKey,
+  encryptMessage: async () => ({ message: new Uint8Array() }),
+  decryptMessage: async () => ({ data: new Uint8Array() }),
+});
+
 mock.module("../src/crypto.ts", () => ({
-  getCryptoProxy: async (): Promise<CryptoProxyLike> => ({
-    setEndpoint: () => {},
-    importPrivateKey: mockImportPrivateKey,
-    importPublicKey: mockImportPublicKey,
-    encryptMessage: async () => ({ message: new Uint8Array() }),
-    decryptMessage: async () => ({ data: new Uint8Array() }),
-  }),
+  bootstrapCryptoProxy: async (): Promise<CryptoProxyLike> => mockCryptoProxy(),
+  getCryptoProxy: async (): Promise<CryptoProxyLike> => mockCryptoProxy(),
   ensureCryptoProxy: async (): Promise<void> => {},
 }));
 

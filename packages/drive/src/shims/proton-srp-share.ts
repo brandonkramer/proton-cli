@@ -5,7 +5,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { ensureCryptoProxy } from "@bkramer/proton-core";
+import { bootstrapCryptoProxy, ensureCryptoProxy } from "@bkramer/proton-core";
 
 export interface ShareHashPasswordOptions {
   version: number;
@@ -32,6 +32,7 @@ export interface ShareSrpModule {
 let shareSrpPromise: Promise<ShareSrpModule> | undefined;
 
 async function loadShareSrpModule(): Promise<ShareSrpModule> {
+  await bootstrapCryptoProxy((id) => import(id));
   await ensureCryptoProxy();
   const srpId = "@protontech/" + "crypto/srp";
   const require = createRequire(import.meta.url);

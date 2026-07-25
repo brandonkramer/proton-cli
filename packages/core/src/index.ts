@@ -26,6 +26,7 @@ export {
 } from "./store.ts";
 export { dualMintSignIn, type DualSignInOptions } from "./signin.ts";
 export {
+  bootstrapCryptoProxy,
   ensureCryptoProxy,
   getCryptoProxy,
   type CryptoProxyLike,
