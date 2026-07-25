@@ -1,6 +1,6 @@
 {
   "name": "proton",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Proton CLI via thin MCP tools — status, VPN, Authenticator codes, Mail/Drive list, plus proton_cli for full CLI coverage",
   "author": {
     "name": "brandonkramer",

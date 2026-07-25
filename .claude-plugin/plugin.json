@@ -1,6 +1,6 @@
 {
   "name": "proton",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Proton CLI + MCP tools — VPN, Authenticator, Mail, Drive, Calendar, Contacts, Settings, plus proton_cli for full coverage",
   "author": {
     "name": "brandonkramer",
