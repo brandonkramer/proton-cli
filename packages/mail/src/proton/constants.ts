@@ -8,7 +8,8 @@ export const AUTH_REFRESH_PATH = "/auth/v4/refresh";
 export const USERS_PATH = "/core/v4/users";
 export const KEYS_SALTS_PATH = "/core/v4/keys/salts";
 export const CORE_AUTH_INFO_PATH = "/core/v4/auth/info";
-export const USERS_PASSWORD_PATH = "/core/v4/users/password";
+/** Unlock locked session scope (required for `/keys/salts`). Not `/users/password`. */
+export const USERS_UNLOCK_PATH = "/core/v4/users/unlock";
 export const ADDRESSES_PATH = "/core/v4/addresses";
 export const LABELS_PATH = "/core/v4/labels";
 export const KEYS_ALL_PATH = "/core/v4/keys/all";

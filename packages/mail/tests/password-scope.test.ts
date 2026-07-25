@@ -12,7 +12,7 @@ mock.module("../src/shims/proton-srp.ts", () => ({ getSrp }));
 const { unlockPasswordScope } = await import("../src/crypto/password-scope.ts");
 
 describe("unlockPasswordScope", () => {
-  test("POSTs auth/info then PUTs users/password with SRP proofs", async () => {
+  test("POSTs auth/info then PUTs users/unlock with SRP proofs", async () => {
     const calls: Array<{ path: string; method?: string; body?: unknown }> = [];
     const fetchImpl = (async (input: string | URL | Request, init?: RequestInit) => {
       const url = String(input);
@@ -33,7 +33,7 @@ describe("unlockPasswordScope", () => {
           { status: 200 },
         );
       }
-      if (path.includes("/core/v4/users/password")) {
+      if (path.includes("/core/v4/users/unlock")) {
         return new Response(JSON.stringify({ Code: 1000 }), { status: 200 });
       }
       return new Response(JSON.stringify({ Code: 0, Error: "unexpected" }), {
@@ -62,10 +62,10 @@ describe("unlockPasswordScope", () => {
       {
         path: "/core/v4/auth/info",
         method: "POST",
-        body: { Username: "alice" },
+        body: { Username: "alice", Intent: "Proton" },
       },
       {
-        path: "/core/v4/users/password",
+        path: "/core/v4/users/unlock",
         method: "PUT",
         body: {
           ClientProof: "proof",
