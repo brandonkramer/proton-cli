@@ -55,11 +55,24 @@ function MessageListApp({
   );
 }
 
-function MessageDetailApp({ message }: { message: DecryptedMessage }): ReactNode {
+export type MessageDetailAction =
+  | "close"
+  | "reply"
+  | "reply-all"
+  | "forward";
+
+function MessageDetailApp({
+  message,
+  onAction,
+}: {
+  message: DecryptedMessage;
+  onAction: (action: MessageDetailAction) => void;
+}): ReactNode {
   const { exit } = useApp();
 
   useInput((input, key) => {
     if (key.escape || input === "q") {
+      onAction("close");
       exit();
     }
   });
@@ -92,14 +105,27 @@ function MessageDetailApp({ message }: { message: DecryptedMessage }): ReactNode
               : "unknown"}
         </Text>
       </Box>
-      <Box flexDirection="column">
+      <Box flexDirection="column" marginBottom={1}>
         <Text>
           {formatMessageBodyForDisplay(message.body, message.mimeType) ||
             "(empty body)"}
         </Text>
       </Box>
+      <Select
+        visibleOptionCount={5}
+        options={[
+          { label: "Reply", value: "reply" },
+          { label: "Reply all", value: "reply-all" },
+          { label: "Forward", value: "forward" },
+          { label: "Close", value: "close" },
+        ]}
+        onChange={(value) => {
+          onAction(value as MessageDetailAction);
+          exit();
+        }}
+      />
       <Box marginTop={1}>
-        <Text dimColor>q / Esc close · CLI: `proton mail read {message.id}`</Text>
+        <Text dimColor>Esc/q close · enter to act</Text>
       </Box>
     </Box>
   );
@@ -162,6 +188,10 @@ export async function pickMessage(
   });
 }
 
-export async function showMessageDetail(message: DecryptedMessage): Promise<void> {
-  await renderUntilExit(<MessageDetailApp message={message} />);
+export async function showMessageDetail(
+  message: DecryptedMessage,
+): Promise<MessageDetailAction> {
+  return renderPrompt<MessageDetailAction>(({ resolve }) => (
+    <MessageDetailApp message={message} onAction={resolve} />
+  ));
 }

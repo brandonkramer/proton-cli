@@ -10,6 +10,7 @@ export type TuiIntent =
   | { type: "signout" }
   | { type: "list" }
   | { type: "search" }
+  | { type: "compose" }
   | { type: "status" };
 
 interface HomeSnapshot {
@@ -64,6 +65,7 @@ export async function showHome(): Promise<TuiIntent> {
       const options = [
         { label: "List inbox", value: "list" },
         { label: "Search mail", value: "search" },
+        { label: "Compose", value: "compose" },
         { label: "Status", value: "status" },
         ...(signedIn ? [{ label: "Sign out", value: "signout" }] : []),
         { label: "Back", value: "quit" },
@@ -98,6 +100,9 @@ export async function showHome(): Promise<TuiIntent> {
                     break;
                   case "search":
                     resolve({ type: "search" });
+                    break;
+                  case "compose":
+                    resolve({ type: "compose" });
                     break;
                   case "status":
                     resolve({ type: "status" });

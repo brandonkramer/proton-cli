@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Mail TUI Compose (to/subject/body) plus Reply / Reply all / Forward after reading a message
+
 ### Fixed
 - Parent TUI multi-product sign-in keeps successful sessions when a later product fails (e.g. Drive CAPTCHA) and continues minting the rest
 - SRP/CryptoProxy init no longer hits "endpoint not initialized" when Bun nested a second `@protontech/crypto` under `packages/*/node_modules`

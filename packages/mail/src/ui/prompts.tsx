@@ -1,5 +1,5 @@
-import { Box, Text } from "ink";
-import { PasswordInput, TextInput } from "@inkjs/ui";
+import { Box, Text, useApp, useInput } from "ink";
+import { PasswordInput, Select, TextInput } from "@inkjs/ui";
 import type { ReactNode } from "react";
 import { Brand } from "./brand.tsx";
 import { renderPrompt } from "./render.tsx";
@@ -78,4 +78,63 @@ export async function inkPromptPassword(
       </Box>
     </PromptFrame>
   ));
+}
+
+/** Optional text — empty submit is allowed (returns ""). */
+export async function inkPromptOptionalText(
+  label: string,
+  options: { placeholder?: string; defaultValue?: string; hint?: string } = {},
+): Promise<string> {
+  return renderPrompt<string>(({ resolve }) => (
+    <PromptFrame title={label} hint={options.hint}>
+      <Box flexDirection="column">
+        <Text>
+          <Text color="cyan">› </Text>
+          {label}
+        </Text>
+        <TextInput
+          placeholder={options.placeholder ?? "(optional)"}
+          defaultValue={options.defaultValue}
+          onSubmit={(value) => resolve(value.trim())}
+        />
+      </Box>
+    </PromptFrame>
+  ));
+}
+
+export async function inkPromptSelect(
+  title: string,
+  options: Array<{ label: string; value: string }>,
+  footer = "Esc/q cancel",
+): Promise<string | null> {
+  return renderPrompt<string | null>(({ resolve }) => {
+    function Picker(): ReactNode {
+      const { exit } = useApp();
+
+      useInput((input, key) => {
+        if (key.escape || input === "q") {
+          resolve(null);
+          exit();
+        }
+      });
+
+      return (
+        <PromptFrame title={title}>
+          <Select
+            visibleOptionCount={Math.min(10, options.length)}
+            options={options}
+            onChange={(value) => {
+              resolve(value);
+              exit();
+            }}
+          />
+          <Box marginTop={1}>
+            <Text dimColor>{footer}</Text>
+          </Box>
+        </PromptFrame>
+      );
+    }
+
+    return <Picker />;
+  });
 }
