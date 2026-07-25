@@ -7,7 +7,7 @@ import {
 } from "./proton/auth.ts";
 
 /**
- * Dual-mint authenticator for Contacts API (contacts-api.proton.me).
+ * Dual-mint authenticator for Contacts (mail-api.proton.me /contacts/v4).
  * Persists product-local + shared session via store.saveSession.
  */
 export const authenticateContacts: ProductAuthenticator = async (credentials) => {

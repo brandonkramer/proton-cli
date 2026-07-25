@@ -20,9 +20,9 @@ const SAMPLE_ARMORED_KEY = [
 ].join("\n");
 
 const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
-  const url = String(input);
-  const path = url.replace("https://contacts-api.proton.me", "").replace(/\?.*$/, "");
-  const query = url.includes("?") ? url.slice(url.indexOf("?")) : "";
+  const parsed = new URL(String(input));
+  const path = parsed.pathname;
+  const query = parsed.search;
   const method = init?.method ?? "GET";
   const body = init?.body ? JSON.parse(String(init.body)) : undefined;
   fetchCalls.push({ path: path + query, method, body });
