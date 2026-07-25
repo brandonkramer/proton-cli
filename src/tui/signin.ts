@@ -8,7 +8,7 @@ import {
   dualMintSignIn,
   PRODUCTS,
   resolvePassLogin,
-  resolvePassRefFromEnv,
+  resolvePassRef,
   resolvePassTotp,
   saveAccount,
   type ProductId,
@@ -49,7 +49,7 @@ async function collectBaseCredentials(): Promise<{
   credentials: SignInCredentials;
   passRef?: string;
 }> {
-  const passRef = resolvePassRefFromEnv();
+  const passRef = await resolvePassRef();
   if (passRef) {
     const login = await runTask({
       title: "Sign in",

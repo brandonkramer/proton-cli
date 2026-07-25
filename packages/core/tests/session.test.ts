@@ -8,6 +8,8 @@ import {
   loadAccount,
   loadProductSession,
   parseProductList,
+  saveAccountPassRef,
+  saveProductSession,
   sessionPath,
   setConfigRootForTests,
   type Session,
@@ -136,6 +138,22 @@ describe("paths + dual-mint sign-in", () => {
     expect(await loadProductSession("vpn")).toBeNull();
     expect(await loadProductSession("authenticator")).toBeNull();
     expect(await loadAccount()).toBeNull();
+
+    await rm(root, { recursive: true, force: true });
+  });
+
+  test("sign-out preserves saved Pass reference", async () => {
+    const root = await mkdtemp(join(tmpdir(), "proton-cli-"));
+    setConfigRootForTests(root);
+
+    await saveAccountPassRef("pass://Personal/Proton");
+    await saveProductSession("vpn", fakeSession("vpn-uid"), "alice");
+    await clearAllSessions();
+
+    const account = await loadAccount();
+    expect(account?.passRef).toBe("pass://Personal/Proton");
+    expect(account?.username).toBe("");
+    expect(await loadProductSession("vpn")).toBeNull();
 
     await rm(root, { recursive: true, force: true });
   });

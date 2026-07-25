@@ -16,12 +16,14 @@ export {
 } from "./paths.ts";
 export {
   clearAccount,
+  clearAccountPassRef,
   clearAllSessions,
   clearProductSession,
   listSavedSessions,
   loadAccount,
   loadProductSession,
   saveAccount,
+  saveAccountPassRef,
   saveProductSession,
 } from "./store.ts";
 export { dualMintSignIn, type DualSignInOptions } from "./signin.ts";
@@ -45,6 +47,7 @@ export {
   normalizePassItemRef,
   PASS_ENV_CANDIDATES,
   resolvePassLogin,
+  resolvePassRef,
   resolvePassRefFromEnv,
   resolvePassTotp,
   type PassLoginFields,

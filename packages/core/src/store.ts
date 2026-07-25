@@ -48,10 +48,12 @@ async function unlinkIfExists(path: string): Promise<void> {
 }
 
 export async function saveAccount(username: string, products: ProductId[]): Promise<void> {
+  const existing = await loadAccount();
   const payload: AccountRecord = {
     username,
     products,
     savedAt: new Date().toISOString(),
+    ...(existing?.passRef ? { passRef: existing.passRef } : {}),
   };
   await writeSecureJson(accountPath(), payload);
 }
@@ -60,7 +62,46 @@ export async function loadAccount(): Promise<AccountRecord | null> {
   return readJsonFile<AccountRecord>(accountPath());
 }
 
+/** Persist default Pass login item; preserves username/products when present. */
+export async function saveAccountPassRef(passRef: string): Promise<AccountRecord> {
+  const existing = await loadAccount();
+  const payload: AccountRecord = {
+    username: existing?.username ?? "",
+    products: existing?.products ?? [],
+    savedAt: existing?.savedAt ?? new Date().toISOString(),
+    passRef,
+  };
+  await writeSecureJson(accountPath(), payload);
+  return payload;
+}
+
+/** Remove saved Pass reference; keeps signed-in username/products when present. */
+export async function clearAccountPassRef(): Promise<void> {
+  const existing = await loadAccount();
+  if (!existing) return;
+  if (!existing.username && existing.products.length === 0) {
+    await unlinkIfExists(accountPath());
+    return;
+  }
+  const { passRef: _removed, ...rest } = existing;
+  await writeSecureJson(accountPath(), rest);
+}
+
+/**
+ * Clear signed-in account metadata. Keeps `passRef` so the next sign-in can
+ * reuse the configured Pass item without re-running `proton account`.
+ */
 export async function clearAccount(): Promise<void> {
+  const existing = await loadAccount();
+  if (existing?.passRef) {
+    await writeSecureJson(accountPath(), {
+      username: "",
+      products: [],
+      savedAt: new Date().toISOString(),
+      passRef: existing.passRef,
+    });
+    return;
+  }
   await unlinkIfExists(accountPath());
 }
 

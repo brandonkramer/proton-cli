@@ -34,6 +34,7 @@ export function registerStatus(program: Command): void {
       const payload = {
         version: 1,
         username: account?.username ?? sessions[0]?.username ?? null,
+        passRef: account?.passRef ?? null,
         products: byProduct,
         note: "Sessions are per API host; tokens are not shared across products.",
       };
@@ -44,6 +45,9 @@ export function registerStatus(program: Command): void {
       }
 
       console.log(`Account: ${payload.username ?? "(not signed in)"}`);
+      console.log(
+        `Pass: ${payload.passRef ?? "(not set — proton account pass://Vault/Item)"}`,
+      );
       for (const product of PRODUCTS) {
         const info = byProduct[product] as {
           signedIn: boolean;

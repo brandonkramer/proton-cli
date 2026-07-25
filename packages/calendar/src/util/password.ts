@@ -1,4 +1,7 @@
-import { resolvePassLogin } from "@bkramer/proton-core";
+import {
+  resolvePassLogin,
+  resolvePassRef,
+} from "@bkramer/proton-core";
 
 export async function resolveAccountPassword(options: {
   password?: string;
@@ -6,24 +9,16 @@ export async function resolveAccountPassword(options: {
 }): Promise<string> {
   if (options.password) return options.password;
 
-  const fromEnv =
-    process.env.PROTON_PASSWORD ??
-    process.env.PROTON_PASS ??
-    process.env.PROTONVPN_PASS;
-  if (fromEnv) {
-    if (fromEnv.startsWith("pass://") || !fromEnv.includes("@")) {
-      const login = await resolvePassLogin(fromEnv);
-      if (login.password) return login.password;
-    }
-    return fromEnv;
-  }
+  const fromEnv = process.env.PROTON_PASSWORD?.trim();
+  if (fromEnv) return fromEnv;
 
-  if (options.pass) {
-    const login = await resolvePassLogin(options.pass);
+  const passRef = await resolvePassRef(options.pass);
+  if (passRef) {
+    const login = await resolvePassLogin(passRef);
     if (login.password) return login.password;
   }
 
   throw new Error(
-    "Account password required. Use --password, --pass pass://Vault/Item, or set PROTON_PASSWORD.",
+    "Account password required. Use --password, --pass pass://Vault/Item, or `proton account`.",
   );
 }

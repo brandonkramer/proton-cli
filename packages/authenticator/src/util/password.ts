@@ -1,8 +1,8 @@
+import { resolvePassRef } from "@bkramer/proton-core";
 import {
   PASSWORD_ENV,
   passwordFromEnv,
   resolvePassLogin,
-  resolvePassRefFromEnv,
   resolvePassTotp,
   totpFromEnv,
   usernameFromEnv,
@@ -17,7 +17,7 @@ export async function resolveAccountPassword(options: {
   const fromEnv = passwordFromEnv();
   if (fromEnv) return fromEnv;
 
-  const passRef = resolvePassRefFromEnv(options.passRef);
+  const passRef = await resolvePassRef(options.passRef);
   if (passRef) {
     const login = await resolvePassLogin(passRef);
     return login.password;
@@ -26,7 +26,7 @@ export async function resolveAccountPassword(options: {
   if (preferNonInteractive()) {
     throw new CliError(
       `Password required in non-interactive mode.\n` +
-        `Set $${PASSWORD_ENV} (or pass:// via pass-cli run), or pass --pass <ref>.`,
+        `Set $${PASSWORD_ENV}, \`proton account pass://…\`, or pass --pass <ref>.`,
       "password_required",
     );
   }
@@ -35,7 +35,7 @@ export async function resolveAccountPassword(options: {
   return inkPromptPassword("Proton password", {
     hint:
       options.promptHint ??
-      `Account password (Single Password Mode). Prefer Pass: export ${PASSWORD_ENV}='pass://…' && pass-cli run -- proton signin`,
+      `Account password (Single Password Mode). Prefer: proton account pass://Vault/Item`,
   });
 }
 
@@ -43,7 +43,7 @@ export async function resolveLoginIdentity(options: {
   usernameArg?: string;
   passRef?: string;
 }): Promise<{ username?: string; password?: string; passRef?: string }> {
-  const passRef = resolvePassRefFromEnv(options.passRef);
+  const passRef = await resolvePassRef(options.passRef);
   if (passRef) {
     const login = await resolvePassLogin(passRef);
     return {

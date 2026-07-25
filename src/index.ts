@@ -7,6 +7,7 @@ import { registerMailCommands } from "@bkramer/proton-mail";
 import { registerSettingsCommands } from "@bkramer/proton-settings";
 import { registerVpnCommands } from "@bkramer/proton-vpn";
 import { Command } from "commander";
+import { registerAccount } from "./commands/account.ts";
 import { registerSignin } from "./commands/signin.ts";
 import { registerSignout } from "./commands/signout.ts";
 import { registerStatus } from "./commands/status.ts";
@@ -48,7 +49,8 @@ if (argv.length === 0) {
     console.error(
       "proton: no command given.\n" +
         "Examples: proton status --json | proton vpn connect --country US | proton auth code github\n" +
-        "Sign in once: proton signin --pass pass://Vault/Item",
+        "Configure Pass: proton account pass://Vault/Item\n" +
+        "Sign in: proton signin",
     );
     process.exit(2);
   }
@@ -69,6 +71,7 @@ program
   .option("-y, --yes", "Non-interactive confirmations")
   .option("--sudo", "Allow interactive sudo for WireGuard (macOS)");
 
+registerAccount(program);
 registerSignin(program);
 registerSignout(program);
 registerStatus(program);

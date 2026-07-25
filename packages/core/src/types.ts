@@ -31,6 +31,11 @@ export interface AccountRecord {
   username: string;
   products: ProductId[];
   savedAt: string;
+  /**
+   * Default Proton Pass login item (`pass://Vault/Item`) for sign-in TOTP
+   * and account-password unlock. Not a secret — only a vault/item pointer.
+   */
+  passRef?: string;
 }
 
 export interface SignInCredentials {

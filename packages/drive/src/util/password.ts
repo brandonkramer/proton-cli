@@ -1,6 +1,6 @@
 import {
   resolvePassLogin,
-  resolvePassRefFromEnv,
+  resolvePassRef,
 } from "@bkramer/proton-core";
 import { CliError } from "./errors.ts";
 import { ExitCode } from "./exit.ts";
@@ -21,8 +21,7 @@ export async function resolveAccountPassword(options: {
   }
 
   const passRef =
-    options.passRef?.trim() ||
-    resolvePassRefFromEnv(undefined) ||
+    (await resolvePassRef(options.passRef)) ||
     process.env.PROTON_DRIVE_PASS?.trim();
 
   if (passRef) {
@@ -34,7 +33,7 @@ export async function resolveAccountPassword(options: {
 
   throw new CliError(
     "Account password required for encrypted Drive operations.\n" +
-      "Set PROTON_PASSWORD, pass --password, or use --pass pass://Vault/Item.",
+      "Set PROTON_PASSWORD, `proton account pass://…`, --password, or --pass.",
     ExitCode.ERROR,
   );
 }

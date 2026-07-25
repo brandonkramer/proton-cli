@@ -8,7 +8,7 @@ import {
   dualMintSignIn,
   parseProductList,
   resolvePassLogin,
-  resolvePassRefFromEnv,
+  resolvePassRef,
   resolvePassTotp,
   type ProductId,
   type SignInCredentials,
@@ -26,7 +26,7 @@ async function readCredentials(opts: {
   totp?: string;
   pass?: string;
 }): Promise<{ credentials: SignInCredentials; passRef?: string }> {
-  const passRef = resolvePassRefFromEnv(opts.pass);
+  const passRef = await resolvePassRef(opts.pass);
   if (passRef) {
     const login = await resolvePassLogin(passRef);
     return {
@@ -52,7 +52,7 @@ async function readCredentials(opts: {
   if (!username || !password) {
     throw new Error(
       "Username and password required.\n" +
-        "Use --pass pass://Vault/Item, --username/--password, or set PROTON_USERNAME / PROTON_PASSWORD / PROTON_PASS.",
+        "Use `proton account pass://Vault/Item`, --pass, --username/--password, or PROTON_PASS.",
     );
   }
 
@@ -146,7 +146,7 @@ export function registerSignin(program: Command): void {
     .option("-p, --password <password>", "Proton password (prefer env / Pass)")
     .option(
       "--pass <ref>",
-      "Proton Pass login item (pass://Vault/Item). Also: PROTON_PASS / PROTONVPN_PASS / PROTONAUTH_PASS",
+      "Proton Pass login item (pass://Vault/Item). Also: proton account, PROTON_PASS",
     )
     .option(
       "--totp <code>",

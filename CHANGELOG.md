@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `proton account [pass://Vault/Item]` saves a default Proton Pass login ref for sign-in TOTP and password unlock (persists across `signout`; also `--clear` / show)
 - Mail TUI Compose (to/subject/body) plus Reply / Reply all / Forward after reading a message
 - Mail TUI Compose: pick To from Contacts or type email; optional local file attachments
 - Mail live send supports `--attach` (encrypt + multipart upload to draft, then send packages)

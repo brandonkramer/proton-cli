@@ -1,6 +1,6 @@
 import {
   resolvePassLogin,
-  resolvePassRefFromEnv,
+  resolvePassRef,
 } from "@bkramer/proton-core";
 import { isNonInteractive } from "./agent.ts";
 import { CliError } from "./errors.ts";
@@ -20,7 +20,7 @@ export async function resolveAccountPassword(options: {
   const fromEnv = passwordFromEnv();
   if (fromEnv) return fromEnv;
 
-  const passRef = resolvePassRefFromEnv(options.passRef);
+  const passRef = await resolvePassRef(options.passRef);
   if (passRef) {
     const login = await resolvePassLogin(passRef);
     return login.password;
@@ -29,7 +29,7 @@ export async function resolveAccountPassword(options: {
   if (isNonInteractive()) {
     throw new CliError(
       `Password required in non-interactive mode.\n` +
-        `Set $${PASSWORD_ENV} (or pass:// via pass-cli run), or pass --pass <ref>.`,
+        `Set $${PASSWORD_ENV}, \`proton account pass://…\`, or pass --pass <ref>.`,
       ExitCode.ERROR,
     );
   }

@@ -1,5 +1,7 @@
 /** Shared Proton Pass helpers for unified `proton signin --pass`. */
 
+import { loadAccount } from "./store.ts";
+
 export const PASS_ENV_CANDIDATES = [
   "PROTON_PASS",
   "PROTONVPN_PASS",
@@ -139,6 +141,7 @@ export async function resolvePassTotp(ref: string): Promise<string | null> {
   return viewField(itemRef, "totp", { optional: true });
 }
 
+/** Sync: CLI option, then env (`PROTON_PASS`, …). Does not read account.json. */
 export function resolvePassRefFromEnv(optionValue?: string): string | undefined {
   const fromOption = optionValue?.trim();
   if (fromOption) return fromOption;
@@ -147,4 +150,18 @@ export function resolvePassRefFromEnv(optionValue?: string): string | undefined 
     if (value) return value;
   }
   return undefined;
+}
+
+/**
+ * Option → env → saved `proton account` Pass ref (`account.json`).
+ * Prefer this for sign-in and password unlock.
+ */
+export async function resolvePassRef(
+  optionValue?: string,
+): Promise<string | undefined> {
+  const fromEnv = resolvePassRefFromEnv(optionValue);
+  if (fromEnv) return fromEnv;
+  const account = await loadAccount();
+  const fromAccount = account?.passRef?.trim();
+  return fromAccount || undefined;
 }

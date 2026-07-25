@@ -1,7 +1,7 @@
+import { resolvePassRef } from "@bkramer/proton-core";
 import { saveSession } from "../config/store.ts";
 import {
   resolvePassLogin,
-  resolvePassRefFromEnv,
   resolvePassTotp,
 } from "../pass/credentials.ts";
 import {
@@ -58,7 +58,7 @@ export async function runInteractiveSignin(
   // Backward-compatible: older callers passed a username string.
   const opts: SigninOptions =
     typeof options === "string" ? { usernameArg: options } : options;
-  const passRef = resolvePassRefFromEnv(opts.passRef);
+  const passRef = await resolvePassRef(opts.passRef);
   const usernameArg = opts.usernameArg;
 
   const reused = await runTask({

@@ -56,8 +56,11 @@ Global options: `--json`, `-y` / `--yes`, `--sudo` (WireGuard on macOS).
 
 ```bash
 proton                            # interactive menu (TTY)
-proton signin
-proton signin --pass "pass://Vault/Item"   # recommended with 2FA (fresh TOTP per product)
+proton account pass://Vault/Item  # save default Pass login (password + TOTP)
+proton account                    # show saved Pass ref / username
+proton account --clear            # clear saved Pass ref
+proton signin                     # uses saved Pass ref (or --pass / PROTON_PASS)
+proton signin --pass "pass://Vault/Item"
 proton signin --products vpn          # or auth / ctc / all
 proton signin --partial-ok
 proton status --json
@@ -66,7 +69,7 @@ proton update --check
 proton update
 ```
 
-With 2FA, `proton signin` / TUI **Sign in** prompts for a **fresh TOTP per product** being minted (VPN, Authenticator, Contacts, Calendar, Drive, Settings, Mail). One code cannot cover multiple products — use `--pass` so Pass can supply a new code for each mint.
+With 2FA, `proton signin` / TUI **Sign in** need a **fresh TOTP per product** being minted. Prefer `proton account pass://Vault/Item` (or `--pass` / `PROTON_PASS`) so Pass supplies a new code for each mint. Requires `pass-cli` logged in. Sign-out keeps the saved Pass ref.
 
 ### VPN (`proton vpn …`)
 
