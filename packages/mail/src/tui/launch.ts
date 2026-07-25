@@ -2,6 +2,7 @@ import { handleCommandError } from "../util/command.ts";
 import {
   actionCompose,
   actionListInbox,
+  actionListSent,
   actionSearch,
   actionSignout,
   actionStatus,
@@ -17,6 +18,9 @@ async function handleIntent(intent: TuiIntent): Promise<"home" | "quit"> {
       return "home";
     case "list":
       await actionListInbox();
+      return "home";
+    case "sent":
+      await actionListSent();
       return "home";
     case "search":
       await actionSearch();

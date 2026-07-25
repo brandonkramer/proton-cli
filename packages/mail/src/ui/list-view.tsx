@@ -9,20 +9,32 @@ import { formatMessageBodyForDisplay } from "../util/html-to-text.ts";
 import { Brand } from "./brand.tsx";
 import { renderPrompt, renderUntilExit } from "./render.tsx";
 
-function formatMessageLabel(message: MessageSummary): string {
+export type MessageListParty = "from" | "to";
+
+function formatMessageLabel(
+  message: MessageSummary,
+  party: MessageListParty = "from",
+): string {
   const date = new Date(message.time * 1000).toISOString().slice(0, 16);
   const unread = message.unread ? "*" : " ";
-  const sender = message.senderName || message.senderEmail || "(unknown)";
   const subject = message.subject || "(no subject)";
-  return `${unread} ${date}  ${sender}  ${subject}`;
+  const partyLabel =
+    party === "to"
+      ? message.to.length > 0
+        ? `→ ${message.to.join(", ")}`
+        : "(no recipients)"
+      : message.senderName || message.senderEmail || "(unknown)";
+  return `${unread} ${date}  ${partyLabel}  ${subject}`;
 }
 
 function MessageListApp({
   title,
   messages,
+  party = "from",
 }: {
   title: string;
   messages: MessageSummary[];
+  party?: MessageListParty;
 }): ReactNode {
   const { exit } = useApp();
 
@@ -42,7 +54,7 @@ function MessageListApp({
           {messages.map((message) => (
             <Box key={message.id} gap={1}>
               <Text color={message.unread ? "cyan" : undefined}>
-                {formatMessageLabel(message)}
+                {formatMessageLabel(message, party)}
               </Text>
             </Box>
           ))}
@@ -134,16 +146,20 @@ function MessageDetailApp({
 export async function showMessageList(
   title: string,
   messages: MessageSummary[],
+  party: MessageListParty = "from",
 ): Promise<void> {
-  await renderUntilExit(<MessageListApp title={title} messages={messages} />);
+  await renderUntilExit(
+    <MessageListApp title={title} messages={messages} party={party} />,
+  );
 }
 
 export async function pickMessage(
   title: string,
   messages: MessageSummary[],
+  party: MessageListParty = "from",
 ): Promise<string | null> {
   if (messages.length === 0) {
-    await showMessageList(title, messages);
+    await showMessageList(title, messages, party);
     return null;
   }
 
@@ -160,7 +176,7 @@ export async function pickMessage(
 
       const options = [
         ...messages.map((message) => ({
-          label: formatMessageLabel(message),
+          label: formatMessageLabel(message, party),
           value: message.id,
         })),
         { label: "Back", value: "__back__" },

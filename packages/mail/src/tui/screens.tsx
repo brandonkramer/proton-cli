@@ -9,6 +9,7 @@ export type TuiIntent =
   | { type: "quit" }
   | { type: "signout" }
   | { type: "list" }
+  | { type: "sent" }
   | { type: "search" }
   | { type: "compose" }
   | { type: "status" };
@@ -64,6 +65,7 @@ export async function showHome(): Promise<TuiIntent> {
       const signedIn = Boolean(snap?.signedIn);
       const options = [
         { label: "List inbox", value: "list" },
+        { label: "List sent", value: "sent" },
         { label: "Search mail", value: "search" },
         { label: "Compose", value: "compose" },
         { label: "Status", value: "status" },
@@ -97,6 +99,9 @@ export async function showHome(): Promise<TuiIntent> {
                 switch (value) {
                   case "list":
                     resolve({ type: "list" });
+                    break;
+                  case "sent":
+                    resolve({ type: "sent" });
                     break;
                   case "search":
                     resolve({ type: "search" });

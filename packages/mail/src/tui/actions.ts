@@ -39,9 +39,13 @@ export async function actionSignout(): Promise<void> {
   });
 }
 
-export async function actionListInbox(): Promise<void> {
+async function actionListLabel(options: {
+  title: string;
+  labelId: string;
+  party?: "from" | "to";
+}): Promise<void> {
   const result = await runTask({
-    title: "Inbox",
+    title: options.title,
     steps: [
       { id: "session", label: "Loading session" },
       { id: "fetch", label: "Fetching messages" },
@@ -53,7 +57,7 @@ export async function actionListInbox(): Promise<void> {
       ui.updateStep("fetch", { status: "running" });
       const page = await listMessagesForCommand({
         session: runtime.session,
-        labelId: "inbox",
+        labelId: options.labelId,
       });
       ui.updateStep("fetch", {
         status: "done",
@@ -63,10 +67,22 @@ export async function actionListInbox(): Promise<void> {
     },
   });
 
-  const picked = await pickMessage("Inbox", result.messages);
+  const picked = await pickMessage(
+    options.title,
+    result.messages,
+    options.party ?? "from",
+  );
   if (picked) {
     await actionRead(picked);
   }
+}
+
+export async function actionListInbox(): Promise<void> {
+  await actionListLabel({ title: "Inbox", labelId: "inbox" });
+}
+
+export async function actionListSent(): Promise<void> {
+  await actionListLabel({ title: "Sent", labelId: "sent", party: "to" });
 }
 
 export async function actionSearch(): Promise<void> {

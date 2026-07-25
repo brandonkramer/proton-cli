@@ -178,6 +178,7 @@ E2EE list/read/search/send/organize via Proton Mail REST API (not Bridge IMAP/SM
 proton mail status
 proton mail list
 proton mail list --label sent --unread
+proton mail sent                         # shortcut for --label sent
 proton mail read MESSAGE_ID              # HTML → plain text in the terminal
 proton mail read MESSAGE_ID --raw        # keep original HTML
 proton mail search "invoice"
@@ -190,7 +191,7 @@ proton mail labels list
 proton mail addresses list
 ```
 
-Bare `proton` (TTY) opens a nested Mail menu (list inbox / search / compose / status). From a message you can reply / reply-all / forward. Compose can pick **To** from Contacts or type an address, and accept optional local attachment paths. Prefer `proton mail … --json` for scripting.
+Bare `proton` (TTY) opens a nested Mail menu (list inbox / list sent / search / compose / status). From a message you can reply / reply-all / forward. Compose can pick **To** from Contacts or type an address, and accept optional local attachment paths. Prefer `proton mail … --json` for scripting.
 
 Read/send/decrypt need the account password via saved `proton account` / `PROTON_PASS` / `--pass`, or `--password` / `PROTON_PASSWORD`.
 

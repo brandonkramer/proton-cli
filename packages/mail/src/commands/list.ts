@@ -8,7 +8,10 @@ import { DEFAULT_PAGE_SIZE, resolveLabelId } from "../proton/constants.ts";
 import { emitOk, isDryRun, wantsJson } from "../util/agent.ts";
 import { reportCommandError } from "../util/errors.ts";
 
-function printMessageTable(messages: MessageSummary[]): void {
+function printMessageTable(
+  messages: MessageSummary[],
+  options: { party?: "from" | "to" } = {},
+): void {
   if (messages.length === 0) {
     process.stdout.write("No messages.\n");
     return;
@@ -17,11 +20,16 @@ function printMessageTable(messages: MessageSummary[]): void {
   for (const message of messages) {
     const date = new Date(message.time * 1000).toISOString().slice(0, 16);
     const unread = message.unread ? "*" : " ";
-    const sender = message.senderName
-      ? `${message.senderName} <${message.senderEmail}>`
-      : message.senderEmail;
+    const party =
+      options.party === "to"
+        ? message.to.length > 0
+          ? `→ ${message.to.join(", ")}`
+          : "(no recipients)"
+        : message.senderName
+          ? `${message.senderName} <${message.senderEmail}>`
+          : message.senderEmail;
     process.stdout.write(
-      `${unread}\t${date}\t${sender}\t${message.subject}\t${message.id}\n`,
+      `${unread}\t${date}\t${party}\t${message.subject}\t${message.id}\n`,
     );
   }
 }
@@ -70,16 +78,26 @@ export async function runMailList(options: {
     return;
   }
 
-  printMessageTable(result.messages);
+  const party =
+    result.labelId === resolveLabelId("sent") || options.label === "sent"
+      ? "to"
+      : "from";
+  printMessageTable(result.messages, { party });
 }
 
-export function registerList(mail: Command): void {
+function registerListCommand(
+  mail: Command,
+  name: string,
+  description: string,
+  defaultLabel?: string,
+): void {
   mail
-    .command("list")
-    .description("List messages in a label (default: inbox)")
+    .command(name)
+    .description(description)
     .option(
       "--label <id>",
       "Label ID or system name (inbox, sent, drafts, trash, spam, archive, starred, all)",
+      defaultLabel,
     )
     .option("--page <n>", "Page index (0-based)", (value) => Number.parseInt(value, 10))
     .option("--page-size <n>", "Page size", (value) => Number.parseInt(value, 10))
@@ -98,10 +116,20 @@ export function registerList(mail: Command): void {
         const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
         await runMailList({
           ...options,
+          label: options.label ?? defaultLabel,
           passRef: globals?.pass,
         });
       } catch (error) {
         reportCommandError(error);
       }
     });
+}
+
+export function registerList(mail: Command): void {
+  registerListCommand(
+    mail,
+    "list",
+    "List messages in a label (default: inbox)",
+  );
+  registerListCommand(mail, "sent", "List sent messages", "sent");
 }

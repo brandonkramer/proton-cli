@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Mail TUI **List sent** and `proton mail sent` (shortcut for `list --label sent`); sent list shows recipients
+
 ### Changed
 - README: document `proton account`, mail attach/compose/contacts picker, and mail-api session sharing
 
