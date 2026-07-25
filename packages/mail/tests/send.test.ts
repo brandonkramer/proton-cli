@@ -150,10 +150,11 @@ describe("encryptForSend / INV-E2EE-001", () => {
       data: new Uint8Array([1, 2, 3, 4]),
       algorithm: "aes256",
     };
-    let sawSigningKeys = false;
+    let packageBodySigned = false;
     const cryptoProxy = {
       encryptMessage: async (opts: Record<string, unknown>) => {
-        if (opts.signingKeys) sawSigningKeys = true;
+        // Package body encrypt uses sessionKey; draft uses armored + encryptionKeys.
+        if (opts.sessionKey && opts.signingKeys) packageBodySigned = true;
         if (opts.format === "armored") {
           return {
             message:
@@ -184,7 +185,7 @@ describe("encryptForSend / INV-E2EE-001", () => {
       SIGNATURE_TYPE.NONE,
     );
     expect(pack.BodyKey?.Key).toBeTruthy();
-    expect(sawSigningKeys).toBe(false);
+    expect(packageBodySigned).toBe(false);
   });
 });
 
