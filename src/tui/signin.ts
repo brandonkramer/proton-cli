@@ -10,7 +10,6 @@ import {
   resolveFreshPassTotp,
   resolvePassLogin,
   resolvePassRef,
-  resolvePassTotp,
   saveAccount,
   type ProductId,
   type SignInCredentials,
@@ -78,41 +77,6 @@ async function collectBaseCredentials(): Promise<{
   const username = await inkPromptText("Username / email");
   const password = await inkPromptPassword("Password");
   return { credentials: { username, password } };
-}
-
-async function totpForProduct(
-  product: ProductId,
-  passRef: string | undefined,
-): Promise<string | undefined> {
-  if (passRef) {
-    const fromPass = await runTask({
-      title: "Sign in",
-      steps: [
-        {
-          id: "totp",
-          label: `Reading TOTP for ${productLabel(product)} from Pass`,
-        },
-      ],
-      run: async (ui) => {
-        ui.updateStep("totp", { status: "running" });
-        const totp = (await resolvePassTotp(passRef)) ?? undefined;
-        ui.updateStep("totp", {
-          status: totp ? "done" : "skipped",
-          detail: totp ? "ok" : "none — will prompt",
-        });
-        return totp;
-      },
-    });
-    if (fromPass) return fromPass;
-  }
-
-  const totp = await inkPromptTotp(
-    `TOTP for ${productLabel(product)}`,
-    passRef
-      ? "This Pass item has no TOTP — enter a fresh code (or add 2FA to the item in Pass)"
-      : "Each product needs its own fresh code (TOTP is single-use per API host)",
-  );
-  return totp || undefined;
 }
 
 async function mintProduct(
@@ -197,13 +161,10 @@ export async function runParentSignin(): Promise<void> {
   const failed: Array<{ product: ProductId; error: string }> = [];
 
   for (const product of PRODUCTS) {
-    // Prompt / Pass TOTP immediately before this product's mint (codes expire).
-    const totp = await totpForProduct(product, passRef);
-    const outcome = await mintProduct(
-      product,
-      { ...credentials, totp },
-      passRef,
-    );
+    // Do not attach TOTP to /auth — CAPTCHA + TwoFactorCode on the same
+    // password request often fails post-HV with 8002. Fetch TOTP only when
+    // upgrading a twofactor-limited session (see refreshTotp in mintProduct).
+    const outcome = await mintProduct(product, credentials, passRef);
     if (outcome.ok) {
       succeeded.push(product);
     } else {

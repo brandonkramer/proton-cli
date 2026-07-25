@@ -192,14 +192,14 @@ export async function loginWithPassword(options: {
           "Retry signin, or sign in once at https://account.proton.me from this network.",
       );
     }
-    const afterCaptcha =
-      "Authentication failed after CAPTCHA. Retry sign-in; complete the challenge again if prompted.";
-    const detail = messageForApiCode(
-      data.Code,
-      data.Error ?? `Authentication failed (HTTP ${status}).`,
-    );
+    const apiDetail =
+      data.Error?.trim() ||
+      messageForApiCode(
+        data.Code,
+        `Authentication failed (HTTP ${status}, code ${data.Code}).`,
+      );
     throw new CliError(
-      detail.includes("username and password") ? afterCaptcha : `${detail}\n${afterCaptcha}`,
+      `Authentication failed after CAPTCHA (code ${data.Code}).\n${apiDetail}`,
     );
   }
 

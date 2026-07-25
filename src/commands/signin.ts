@@ -10,8 +10,6 @@ import {
   resolvePassLogin,
   resolveFreshPassTotp,
   resolvePassRef,
-  resolvePassTotp,
-  type ProductId,
   type SignInCredentials,
 } from "@bkramer/proton-core";
 import { authenticateMail, clearMailState } from "@bkramer/proton-mail";
@@ -35,7 +33,6 @@ async function readCredentials(opts: {
       credentials: {
         username: opts.username ?? login.username,
         password: login.password,
-        // Prefer fresh Pass TOTP per product via prepareCredentials.
         totp: opts.totp ?? process.env.PROTON_TOTP ?? undefined,
       },
     };
@@ -63,78 +60,6 @@ async function readCredentials(opts: {
       password,
       totp: opts.totp ?? process.env.PROTON_TOTP ?? process.env.PROTONVPN_TOTP,
     },
-  };
-}
-
-function productLabel(product: ProductId): string {
-  switch (product) {
-    case "vpn":
-      return "VPN";
-    case "authenticator":
-      return "Authenticator";
-    case "drive":
-      return "Drive";
-    case "calendar":
-      return "Calendar";
-    case "contacts":
-      return "Contacts";
-    case "settings":
-      return "Settings";
-    case "mail":
-      return "Mail";
-  }
-}
-
-async function promptTotp(product: ProductId): Promise<string | undefined> {
-  if (!process.stdin.isTTY || !process.stdout.isTTY) return undefined;
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  try {
-    const label = productLabel(product);
-    const value = await rl.question(
-      `TOTP for ${label} (fresh code; Enter to skip): `,
-    );
-    return value.trim() || undefined;
-  } finally {
-    rl.close();
-  }
-}
-
-function makePrepareCredentials(options: {
-  passRef?: string;
-  products: ProductId[];
-  staticTotp?: string;
-}): (
-  product: ProductId,
-  credentials: SignInCredentials,
-) => Promise<SignInCredentials> {
-  let index = 0;
-  return async (product, base) => {
-    const isFirst = index === 0;
-    index += 1;
-
-    if (options.passRef && !options.staticTotp) {
-      const fromPass = (await resolvePassTotp(options.passRef)) ?? undefined;
-      if (fromPass) return { ...base, totp: fromPass };
-      // Pass item has no TOTP — fall through to prompt / static code.
-    }
-
-    // Single --totp / env code only works for the first product (codes are single-use).
-    if (isFirst && (options.staticTotp || base.totp)) {
-      return { ...base, totp: options.staticTotp ?? base.totp };
-    }
-
-    if (options.products.length > 1 || options.passRef) {
-      const totp = await promptTotp(product);
-      if (totp) return { ...base, totp };
-      if (!isFirst && (options.staticTotp || base.totp)) {
-        throw new Error(
-          `TOTP codes are single-use per API host. Provide a fresh code for ${product} ` +
-            `(interactive prompt), or add TOTP to your Pass item.`,
-        );
-      }
-    }
-
-    return base;
   };
 }
 
@@ -188,6 +113,8 @@ export function registerSignin(program: Command): void {
                   })) ?? undefined
                 );
               }
+              const staticTotp = opts.totp ?? process.env.PROTON_TOTP;
+              if (staticTotp && !previous) return staticTotp;
               if (!process.stdin.isTTY || !process.stdout.isTTY) {
                 return undefined;
               }
@@ -197,7 +124,7 @@ export function registerSignin(program: Command): void {
               });
               try {
                 const value = await rl.question(
-                  "Fresh TOTP after CAPTCHA (previous code expired): ",
+                  "TOTP to finish sign-in (fresh authenticator code): ",
                 );
                 return value.trim() || undefined;
               } finally {
@@ -225,11 +152,6 @@ export function registerSignin(program: Command): void {
             settings: clearSettingsState,
             mail: clearMailState,
           },
-          prepareCredentials: makePrepareCredentials({
-            passRef,
-            products,
-            staticTotp: opts.totp ?? process.env.PROTON_TOTP,
-          }),
         });
 
         if (opts.json) {

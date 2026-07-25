@@ -10,6 +10,10 @@ import {
 /**
  * Dual-mint authenticator for Contacts API (mail-api.proton.me).
  * Persists product-local + shared session via store.saveSession.
+ *
+ * Password (/auth) and TOTP (/auth/v4/2fa) are separate steps. Sending TOTP on
+ * /auth during a CAPTCHA challenge often yields post-CAPTCHA 8002 (mapped as
+ * wrong password).
  */
 export const authenticateContacts: ProductAuthenticator = async (credentials) => {
   const username = normalizeUsername(credentials.username);
@@ -17,7 +21,6 @@ export const authenticateContacts: ProductAuthenticator = async (credentials) =>
   let session = await loginWithPassword({
     username,
     password: credentials.password,
-    totp,
     refreshTotp: credentials.refreshTotp,
   });
 

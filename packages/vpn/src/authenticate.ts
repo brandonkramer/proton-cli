@@ -10,6 +10,9 @@ import {
 /**
  * Dual-mint authenticator for VPN (vpn-api.proton.me).
  * Persists product-local + shared session via store.saveSession.
+ *
+ * Password (/auth) and TOTP (/auth/2fa) are separate steps so CAPTCHA can
+ * complete without a burned TwoFactorCode on the password request.
  */
 export const authenticateVpn: ProductAuthenticator = async (credentials) => {
   const username = normalizeUsername(credentials.username);
@@ -17,7 +20,6 @@ export const authenticateVpn: ProductAuthenticator = async (credentials) => {
   let session = await loginWithPassword({
     username,
     password: credentials.password,
-    totp,
     refreshTotp: credentials.refreshTotp,
   });
 
