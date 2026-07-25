@@ -176,7 +176,29 @@ export function registerSignin(program: Command): void {
         const products = parseProductList(opts.products);
         const { credentials, passRef } = await readCredentials(opts);
         const result = await dualMintSignIn({
-          credentials,
+          credentials: {
+            ...credentials,
+            refreshTotp: async () => {
+              if (passRef && !(opts.totp ?? process.env.PROTON_TOTP)) {
+                return (await resolvePassTotp(passRef)) ?? undefined;
+              }
+              if (!process.stdin.isTTY || !process.stdout.isTTY) {
+                return undefined;
+              }
+              const rl = createInterface({
+                input: process.stdin,
+                output: process.stdout,
+              });
+              try {
+                const value = await rl.question(
+                  "Fresh TOTP after CAPTCHA (previous code expired): ",
+                );
+                return value.trim() || undefined;
+              } finally {
+                rl.close();
+              }
+            },
+          },
           products,
           partialOk: Boolean(opts.partialOk),
           authenticators: {

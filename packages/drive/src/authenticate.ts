@@ -12,14 +12,21 @@ import {
  */
 export const authenticateDrive: ProductAuthenticator = async (credentials) => {
   const username = normalizeUsername(credentials.username);
+  let totp = credentials.totp;
   let session = await loginWithPassword({
     username,
     password: credentials.password,
-    totp: credentials.totp,
+    totp,
+    refreshTotp: credentials.refreshTotp
+      ? async () => {
+          totp = await credentials.refreshTotp!();
+          return totp;
+        }
+      : undefined,
   });
 
-  if (credentials.totp) {
-    session = await ensureFullScope(session, credentials.totp);
+  if (totp) {
+    session = await ensureFullScope(session, totp);
   }
 
   await persistSession(session, username);

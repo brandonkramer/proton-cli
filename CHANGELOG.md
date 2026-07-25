@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SRP/CryptoProxy init no longer hits "endpoint not initialized" when Bun nested a second `@protontech/crypto` under `packages/*/node_modules`
 - Drive/VPN/Calendar/Contacts/Settings/Mail open the shared macOS CAPTCHA helper on human verification (same as Authenticator), instead of only pointing at account.proton.me
 - Calendar/Contacts/Settings/Mail app-version headers use allowlisted web-* client ids; Contacts API host corrected to mail-api.proton.me
+- After CAPTCHA, prompt for a fresh TOTP before retrying SRP (stale codes were misreported as wrong password)
 
 ## [0.3.0] - 2026-07-24
 

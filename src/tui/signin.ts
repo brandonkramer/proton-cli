@@ -128,7 +128,14 @@ async function mintProduct(
       run: async (ui) => {
         ui.updateStep(product, { status: "running" });
         const result = await dualMintSignIn({
-          credentials,
+          credentials: {
+            ...credentials,
+            refreshTotp: async () =>
+              (await inkPromptTotp(
+                `Fresh TOTP for ${productLabel(product)}`,
+                "CAPTCHA done — enter a new code (the previous one expired)",
+              )) || undefined,
+          },
           products: [product],
           authenticators: {
             vpn: authenticateVpn,

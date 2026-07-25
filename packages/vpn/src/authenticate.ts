@@ -13,17 +13,24 @@ import {
  */
 export const authenticateVpn: ProductAuthenticator = async (credentials) => {
   const username = normalizeUsername(credentials.username);
+  let totp = credentials.totp;
   let session = await loginWithPassword({
     username,
     password: credentials.password,
-    totp: credentials.totp,
+    totp,
+    refreshTotp: credentials.refreshTotp
+      ? async () => {
+          totp = await credentials.refreshTotp!();
+          return totp;
+        }
+      : undefined,
   });
 
   if (sessionNeedsVpnTotp(session)) {
-    if (!credentials.totp) {
+    if (!totp) {
       throw new Error("2FA code required to unlock VPN scope.");
     }
-    session = await ensureVpnScope(session, credentials.totp);
+    session = await ensureVpnScope(session, totp);
   }
 
   await persistSession(session, username);

@@ -38,6 +38,11 @@ export interface SignInCredentials {
   password: string;
   totp?: string;
   mailboxPassword?: string;
+  /**
+   * After CAPTCHA, obtain a fresh TOTP. The code entered before CAPTCHA is
+   * typically consumed or expired by the time the challenge finishes.
+   */
+  refreshTotp?: () => Promise<string | undefined>;
 }
 
 export interface ProductAuthResult {

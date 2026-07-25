@@ -59,7 +59,6 @@ export function resolveLabelId(label?: string): string {
 
 export const PACKAGE_VERSION = "0.1.0";
 
-/** Honest third-party Mail client id. */
 /**
  * `external-mail-*` is not allowlisted (5002). Use a current web-mail client id
  * (probed: web-mail@5.0.70.0 → 1000 on mail-api).

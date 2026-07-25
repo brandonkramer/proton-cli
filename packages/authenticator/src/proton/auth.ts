@@ -157,6 +157,8 @@ export async function loginWithPassword(options: {
   username: string;
   password: string;
   totp?: string;
+  /** After CAPTCHA, obtain a fresh TOTP (pre-CAPTCHA codes are stale). */
+  refreshTotp?: () => Promise<string | undefined>;
   /** Called when a browser CAPTCHA challenge is opened. */
   onHumanVerification?: (info: { url: string; webUrl?: string }) => void;
 }): Promise<Session> {
@@ -173,9 +175,17 @@ export async function loginWithPassword(options: {
       },
     });
 
-    // Fresh SRP challenge + solved CAPTCHA token (challenge tokens are one-shot).
+    // Fresh SRP + CAPTCHA token. Re-prompt TOTP — the pre-CAPTCHA code is stale.
+    let totp = options.totp;
+    if (options.refreshTotp) {
+      totp = await options.refreshTotp();
+    } else {
+      // Do not replay a burned TOTP (maps to misleading "wrong password").
+      totp = undefined;
+    }
     ({ status, data, expectedServerProof } = await srpAuthAttempt({
       ...options,
+      totp,
       humanVerification: hv,
     }));
   }
@@ -191,11 +201,15 @@ export async function loginWithPassword(options: {
           "Retry signin, or sign in once at https://account.proton.me from this network.",
       );
     }
+    const afterCaptcha =
+      "Authentication failed after CAPTCHA. If you use 2FA, enter a fresh TOTP and retry — " +
+      "codes expire while solving CAPTCHA.";
+    const detail = messageForApiCode(
+      data.Code,
+      data.Error ?? `Authentication failed (HTTP ${status}).`,
+    );
     throw new CliError(
-      messageForApiCode(
-        data.Code,
-        data.Error ?? `Authentication failed (HTTP ${status}).`,
-      ),
+      detail.includes("username and password") ? afterCaptcha : `${detail}\n${afterCaptcha}`,
     );
   }
 
