@@ -31,6 +31,12 @@ export function messageForApiCode(code: number, fallback?: string): string {
         "This account uses legacy two-password mode, which is not supported.\n" +
         "Switch to one-password mode at account.proton.me → Account and password."
       );
+    case 2028:
+      return (
+        "Too many recent logins (Proton rate limit).\n" +
+        "Wait a few minutes, then retry only failed products, e.g.\n" +
+        "  proton signin --products drive,ctc,settings,mail --partial-ok"
+      );
     default:
       return fallback ?? `Proton API error (code ${code}).`;
   }

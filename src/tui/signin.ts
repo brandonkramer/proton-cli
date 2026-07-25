@@ -10,7 +10,6 @@ import {
   resolveFreshPassTotp,
   resolvePassLogin,
   resolvePassRef,
-  saveAccount,
   type ProductId,
   type SignInCredentials,
 } from "@bkramer/proton-core";
@@ -79,125 +78,114 @@ async function collectBaseCredentials(): Promise<{
   return { credentials: { username, password } };
 }
 
-async function mintProduct(
-  product: ProductId,
-  credentials: SignInCredentials,
-  passRef?: string,
-): Promise<{ ok: true } | { ok: false; error: string }> {
-  try {
-    await runTask({
-      title: "Sign in",
-      steps: [
-        {
-          id: product,
-          label: `Signing in to ${productLabel(product)}`,
-        },
-      ],
-      note: "Contacting Proton API…",
-      run: async (ui) => {
-        ui.updateStep(product, { status: "running" });
-        const result = await dualMintSignIn({
-          credentials: {
-            ...credentials,
-            refreshTotp: async (previous?: string) => {
-              if (passRef) {
-                ui.setNote("Unlocking 2FA — fetching fresh TOTP from Pass…");
-                const fromPass = await resolveFreshPassTotp(passRef, {
-                  avoidCode: previous ?? credentials.totp,
-                });
-                if (fromPass) return fromPass;
-              }
-              return (
-                (await inkPromptTotp(
-                  `TOTP for ${productLabel(product)}`,
-                  "Enter a fresh authenticator code to finish sign-in",
-                )) || undefined
-              );
-            },
-          },
-          products: [product],
-          authenticators: {
-            vpn: authenticateVpn,
-            authenticator: authenticateAuthenticator,
-            drive: authenticateDrive,
-            calendar: authenticateCalendar,
-            contacts: authenticateContacts,
-            settings: authenticateSettings,
-            mail: authenticateMail,
-          },
-          clearers: {
-            vpn: clearVpnSession,
-            authenticator: clearAuthenticatorState,
-            drive: clearDriveState,
-            calendar: clearCalendarState,
-            contacts: clearContactsState,
-            settings: clearSettingsState,
-            mail: clearMailState,
-          },
-          partialOk: false,
-        });
-        if (result.failed.length) {
-          const err = result.failed[0]?.error ?? "unknown error";
-          ui.updateStep(product, { status: "error", detail: err });
-          throw new Error(err);
-        }
-        ui.updateStep(product, { status: "done" });
-        await Bun.sleep(350);
-      },
-    });
-    return { ok: true };
-  } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
-}
-
 /** Interactive shared sign-in (dual-mint) for the parent TUI. */
 export async function runParentSignin(): Promise<void> {
   const { credentials, passRef } = await collectBaseCredentials();
-  const succeeded: ProductId[] = [];
-  const failed: Array<{ product: ProductId; error: string }> = [];
 
-  for (const product of PRODUCTS) {
-    // Do not attach TOTP to /auth — CAPTCHA + TwoFactorCode on the same
-    // password request often fails post-HV with 8002. Fetch TOTP only when
-    // upgrading a twofactor-limited session (see refreshTotp in mintProduct).
-    const outcome = await mintProduct(product, credentials, passRef);
-    if (outcome.ok) {
-      succeeded.push(product);
-    } else {
-      // Keep earlier successes — CAPTCHA / HV on one API host must not wipe
-      // sessions already minted for other products. Continue so remaining
-      // products can still sign in.
-      failed.push({ product, error: outcome.error });
-    }
-  }
+  const result = await runTask({
+    title: "Sign in",
+    steps: PRODUCTS.map((product) => ({
+      id: product,
+      label: `Signing in to ${productLabel(product)}`,
+      status: "pending" as const,
+    })),
+    note: "Password first, then Pass TOTP for 2FA. mail-api sessions are shared.",
+    run: async (ui) => {
+      return dualMintSignIn({
+        credentials: {
+          ...credentials,
+          refreshTotp: async (previous?: string) => {
+            if (passRef) {
+              ui.setNote("Unlocking 2FA — fetching fresh TOTP from Pass…");
+              const fromPass = await resolveFreshPassTotp(passRef, {
+                avoidCode: previous ?? credentials.totp,
+              });
+              if (fromPass) return fromPass;
+            }
+            return (
+              (await inkPromptTotp(
+                "TOTP to finish sign-in",
+                "Enter a fresh authenticator code",
+              )) || undefined
+            );
+          },
+        },
+        products: [...PRODUCTS],
+        partialOk: true,
+        productGapMs: 8_000,
+        rateLimitRetries: 2,
+        rateLimitWaitMs: 60_000,
+        onProgress: (event) => {
+          switch (event.type) {
+            case "start":
+              ui.updateStep(event.product, { status: "running" });
+              ui.setNote(`Contacting ${productLabel(event.product)} API…`);
+              break;
+            case "done":
+              ui.updateStep(event.product, {
+                status: "done",
+                detail: event.detail,
+              });
+              break;
+            case "shared":
+              ui.updateStep(event.product, {
+                status: "done",
+                detail: `shared with ${event.from}`,
+              });
+              break;
+            case "error":
+              ui.updateStep(event.product, {
+                status: "error",
+                detail: event.error,
+              });
+              break;
+            case "wait":
+              ui.setNote(event.message);
+              break;
+          }
+        },
+        authenticators: {
+          vpn: authenticateVpn,
+          authenticator: authenticateAuthenticator,
+          drive: authenticateDrive,
+          calendar: authenticateCalendar,
+          contacts: authenticateContacts,
+          settings: authenticateSettings,
+          mail: authenticateMail,
+        },
+        clearers: {
+          vpn: clearVpnSession,
+          authenticator: clearAuthenticatorState,
+          drive: clearDriveState,
+          calendar: clearCalendarState,
+          contacts: clearContactsState,
+          settings: clearSettingsState,
+          mail: clearMailState,
+        },
+      });
+    },
+  });
 
-  if (succeeded.length > 0) {
-    await saveAccount(credentials.username, succeeded);
-  }
-
-  if (failed.length && succeeded.length === 0) {
+  if (result.failed.length && result.succeeded.length === 0) {
     await showMessage({
       variant: "error",
       title: "Sign-in failed",
-      body: failed.map((f) => `${f.product}: ${f.error}`).join("\n"),
+      body: result.failed.map((f) => `${f.product}: ${f.error}`).join("\n"),
       holdMs: 1800,
     });
     return;
   }
 
-  if (failed.length) {
+  if (result.failed.length) {
+    const failedList = result.failed.map((f) => f.product).join(",");
     await showMessage({
       variant: "warning",
       title: "Sign-in partial",
       body:
-        `Kept: ${succeeded.join(", ")}\n` +
-        `Failed: ${failed.map((f) => `${f.product}: ${f.error}`).join("; ")}\n` +
-        `Retry failed products later (e.g. proton signin --products drive --partial-ok).`,
-      holdMs: 2200,
+        `Kept: ${result.succeeded.join(", ")}\n` +
+        `Failed: ${result.failed.map((f) => `${f.product}: ${f.error}`).join("; ")}\n` +
+        `Retry later: proton signin --products ${failedList} --partial-ok`,
+      holdMs: 2400,
     });
     return;
   }
@@ -205,7 +193,7 @@ export async function runParentSignin(): Promise<void> {
   await showMessage({
     variant: "success",
     title: "Signed in",
-    body: `Sessions minted for ${succeeded.join(", ")}.`,
+    body: `Sessions minted for ${result.succeeded.join(", ")}.`,
     holdMs: 900,
   });
 }

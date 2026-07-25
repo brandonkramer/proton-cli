@@ -26,7 +26,14 @@ export {
   saveAccountPassRef,
   saveProductSession,
 } from "./store.ts";
-export { dualMintSignIn, type DualSignInOptions } from "./signin.ts";
+export {
+  dualMintSignIn,
+  isRateLimitError,
+  sessionSharePeers,
+  SESSION_SHARE_GROUPS,
+  type DualSignInOptions,
+  type DualSignInProgress,
+} from "./signin.ts";
 export {
   bootstrapCryptoProxy,
   ensureCryptoProxy,

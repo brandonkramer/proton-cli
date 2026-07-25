@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mail live send supports `--attach` (encrypt + multipart upload to draft, then send packages)
 
 ### Fixed
+- Multi-product sign-in shares one session across Contacts/Settings/Mail (same `mail-api` host), gaps between products, and retries on API 2028 “too many recent logins”
 - Sign-in no longer sends TOTP on `/auth` (password + CAPTCHA only); 2FA uses `/auth/v4/2fa` after login — fixes post-CAPTCHA 8002 on Authenticator/Drive/etc.
 - After CAPTCHA, complete password login first, then unlock 2FA with a fresh Pass TOTP via `/auth/v4/2fa` (avoids burning codes / HV token expiry)
 - After CAPTCHA, TUI sign-in refreshes TOTP from Pass (waits for next 30s window if needed) instead of prompting

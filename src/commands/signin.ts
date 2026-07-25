@@ -134,6 +134,18 @@ export function registerSignin(program: Command): void {
           },
           products,
           partialOk: Boolean(opts.partialOk),
+          productGapMs: 8_000,
+          rateLimitRetries: 2,
+          rateLimitWaitMs: 60_000,
+          onProgress: (event) => {
+            if (opts.json) return;
+            if (event.type === "wait") console.log(event.message);
+            if (event.type === "shared") {
+              console.log(
+                `  ${event.product}: reused ${event.from} session (same API host)`,
+              );
+            }
+          },
           authenticators: {
             vpn: authenticateVpn,
             authenticator: authenticateAuthenticator,

@@ -5,18 +5,19 @@ import {
   normalizeUsername,
   persistSession,
   sessionNeedsTotpUpgrade,
+  tryExistingSession,
 } from "./proton/auth.ts";
 
 /**
- * Dual-mint authenticator for Settings API (account-api.proton.me).
- * Persists product-local + shared session via store.saveSession.
- *
- * Password (/auth) and TOTP (/auth/v4/2fa) are separate steps. Sending TOTP on
- * /auth during a CAPTCHA challenge often yields post-CAPTCHA 8002 (mapped as
- * wrong password).
+ * Dual-mint authenticator for Settings API (mail-api.proton.me).
  */
 export const authenticateSettings: ProductAuthenticator = async (credentials) => {
   const username = normalizeUsername(credentials.username);
+  const existing = await tryExistingSession(username);
+  if (existing) {
+    return { product: "settings", session: existing.session };
+  }
+
   let totp = credentials.totp;
   let session = await loginWithPassword({
     username,

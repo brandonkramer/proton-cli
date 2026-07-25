@@ -241,6 +241,30 @@ export function normalizeUsername(raw: string): string {
   return trimmed.slice(0, at);
 }
 
+
+/** Try cached/refresh session without prompting. */
+export async function tryExistingSession(
+  usernameArg?: string,
+): Promise<{ username: string; session: Session } | null> {
+  const existing = await loadSession(
+    usernameArg ? normalizeUsername(usernameArg) : undefined,
+  );
+  if (!existing) return null;
+
+  if (await verifySession(existing.session)) {
+    return { username: existing.username, session: existing.session };
+  }
+
+  try {
+    const refreshed = await refreshSession(existing.session);
+    await saveSession(refreshed, existing.username);
+    return { username: existing.username, session: refreshed };
+  } catch {
+    await clearSession();
+    return null;
+  }
+}
+
 export async function persistSession(
   session: Session,
   username: string,

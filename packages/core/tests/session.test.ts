@@ -96,6 +96,8 @@ describe("paths + dual-mint sign-in", () => {
 
     const calls: string[] = [];
     const result = await dualMintSignIn({
+      productGapMs: 0,
+      rateLimitRetries: 0,
       credentials: {
         username: "alice@example.com",
         password: "secret",
@@ -163,6 +165,8 @@ describe("paths + dual-mint sign-in", () => {
     setConfigRootForTests(root);
 
     const result = await dualMintSignIn({
+      productGapMs: 0,
+      rateLimitRetries: 0,
       credentials: { username: "alice", password: "secret" },
       products: ["mail", "settings"],
       authenticators: {
@@ -175,11 +179,10 @@ describe("paths + dual-mint sign-in", () => {
     });
 
     expect(result.failed).toEqual([]);
-    expect(result.succeeded).toEqual(["mail", "settings"]);
+    expect(result.succeeded.sort()).toEqual(["mail", "settings"]);
+    // contacts/settings/mail share mail-api sessions
     expect((await loadProductSession("mail"))?.session.UID).toBe("mail-uid");
-    expect((await loadProductSession("settings"))?.session.UID).toBe(
-      "settings-uid",
-    );
+    expect((await loadProductSession("settings"))?.session.UID).toBe("mail-uid");
 
     await rm(root, { recursive: true, force: true });
   });
@@ -191,6 +194,8 @@ describe("paths + dual-mint sign-in", () => {
     const totps: string[] = [];
     let n = 0;
     const result = await dualMintSignIn({
+      productGapMs: 0,
+      rateLimitRetries: 0,
       credentials: { username: "alice", password: "secret", totp: "111111" },
       products: ["vpn", "authenticator"],
       prepareCredentials: async (_product, creds) => {
@@ -224,6 +229,8 @@ describe("paths + dual-mint sign-in", () => {
     setConfigRootForTests(root);
 
     const result = await dualMintSignIn({
+      productGapMs: 0,
+      rateLimitRetries: 0,
       credentials: { username: "bob", password: "x" },
       products: ["vpn", "authenticator"],
       authenticators: {

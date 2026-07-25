@@ -47,6 +47,12 @@ export function messageForApiCode(code: number, fallback?: string): string {
         fallback ??
         "Invalid input (Proton API 2001). Check recipients, draft fields, and try again."
       );
+    case 2028:
+      return (
+        "Too many recent logins (Proton rate limit).\n" +
+        "Wait a few minutes, then retry only failed products, e.g.\n" +
+        "  proton signin --products drive,ctc,settings,mail --partial-ok"
+      );
     default:
       return fallback ?? `Proton API error (code ${code}).`;
   }
