@@ -7,11 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-25
+
 ### Added
+- Contacts TUI **Add contact** (name / email / optional phone)
+- Calendar TUI **Add event** (calendar pick, title, start, duration, optional location)
+- Drive TUI **Upload file** (local path + destination folder)
 - Mail TUI **List sent** and `proton mail sent` (shortcut for `list --label sent`); sent list shows recipients
 
 ### Changed
 - README: document `proton account`, mail attach/compose/contacts picker, and mail-api session sharing
+- README: Contacts/Calendar/Drive TUI create/upload menu entries
 
 ## [0.4.0] - 2026-07-25
 
@@ -111,7 +117,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI + Release workflows; migration guide from standalone CLIs
 - Publish as **`@bkramer/proton-cli`** (npm); GitHub repo `brandonkramer/proton-cli`
 
-[Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/brandonkramer/proton-cli/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/brandonkramer/proton-cli/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/brandonkramer/proton-cli/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/brandonkramer/proton-cli/compare/v0.1.1...v0.2.0
