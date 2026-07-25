@@ -18,11 +18,12 @@ export async function runMailRead(
     return;
   }
 
+  const password = await resolveAccountPassword({ passRef: options.passRef });
   const runtime = await requireMailRuntime({
     passRef: options.passRef,
+    password,
     unlockKeys: true,
   });
-  const password = await resolveAccountPassword({ passRef: options.passRef });
 
   const message = await getAndDecryptMessage({
     session: runtime.session,

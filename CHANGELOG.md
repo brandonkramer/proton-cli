@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drive/VPN/Calendar/Contacts/Settings/Mail open the shared macOS CAPTCHA helper on human verification (same as Authenticator), instead of only pointing at account.proton.me
 - Calendar/Contacts/Settings/Mail app-version headers use allowlisted web-* client ids; Contacts API host corrected to mail-api.proton.me
 - After CAPTCHA, prompt for a fresh TOTP before retrying SRP (stale codes were misreported as wrong password)
+- Mail TUI/CLI prompts for the account password when unlocking keys to read/decrypt (no longer requires pre-set `$PROTON_PASSWORD`)
 
 ## [0.3.0] - 2026-07-24
 

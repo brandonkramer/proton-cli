@@ -99,6 +99,9 @@ export async function actionSearch(): Promise<void> {
 }
 
 export async function actionRead(messageId: string): Promise<void> {
+  // Prompt outside the task spinner so Ink UIs do not stack.
+  const password = await resolveAccountPassword({});
+
   const message = await runTask({
     title: "Read message",
     steps: [
@@ -107,8 +110,7 @@ export async function actionRead(messageId: string): Promise<void> {
     ],
     run: async (ui) => {
       ui.updateStep("unlock", { status: "running" });
-      const runtime = await requireMailRuntime({ unlockKeys: true });
-      const password = await resolveAccountPassword({});
+      const runtime = await requireMailRuntime({ unlockKeys: true, password });
       ui.updateStep("unlock", { status: "done" });
       ui.updateStep("fetch", { status: "running" });
       const decrypted = await getAndDecryptMessage({

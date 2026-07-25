@@ -77,11 +77,12 @@ async function runCompose(
     return;
   }
 
+  const password = await resolveAccountPassword({ passRef: options.passRef });
   const runtime = await requireMailRuntime({
     passRef: options.passRef,
+    password,
     unlockKeys: true,
   });
-  const password = await resolveAccountPassword({ passRef: options.passRef });
 
   const result = await sendMail(input, {
     session: runtime.session,

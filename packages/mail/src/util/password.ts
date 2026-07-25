@@ -15,6 +15,7 @@ export function passwordFromEnv(): string | undefined {
 
 export async function resolveAccountPassword(options: {
   passRef?: string;
+  promptHint?: string;
 } = {}): Promise<string> {
   const fromEnv = passwordFromEnv();
   if (fromEnv) return fromEnv;
@@ -33,9 +34,10 @@ export async function resolveAccountPassword(options: {
     );
   }
 
-  throw new CliError(
-    "Interactive password prompt is not implemented for mail yet.\n" +
-      `Sign in with \`proton signin\` and set $${PASSWORD_ENV} or PROTON_PASS.`,
-    ExitCode.ERROR,
-  );
+  const { inkPromptPassword } = await import("../ui/prompts.tsx");
+  return inkPromptPassword("Proton password", {
+    hint:
+      options.promptHint ??
+      "Account password to unlock mailbox keys (Single Password Mode).",
+  });
 }

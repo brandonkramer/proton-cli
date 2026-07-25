@@ -24,6 +24,8 @@ export interface MailRuntime {
 
 export async function requireMailRuntime(options: {
   passRef?: string;
+  /** Pre-resolved account password (avoids a second prompt). */
+  password?: string;
   fetchImpl?: typeof fetch;
   unlockKeys?: boolean;
 } = {}): Promise<MailRuntime> {
@@ -47,7 +49,9 @@ export async function requireMailRuntime(options: {
   };
 
   if (options.unlockKeys) {
-    const password = await resolveAccountPassword({ passRef: options.passRef });
+    const password =
+      options.password ??
+      (await resolveAccountPassword({ passRef: options.passRef }));
     const unlocked = await unlockMailKeys(
       session,
       password,

@@ -1,5 +1,5 @@
 import { Box, Text } from "ink";
-import { TextInput } from "@inkjs/ui";
+import { PasswordInput, TextInput } from "@inkjs/ui";
 import type { ReactNode } from "react";
 import { Brand } from "./brand.tsx";
 import { renderPrompt } from "./render.tsx";
@@ -47,6 +47,32 @@ export async function inkPromptText(
               return;
             }
             resolve(trimmed);
+          }}
+        />
+      </Box>
+    </PromptFrame>
+  ));
+}
+
+export async function inkPromptPassword(
+  label = "Password",
+  options: { hint?: string } = {},
+): Promise<string> {
+  return renderPrompt<string>(({ resolve, reject }) => (
+    <PromptFrame title={label} hint={options.hint}>
+      <Box flexDirection="column">
+        <Text>
+          <Text color="cyan">› </Text>
+          {label}
+        </Text>
+        <PasswordInput
+          placeholder="••••••••"
+          onSubmit={(value) => {
+            if (!value) {
+              reject(new Error(`${label} is required.`));
+              return;
+            }
+            resolve(value);
           }}
         />
       </Box>
