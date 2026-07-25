@@ -44,12 +44,15 @@ export {
   type UnlockUserKeysWithFetchOptions,
 } from "./unlock.ts";
 export {
+  canonicalizePassItemRef,
+  looksLikePassId,
   normalizePassItemRef,
   PASS_ENV_CANDIDATES,
   resolvePassLogin,
   resolvePassRef,
   resolvePassRefFromEnv,
   resolvePassTotp,
+  type CanonicalPassRef,
   type PassLoginFields,
 } from "./pass.ts";
 export type {

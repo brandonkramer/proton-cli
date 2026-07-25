@@ -1,8 +1,9 @@
 import {
+  canonicalizePassItemRef,
   clearAccountPassRef,
   loadAccount,
-  normalizePassItemRef,
   resolvePassLogin,
+  resolvePassTotp,
   saveAccountPassRef,
 } from "@bkramer/proton-core";
 import type { Command } from "commander";
@@ -41,11 +42,14 @@ export function registerAccount(program: Command): void {
         }
 
         if (passRefArg) {
-          const passRef = normalizePassItemRef(passRefArg);
+          const canonical = await canonicalizePassItemRef(passRefArg);
+          const passRef = canonical.ref;
           let username: string | undefined;
+          let hasTotp = false;
           if (!opts.skipVerify) {
             const login = await resolvePassLogin(passRef);
             username = login.username;
+            hasTotp = Boolean(await resolvePassTotp(passRef));
           }
           const saved = await saveAccountPassRef(passRef);
           if (opts.json) {
@@ -54,7 +58,10 @@ export function registerAccount(program: Command): void {
                 {
                   ok: true,
                   passRef: saved.passRef,
+                  title: canonical.title ?? null,
+                  disambiguated: canonical.disambiguated,
                   username: username ?? (saved.username || null),
+                  hasTotp: opts.skipVerify ? null : hasTotp,
                 },
                 null,
                 2,
@@ -63,8 +70,18 @@ export function registerAccount(program: Command): void {
             return;
           }
           console.log(`Saved Pass reference: ${passRef}`);
+          if (canonical.title && canonical.disambiguated) {
+            console.log(
+              `Note: multiple items titled "${canonical.title}" — chose the one with TOTP.`,
+            );
+          }
           if (username) {
             console.log(`Login username: ${username}`);
+          }
+          if (!opts.skipVerify && !hasTotp) {
+            console.log(
+              "Warning: this Pass item has no TOTP. Sign-in will prompt for codes.",
+            );
           }
           console.log(
             "Use `proton signin` (no --pass needed). Keep pass-cli logged in.",

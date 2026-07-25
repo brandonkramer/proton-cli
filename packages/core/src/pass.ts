@@ -52,6 +52,33 @@ export function normalizePassItemRef(raw: string): string {
   return `pass://${vault}/${item}`;
 }
 
+/** Pass share/item ids are long base64url strings. */
+export function looksLikePassId(value: string): boolean {
+  return value.length >= 40 && /^[A-Za-z0-9_-]+=*$/.test(value);
+}
+
+export interface CanonicalPassRef {
+  /** Stable `pass://<shareId>/<itemId>` when resolved; else normalized name ref. */
+  ref: string;
+  /** True when multiple same-title items existed and one was chosen. */
+  disambiguated: boolean;
+  title?: string;
+}
+
+interface PassListItem {
+  id: string;
+  share_id: string;
+  title: string;
+  item_type?: string;
+}
+
+function parsePassListItems(stdout: string): PassListItem[] {
+  const parsed = JSON.parse(stdout) as
+    | { items?: PassListItem[] }
+    | PassListItem[];
+  return Array.isArray(parsed) ? parsed : (parsed.items ?? []);
+}
+
 async function ensurePassCli(): Promise<string> {
   const path = Bun.which("pass-cli");
   if (!path) {
@@ -115,8 +142,97 @@ async function viewField(
   return value.length > 0 ? value : null;
 }
 
+/**
+ * Resolve a name-based Pass ref to a stable share/item ID ref.
+ * When several items share a title, prefer the one that has TOTP.
+ */
+export async function canonicalizePassItemRef(
+  ref: string,
+): Promise<CanonicalPassRef> {
+  const normalized = normalizePassItemRef(ref);
+  const body = normalized.slice("pass://".length);
+  const parts = body.split("/").filter((part) => part.length > 0);
+  const itemPart = parts[parts.length - 1]!;
+  const vaultPart = parts.slice(0, -1).join("/");
+
+  if (looksLikePassId(itemPart)) {
+    return { ref: normalized, disambiguated: false };
+  }
+
+  const listed = await runPassCli([
+    "item",
+    "list",
+    "--vault-name",
+    vaultPart,
+    "--output",
+    "json",
+  ]);
+  if (listed.exitCode !== 0) {
+    // Fall back to name ref (pass-cli view may still resolve).
+    return { ref: normalized, disambiguated: false, title: itemPart };
+  }
+
+  let items: PassListItem[];
+  try {
+    items = parsePassListItems(listed.stdout);
+  } catch {
+    return { ref: normalized, disambiguated: false, title: itemPart };
+  }
+
+  const titleLower = itemPart.toLowerCase();
+  const matches = items.filter(
+    (item) => (item.title ?? "").toLowerCase() === titleLower,
+  );
+
+  if (matches.length === 0) {
+    return { ref: normalized, disambiguated: false, title: itemPart };
+  }
+
+  if (matches.length === 1) {
+    const only = matches[0]!;
+    return {
+      ref: `pass://${only.share_id}/${only.id}`,
+      disambiguated: false,
+      title: only.title,
+    };
+  }
+
+  const withTotp: PassListItem[] = [];
+  for (const match of matches) {
+    const idRef = `pass://${match.share_id}/${match.id}`;
+    const totp = await viewField(idRef, "totp", { optional: true });
+    if (totp) withTotp.push(match);
+  }
+
+  if (withTotp.length === 1) {
+    const chosen = withTotp[0]!;
+    return {
+      ref: `pass://${chosen.share_id}/${chosen.id}`,
+      disambiguated: true,
+      title: chosen.title,
+    };
+  }
+
+  const format = (item: PassListItem): string =>
+    `  pass://${item.share_id}/${item.id}` +
+    (item.item_type ? ` (${item.item_type})` : "");
+
+  if (withTotp.length > 1) {
+    throw new Error(
+      `Multiple Pass items titled "${itemPart}" in vault "${vaultPart}" have TOTP.\n` +
+        `Use a specific ID ref:\n${withTotp.map(format).join("\n")}`,
+    );
+  }
+
+  throw new Error(
+    `Multiple Pass items titled "${itemPart}" in vault "${vaultPart}", and none have TOTP.\n` +
+      `pass-cli picks one by name (often the wrong duplicate).\n` +
+      `Delete the extra login, rename one, or use an ID ref:\n${matches.map(format).join("\n")}`,
+  );
+}
+
 export async function resolvePassLogin(ref: string): Promise<PassLoginFields> {
-  const itemRef = normalizePassItemRef(ref);
+  const { ref: itemRef } = await canonicalizePassItemRef(ref);
   const [username, email, password] = await Promise.all([
     viewField(itemRef, "username", { optional: true }),
     viewField(itemRef, "email", { optional: true }),
@@ -137,7 +253,7 @@ export async function resolvePassLogin(ref: string): Promise<PassLoginFields> {
 }
 
 export async function resolvePassTotp(ref: string): Promise<string | null> {
-  const itemRef = normalizePassItemRef(ref);
+  const { ref: itemRef } = await canonicalizePassItemRef(ref);
   return viewField(itemRef, "totp", { optional: true });
 }
 

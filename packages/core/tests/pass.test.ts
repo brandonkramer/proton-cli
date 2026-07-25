@@ -3,6 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  looksLikePassId,
   normalizePassItemRef,
   resolvePassRef,
   resolvePassRefFromEnv,
@@ -18,6 +19,16 @@ describe("pass helpers", () => {
     expect(normalizePassItemRef("Personal/Proton/password")).toBe(
       "pass://Personal/Proton",
     );
+  });
+
+  test("looksLikePassId detects share/item ids", () => {
+    expect(
+      looksLikePassId(
+        "HtBr3GwdjDD4Iv83c9YObPhRkCSF82x34AFbm1cU7CJ1vv2ckyAAwS8EsnhP-9ZGUbsyBTMKSYex-4Xp5eMkdA==",
+      ),
+    ).toBe(true);
+    expect(looksLikePassId("proton.me")).toBe(false);
+    expect(looksLikePassId("Personal")).toBe(false);
   });
 
   test("resolvePassRefFromEnv prefers option then env candidates", () => {
