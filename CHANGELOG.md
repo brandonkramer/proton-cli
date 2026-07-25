@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Parent TUI multi-product sign-in keeps successful sessions when a later product fails (e.g. Drive CAPTCHA) and continues minting the rest
+
 ## [0.3.0] - 2026-07-24
 
 ### Added

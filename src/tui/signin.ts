@@ -5,12 +5,12 @@ import {
 import { authenticateCalendar, clearCalendarState } from "@bkramer/proton-calendar";
 import { authenticateContacts, clearContactsState } from "@bkramer/proton-contacts";
 import {
-  clearAllSessions,
   dualMintSignIn,
   PRODUCTS,
   resolvePassLogin,
   resolvePassRefFromEnv,
   resolvePassTotp,
+  saveAccount,
   type ProductId,
   type SignInCredentials,
 } from "@bkramer/proton-core";
@@ -181,28 +181,36 @@ export async function runParentSignin(): Promise<void> {
     if (outcome.ok) {
       succeeded.push(product);
     } else {
+      // Keep earlier successes — CAPTCHA / HV on one API host must not wipe
+      // sessions already minted for other products. Continue so remaining
+      // products can still sign in.
       failed.push({ product, error: outcome.error });
-      // Match dual-mint default: roll back earlier successes.
-      await clearVpnSession();
-      await clearAuthenticatorState();
-      await clearDriveState();
-      await clearCalendarState();
-      await clearContactsState();
-      await clearSettingsState();
-      await clearMailState();
-      await clearAllSessions();
-      break;
     }
+  }
+
+  if (succeeded.length > 0) {
+    await saveAccount(credentials.username, succeeded);
+  }
+
+  if (failed.length && succeeded.length === 0) {
+    await showMessage({
+      variant: "error",
+      title: "Sign-in failed",
+      body: failed.map((f) => `${f.product}: ${f.error}`).join("\n"),
+      holdMs: 1800,
+    });
+    return;
   }
 
   if (failed.length) {
     await showMessage({
-      variant: "error",
-      title: "Sign-in incomplete",
-      body: `Succeeded: ${succeeded.join(", ") || "(none)"}\nFailed: ${failed
-        .map((f) => `${f.product}: ${f.error}`)
-        .join("; ")}`,
-      holdMs: 1600,
+      variant: "warning",
+      title: "Sign-in partial",
+      body:
+        `Kept: ${succeeded.join(", ")}\n` +
+        `Failed: ${failed.map((f) => `${f.product}: ${f.error}`).join("; ")}\n` +
+        `Retry failed products later (e.g. proton signin --products drive --partial-ok).`,
+      holdMs: 2200,
     });
     return;
   }
