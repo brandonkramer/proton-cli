@@ -132,8 +132,6 @@ export async function encryptForSend(
     throw new CliError("Draft encryption failed: plaintext would be uploaded.");
   }
 
-  const hasInternal = uniqueRecipients.some((r) => r.publicKeys.length > 0);
-
   const encryptionKeysForSession = [
     options.senderKey.publicKey,
     ...uniqueRecipients.flatMap((r) => r.publicKeys),
@@ -143,14 +141,13 @@ export async function encryptForSend(
     recipientKeys: encryptionKeysForSession,
   });
 
-  // Sign only when at least one Proton recipient needs a detached signature.
-  // Cleartext-signed external mail shows "BEGIN PGP SIGNED MESSAGE" in Gmail.
+  // Always sign the package body (WebClients sendEncrypt does). Recipient
+  // Signature=0 for external clear still yields plain text outbound — Signature
+  // controls clearsign packaging, not whether the body blob is signed for Proton.
   const encrypted = await proxy.encryptMessage({
     textData: options.plaintext,
     sessionKey,
-    ...(hasInternal
-      ? { signingKeys: [options.senderKey.privateKey] }
-      : {}),
+    signingKeys: [options.senderKey.privateKey],
     format: "binary",
   } as never);
   const dataPacket = asBytes(
@@ -181,7 +178,7 @@ export async function encryptForSend(
       };
       packageType |= PACKAGE_TYPE.SEND_PM;
     } else {
-      // Unsigned clear — readable in Gmail/Outlook (not PGP clearsigned armor).
+      // WebClients sendClear(): SEND_CLEAR + Signature 0 → readable external mail.
       addresses[email] = {
         Type: PACKAGE_TYPE.SEND_CLEAR,
         Signature: SIGNATURE_TYPE.NONE,

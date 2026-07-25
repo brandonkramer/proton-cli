@@ -145,7 +145,7 @@ describe("encryptForSend / INV-E2EE-001", () => {
     expect(encryptSessionKeys).toEqual([{ kind: "bob-1" }, { kind: "bob-2" }]);
   });
 
-  test("external-only clear packages are unsigned (no PGP clearsign)", async () => {
+  test("external-only clear packages use Signature=0 but still sign the body blob", async () => {
     const sessionKey = {
       data: new Uint8Array([1, 2, 3, 4]),
       algorithm: "aes256",
@@ -185,7 +185,7 @@ describe("encryptForSend / INV-E2EE-001", () => {
       SIGNATURE_TYPE.NONE,
     );
     expect(pack.BodyKey?.Key).toBeTruthy();
-    expect(packageBodySigned).toBe(false);
+    expect(packageBodySigned).toBe(true);
   });
 });
 
