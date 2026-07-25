@@ -1,144 +1,10 @@
-import { runProtonCli, validateCliArgs } from "./run.ts";
+import { callTool, TOOLS } from "./tools.ts";
 
 interface JsonRpcRequest {
   jsonrpc?: string;
   id?: string | number | null;
   method?: string;
   params?: Record<string, unknown>;
-}
-
-function toolText(text: string, isError = false): unknown {
-  return {
-    content: [{ type: "text", text }],
-    ...(isError ? { isError: true } : {}),
-  };
-}
-
-function formatResult(result: Awaited<ReturnType<typeof runProtonCli>>): unknown {
-  const body = [
-    result.stdout.trim(),
-    result.stderr.trim() ? `stderr:\n${result.stderr.trim()}` : "",
-    `exit=${result.code} argv=${JSON.stringify(result.argv)}`,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-  return toolText(body || "(no output)", !result.ok);
-}
-
-const TOOLS = [
-  {
-    name: "proton_status",
-    description: "Show Proton CLI session status (proton status --json).",
-    inputSchema: {
-      type: "object",
-      properties: {},
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "proton_vpn_status",
-    description: "Show VPN tunnel/session status (proton vpn status --json).",
-    inputSchema: {
-      type: "object",
-      properties: {},
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "proton_auth_code",
-    description:
-      "Show current Authenticator TOTP/Steam code for a query (proton auth code <query> --json).",
-    inputSchema: {
-      type: "object",
-      properties: {
-        query: { type: "string", description: "Issuer/name substring" },
-      },
-      required: ["query"],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "proton_mail_list",
-    description: "List mail messages (proton mail list --json).",
-    inputSchema: {
-      type: "object",
-      properties: {
-        label: { type: "string", description: "Label id/name (default inbox)" },
-      },
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "proton_drive_list",
-    description: "List Drive folder (proton drive items list --json).",
-    inputSchema: {
-      type: "object",
-      properties: {
-        path: { type: "string", description: "Folder path (default /)" },
-      },
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "proton_cli",
-    description:
-      "Run an allowlisted proton CLI subcommand with JSON/agent mode. Pass args after `proton` (e.g. [\"mail\",\"list\"]). Mutating commands require confirm=true. Never pass --password/--totp.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        args: {
-          type: "array",
-          items: { type: "string" },
-          description: "CLI argv after proton",
-        },
-        confirm: {
-          type: "boolean",
-          description: "Required true for mutating commands",
-        },
-      },
-      required: ["args"],
-      additionalProperties: false,
-    },
-  },
-] as const;
-
-async function callTool(
-  name: string,
-  args: Record<string, unknown>,
-): Promise<unknown> {
-  switch (name) {
-    case "proton_status":
-      return formatResult(await runProtonCli(["status"]));
-    case "proton_vpn_status":
-      return formatResult(await runProtonCli(["vpn", "status"]));
-    case "proton_auth_code": {
-      const query = String(args.query ?? "").trim();
-      if (!query) return toolText("error: query is required", true);
-      return formatResult(await runProtonCli(["auth", "code", query]));
-    }
-    case "proton_mail_list": {
-      const argv = ["mail", "list"];
-      const label = String(args.label ?? "").trim();
-      if (label) argv.push("--label", label);
-      return formatResult(await runProtonCli(argv));
-    }
-    case "proton_drive_list": {
-      const path = String(args.path ?? "/").trim() || "/";
-      return formatResult(await runProtonCli(["drive", "items", "list", path]));
-    }
-    case "proton_cli": {
-      const cliArgs = Array.isArray(args.args)
-        ? args.args.map((a) => String(a))
-        : [];
-      const bad = validateCliArgs(cliArgs);
-      if (bad) return toolText(`error: ${bad}`, true);
-      return formatResult(
-        await runProtonCli(cliArgs, { confirm: Boolean(args.confirm) }),
-      );
-    }
-    default:
-      return toolText(`error: unknown tool ${name}`, true);
-  }
 }
 
 function encodeMessage(message: unknown): Buffer {
@@ -221,7 +87,10 @@ async function readStdinMessages(
     while (buf.length > 0) {
       // Content-Length framing
       const headerEnd = buf.indexOf("\r\n\r\n");
-      if (headerEnd >= 0 && /^content-length:/im.test(buf.subarray(0, headerEnd).toString("utf8"))) {
+      if (
+        headerEnd >= 0 &&
+        /^content-length:/im.test(buf.subarray(0, headerEnd).toString("utf8"))
+      ) {
         const header = buf.subarray(0, headerEnd).toString("utf8");
         const match = /content-length:\s*(\d+)/i.exec(header);
         const len = match ? Number(match[1]) : 0;

@@ -83,7 +83,7 @@ Do not commit secrets, session files, or resolved Pass material.
 ### Agent plugins / MCP
 
 - This repo is a Cursor/Codex/Claude plugin (`.cursor-plugin`, `.codex-plugin`, `.claude-plugin`) and a Pi package (`"pi": { "skills": ["./skills"] }`).
-- Agents should use MCP (`proton mcp`) rather than driving the TUI. Auth remains `proton signin` on a human TTY.
+- Agents should use MCP (`proton mcp`) rather than driving the TUI. Prefer curated tools; `proton_cli` is the long tail (non-reads need `confirm=true`). Auth remains `proton signin` on a human TTY.
 - Wire hosts with `proton install-mcp` (`--scope user|project|local`, `--host cursor|codex|claude|pi|all`).
 - After editing plugin manifests or the skill, keep versions in `.cursor-plugin/plugin.json` / `.codex-plugin/plugin.json` / `.claude-plugin/plugin.json` aligned with `package.json`.
 

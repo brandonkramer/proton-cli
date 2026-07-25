@@ -63,7 +63,7 @@ proton mcp                                      # stdio MCP (used by hosts)
 | Claude | `proton install-mcp --host claude` (project → `.mcp.json`; user → `claude plugin marketplace add` / install) — or load `.claude-plugin/` |
 | Pi | `pi install git:github.com/brandonkramer/proton-cli` (skills via `"pi"` in package.json); wire `proton mcp` through your MCP adapter |
 
-Sign-in / CAPTCHA stay interactive on a human TTY. Prefer curated MCP tools (`proton_status`, `proton_auth_code`, …) or `proton_cli` with `confirm=true` for mutations. See `skills/proton-cli/SKILL.md`.
+Sign-in / CAPTCHA stay interactive on a human TTY. Prefer curated MCP tools (mail/contacts/calendar/drive/vpn/settings reads + common writes) or `proton_cli` with `confirm=true` for non-reads. See `skills/proton-cli/SKILL.md`.
 
 ## Commands
 

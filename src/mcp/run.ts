@@ -30,32 +30,70 @@ const SECRET_FLAGS = new Set([
   "--token",
 ]);
 
-const WRITE_HINTS = new Set([
-  "signin",
-  "signout",
-  "connect",
-  "disconnect",
-  "create",
-  "update",
-  "delete",
-  "send",
-  "reply",
-  "forward",
-  "upload",
-  "trash",
-  "empty",
-  "organize",
-  "set",
-  "pin-key",
-  "unpin-key",
-  "respond",
-  "restore",
-  "rename",
-  "move",
-  "copy",
-  "favorite",
-  "unfavorite",
+/** Flags that do not consume a following value when stripping for command matching. */
+const BOOLEAN_FLAGS = new Set([
+  "--json",
+  "-y",
+  "--yes",
+  "--sudo",
+  "--unread",
+  "--raw",
+  "--html",
+  "--all",
+  "--p2p",
+  "--securecore",
+  "--tor",
+  "--free-only",
+  "--dry-run",
+  "--force",
+  "--permanent",
+  "--edit",
+  "--all-day",
+  "-j",
+  "--help",
+  "-h",
+  "-V",
+  "--version",
 ]);
+
+/**
+ * Explicit safe-read command prefixes (positional argv after `proton`).
+ * Anything else via `proton_cli` requires confirm=true (deny-by-default writes).
+ */
+const SAFE_READ_PREFIXES: readonly (readonly string[])[] = [
+  ["status"],
+  ["account"],
+  ["vpn", "status"],
+  ["vpn", "countries"],
+  ["vpn", "servers"],
+  ["auth", "list"],
+  ["auth", "code"],
+  ["auth", "status"],
+  ["contacts", "list"],
+  ["contacts", "get"],
+  ["contacts", "groups", "list"],
+  ["calendar", "calendars", "list"],
+  ["calendar", "events", "list"],
+  ["calendar", "events", "get"],
+  ["drive", "status"],
+  ["drive", "items", "list"],
+  ["drive", "items", "info"],
+  ["drive", "trash", "list"],
+  ["drive", "photos", "list"],
+  ["drive", "photos", "albums", "list"],
+  ["drive", "invitations", "list"],
+  ["drive", "share", "status"],
+  ["settings", "get"],
+  ["settings", "mail"],
+  ["mail", "status"],
+  ["mail", "list"],
+  ["mail", "sent"],
+  ["mail", "read"],
+  ["mail", "search"],
+  ["mail", "addresses"],
+  ["mail", "labels", "list"],
+  ["mail", "labels", "folders", "list"],
+];
 
 export interface RunCliResult {
   ok: boolean;
@@ -68,6 +106,42 @@ export interface RunCliResult {
 export function looksSecretFlag(arg: string): boolean {
   const base = arg.split("=")[0] ?? arg;
   return SECRET_FLAGS.has(base);
+}
+
+/** Positional tokens only (flags + their values stripped). */
+export function positionalArgs(args: string[]): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i]!;
+    if (a === "--") {
+      out.push(...args.slice(i + 1));
+      break;
+    }
+    if (a.startsWith("-")) {
+      const flag = a.split("=")[0] ?? a;
+      if (a.includes("=") || BOOLEAN_FLAGS.has(flag)) continue;
+      if (i + 1 < args.length && !args[i + 1]!.startsWith("-")) i++;
+      continue;
+    }
+    out.push(a);
+  }
+  return out;
+}
+
+function matchesPrefix(pos: string[], prefix: readonly string[]): boolean {
+  if (pos.length < prefix.length) return false;
+  return prefix.every((p, i) => pos[i] === p);
+}
+
+/** True when argv is a known non-mutating read. */
+export function isSafeRead(args: string[]): boolean {
+  const pos = positionalArgs(args);
+  if (pos.length === 0) return false;
+  // `proton account <pass-ref>` configures credentials — treat as write.
+  if (pos[0] === "account" && pos.length > 1) return false;
+  // `settings set` mutates; `settings mail` is a read (matched below).
+  if (pos[0] === "settings" && pos[1] === "set") return false;
+  return SAFE_READ_PREFIXES.some((prefix) => matchesPrefix(pos, prefix));
 }
 
 export function validateCliArgs(args: string[]): string | null {
@@ -85,8 +159,9 @@ export function validateCliArgs(args: string[]): string | null {
   return null;
 }
 
+/** Deny-by-default: anything not on the safe-read list needs confirm=true. */
 export function needsConfirm(args: string[]): boolean {
-  return args.some((a) => WRITE_HINTS.has(a));
+  return !isSafeRead(args);
 }
 
 export function withAgentJson(args: string[]): string[] {

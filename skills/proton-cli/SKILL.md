@@ -36,8 +36,8 @@ pi install git:github.com/brandonkramer/proton-cli
 
 ### Routing
 
-1. Prefer curated tools: `proton_status`, `proton_vpn_status`, `proton_auth_code`, `proton_mail_list`, `proton_drive_list`.
-2. Other allowlisted CLI → `proton_cli` with `args` (argv after `proton`). Mutating commands need `confirm=true`.
+1. Prefer curated tools for common reads/writes (table below). Write tools confirm internally.
+2. Long-tail allowlisted CLI → `proton_cli` with `args` (argv after `proton`). **Non-read** commands need `confirm=true` (deny-by-default; not a verb heuristic).
 3. Never pass `--password` / `--totp` into MCP; use `proton account` / env / a prior interactive sign-in.
 
 ### Curated tools → CLI
@@ -46,10 +46,22 @@ pi install git:github.com/brandonkramer/proton-cli
 |----------|-----------|
 | `proton_status` | `status --json` |
 | `proton_vpn_status` | `vpn status --json` |
+| `proton_vpn_list` | `vpn countries` or `vpn servers` |
 | `proton_auth_code` | `auth code <query> --json` |
 | `proton_mail_list` | `mail list [--label] --json` |
+| `proton_mail_get` | `mail read <id> --json` |
+| `proton_mail_search` | `mail search <query> --json` |
+| `proton_mail_send` | `mail send` (confirmed) |
+| `proton_mail_reply` | `mail reply <id>` (confirmed) |
+| `proton_contacts_list` | `contacts list --json` |
+| `proton_contacts_create` | `contacts create` (confirmed) |
+| `proton_calendar_upcoming` | `calendar events list` (default next 7 days) |
+| `proton_calendar_create` | `calendar events create` (confirmed) |
 | `proton_drive_list` | `drive items list [path] --json` |
-| `proton_cli` | `<args…>` allowlisted tops only |
+| `proton_drive_get` | `drive items info` or `download` (download confirmed) |
+| `proton_drive_upload` | `drive items upload` (confirmed) |
+| `proton_settings_get` | `settings get` or `settings mail` |
+| `proton_cli` | `<args…>` allowlisted tops; non-reads need `confirm=true` |
 
 ## Install
 

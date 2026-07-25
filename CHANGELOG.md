@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- MCP curated tools for high-frequency agent paths: mail get/search/send/reply, contacts list/create, calendar upcoming/create, drive get/upload, settings get, vpn list
+
+### Changed
+- MCP `proton_cli` confirm gating is deny-by-default (explicit safe-read allowlist) instead of verb heuristics
+
 ## [0.4.2] - 2026-07-25
 
 ### Added
