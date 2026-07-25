@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mail live send supports `--attach` (encrypt + multipart upload to draft, then send packages)
 
 ### Fixed
+- Sign-in prompts for TOTP when the configured Pass item has no totp field (instead of failing with "2FA code required")
 - Mail send create-draft no longer sends `AttachmentKeyPackets: {}` (Proton 2001 Invalid input); uses `[]` and omits Parent/Action for new mail
 - Contacts client tests match `mail-api.proton.me` host (mocks no longer hardcode contacts-api)
 - Mail locked-scope unlock uses `PUT /core/v4/users/unlock` (not `/users/password`, which returned 2001)

@@ -84,7 +84,7 @@ async function totpForProduct(
   passRef: string | undefined,
 ): Promise<string | undefined> {
   if (passRef) {
-    return runTask({
+    const fromPass = await runTask({
       title: "Sign in",
       steps: [
         {
@@ -97,16 +97,19 @@ async function totpForProduct(
         const totp = (await resolvePassTotp(passRef)) ?? undefined;
         ui.updateStep("totp", {
           status: totp ? "done" : "skipped",
-          detail: totp ? "ok" : "none",
+          detail: totp ? "ok" : "none — will prompt",
         });
         return totp;
       },
     });
+    if (fromPass) return fromPass;
   }
 
   const totp = await inkPromptTotp(
     `TOTP for ${productLabel(product)}`,
-    "Each product needs its own fresh code (TOTP is single-use per API host)",
+    passRef
+      ? "This Pass item has no TOTP — enter a fresh code (or add 2FA to the item in Pass)"
+      : "Each product needs its own fresh code (TOTP is single-use per API host)",
   );
   return totp || undefined;
 }

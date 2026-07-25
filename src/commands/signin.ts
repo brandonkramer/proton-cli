@@ -112,8 +112,9 @@ function makePrepareCredentials(options: {
     index += 1;
 
     if (options.passRef && !options.staticTotp) {
-      const totp = (await resolvePassTotp(options.passRef)) ?? undefined;
-      return { ...base, totp };
+      const fromPass = (await resolvePassTotp(options.passRef)) ?? undefined;
+      if (fromPass) return { ...base, totp: fromPass };
+      // Pass item has no TOTP — fall through to prompt / static code.
     }
 
     // Single --totp / env code only works for the first product (codes are single-use).
@@ -121,13 +122,13 @@ function makePrepareCredentials(options: {
       return { ...base, totp: options.staticTotp ?? base.totp };
     }
 
-    if (options.products.length > 1) {
+    if (options.products.length > 1 || options.passRef) {
       const totp = await promptTotp(product);
       if (totp) return { ...base, totp };
       if (!isFirst && (options.staticTotp || base.totp)) {
         throw new Error(
           `TOTP codes are single-use per API host. Provide a fresh code for ${product} ` +
-            `(interactive prompt), or use --pass so Pass can supply a new TOTP.`,
+            `(interactive prompt), or add TOTP to your Pass item.`,
         );
       }
     }
