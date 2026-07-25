@@ -5,6 +5,7 @@ import type {
   DecryptedMessage,
   MessageSummary,
 } from "../service/messages.ts";
+import { formatMessageBodyForDisplay } from "../util/html-to-text.ts";
 import { Brand } from "./brand.tsx";
 import { renderPrompt, renderUntilExit } from "./render.tsx";
 
@@ -92,7 +93,10 @@ function MessageDetailApp({ message }: { message: DecryptedMessage }): ReactNode
         </Text>
       </Box>
       <Box flexDirection="column">
-        <Text>{message.body || "(empty body)"}</Text>
+        <Text>
+          {formatMessageBodyForDisplay(message.body, message.mimeType) ||
+            "(empty body)"}
+        </Text>
       </Box>
       <Box marginTop={1}>
         <Text dimColor>q / Esc close · CLI: `proton mail read {message.id}`</Text>

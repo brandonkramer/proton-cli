@@ -3,11 +3,12 @@ import { requireMailRuntime } from "../context.ts";
 import { getAndDecryptMessage } from "../service/messages.ts";
 import { emitOk, isDryRun, wantsJson } from "../util/agent.ts";
 import { reportCommandError } from "../util/errors.ts";
+import { formatMessageBodyForDisplay } from "../util/html-to-text.ts";
 import { resolveAccountPassword } from "../util/password.ts";
 
 export async function runMailRead(
   messageId: string,
-  options: { passRef?: string; password?: string },
+  options: { passRef?: string; password?: string; raw?: boolean },
 ): Promise<void> {
   if (isDryRun()) {
     emitOk({
@@ -61,7 +62,10 @@ export async function runMailRead(
         : "unknown";
   process.stdout.write(`Signed:  ${verifiedLabel}\n`);
   process.stdout.write("\n");
-  process.stdout.write(`${message.body}\n`);
+  const body = options.raw
+    ? message.body
+    : formatMessageBodyForDisplay(message.body, message.mimeType);
+  process.stdout.write(`${body}\n`);
 }
 
 export function registerRead(mail: Command): void {
@@ -70,18 +74,22 @@ export function registerRead(mail: Command): void {
     .description("Read and decrypt a message by ID")
     .argument("<id>", "Message ID")
     .option("--password <password>", "Account password (or PROTON_PASSWORD)")
+    .option("--raw", "Print the decrypted body without HTML→text conversion")
     .option("--dry-run", "Print planned read without calling the API")
     .action(async function (
       this: Command,
       messageId: string,
-      options: { password?: string },
+      options: { password?: string; raw?: boolean },
     ) {
       try {
         const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
         if (options.password) {
           process.env.PROTON_PASSWORD = options.password;
         }
-        await runMailRead(messageId, { passRef: globals?.pass });
+        await runMailRead(messageId, {
+          passRef: globals?.pass,
+          raw: options.raw,
+        });
       } catch (error) {
         reportCommandError(error);
       }
