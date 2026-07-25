@@ -102,19 +102,30 @@ export function registerSignin(program: Command): void {
       try {
         const products = parseProductList(opts.products);
         const { credentials, passRef } = await readCredentials(opts);
+        let lastTotp: string | undefined = credentials.totp;
         const result = await dualMintSignIn({
           credentials: {
             ...credentials,
             refreshTotp: async (previous?: string) => {
+              const avoid = previous ?? lastTotp;
               if (passRef && !(opts.totp ?? process.env.PROTON_TOTP)) {
-                return (
+                if (avoid && !opts.json) {
+                  console.log(
+                    "Waiting for next Pass TOTP (previous code already used)…",
+                  );
+                }
+                const fresh =
                   (await resolveFreshPassTotp(passRef, {
-                    avoidCode: previous,
-                  })) ?? undefined
-                );
+                    avoidCode: avoid,
+                  })) ?? undefined;
+                if (fresh) lastTotp = fresh;
+                return fresh;
               }
               const staticTotp = opts.totp ?? process.env.PROTON_TOTP;
-              if (staticTotp && !previous) return staticTotp;
+              if (staticTotp && !avoid) {
+                lastTotp = staticTotp;
+                return staticTotp;
+              }
               if (!process.stdin.isTTY || !process.stdout.isTTY) {
                 return undefined;
               }
@@ -126,7 +137,9 @@ export function registerSignin(program: Command): void {
                 const value = await rl.question(
                   "TOTP to finish sign-in (fresh authenticator code): ",
                 );
-                return value.trim() || undefined;
+                const trimmed = value.trim() || undefined;
+                if (trimmed) lastTotp = trimmed;
+                return trimmed;
               } finally {
                 rl.close();
               }
@@ -134,9 +147,9 @@ export function registerSignin(program: Command): void {
           },
           products,
           partialOk: Boolean(opts.partialOk),
-          productGapMs: 8_000,
-          rateLimitRetries: 2,
-          rateLimitWaitMs: 60_000,
+          productGapMs: 0,
+          rateLimitRetries: 1,
+          rateLimitWaitMs: 45_000,
           onProgress: (event) => {
             if (opts.json) return;
             if (event.type === "wait") console.log(event.message);

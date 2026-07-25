@@ -20,7 +20,7 @@ export class CliError extends Error {
 export function messageForApiCode(code: number, fallback?: string): string {
   switch (code) {
     case API_CODE_PASSWORD_WRONG:
-      return "Authentication failed. Check your username and password.";
+      return "Authentication failed. Check password, or use a fresh TOTP (codes are single-use).";
     case API_CODE_HUMAN_VERIFICATION:
       return (
         "CAPTCHA / human verification required.\n" +

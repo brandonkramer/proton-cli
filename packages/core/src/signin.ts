@@ -56,11 +56,11 @@ export interface DualSignInOptions {
     product: ProductId,
     credentials: SignInCredentials,
   ) => Promise<SignInCredentials>;
-  /** Pause between product mints (default 8000). Set 0 to disable. */
+  /** Pause between product mints (default 0). Only needed if Proton 2028s. */
   productGapMs?: number;
-  /** Extra retries after API 2028 (default 2). */
+  /** Extra retries after API 2028 (default 1). */
   rateLimitRetries?: number;
-  /** Wait before a 2028 retry (default 60000). */
+  /** Wait before a 2028 retry (default 45000). */
   rateLimitWaitMs?: number;
   onProgress?: (event: DualSignInProgress) => void;
 }
@@ -103,9 +103,9 @@ export async function dualMintSignIn(
     partialOk = false,
     clearers,
     prepareCredentials,
-    productGapMs = 8_000,
-    rateLimitRetries = 2,
-    rateLimitWaitMs = 60_000,
+    productGapMs = 0,
+    rateLimitRetries = 1,
+    rateLimitWaitMs = 45_000,
     onProgress,
   } = options;
   const succeeded: ProductId[] = [];

@@ -91,30 +91,41 @@ export async function runParentSignin(): Promise<void> {
     })),
     note: "Password first, then Pass TOTP for 2FA. mail-api sessions are shared.",
     run: async (ui) => {
+      // Proton rejects reusing the same TOTP across product logins in one window.
+      let lastTotp: string | undefined = credentials.totp;
       return dualMintSignIn({
         credentials: {
           ...credentials,
           refreshTotp: async (previous?: string) => {
+            const avoid = previous ?? lastTotp;
             if (passRef) {
-              ui.setNote("Unlocking 2FA — fetching fresh TOTP from Pass…");
+              ui.setNote(
+                avoid
+                  ? "Waiting for next Pass TOTP (previous code already used)…"
+                  : "Unlocking 2FA — fetching TOTP from Pass…",
+              );
               const fromPass = await resolveFreshPassTotp(passRef, {
-                avoidCode: previous ?? credentials.totp,
+                avoidCode: avoid,
               });
-              if (fromPass) return fromPass;
+              if (fromPass) {
+                lastTotp = fromPass;
+                return fromPass;
+              }
             }
-            return (
+            const typed =
               (await inkPromptTotp(
                 "TOTP to finish sign-in",
-                "Enter a fresh authenticator code",
-              )) || undefined
-            );
+                "Enter a fresh authenticator code (do not reuse the last one)",
+              )) || undefined;
+            if (typed) lastTotp = typed;
+            return typed;
           },
         },
         products: [...PRODUCTS],
         partialOk: true,
-        productGapMs: 8_000,
-        rateLimitRetries: 2,
-        rateLimitWaitMs: 60_000,
+        productGapMs: 0,
+        rateLimitRetries: 1,
+        rateLimitWaitMs: 45_000,
         onProgress: (event) => {
           switch (event.type) {
             case "start":
