@@ -32,13 +32,20 @@ export async function protonFetch<T>(
   options: RequestOptions = {},
 ): Promise<ProtonFetchResult<T>> {
   const apiUrl = options.apiUrl ?? DEFAULT_API_URL;
+  const isFormData =
+    typeof FormData !== "undefined" && options.body instanceof FormData;
   const headers: Record<string, string> = {
     Accept: "application/json",
-    "Content-Type": "application/json",
     "x-pm-appversion": APP_VERSION,
     "User-Agent": USER_AGENT,
     ...options.headers,
   };
+  // Multipart must set its own boundary — do not force JSON Content-Type.
+  if (isFormData) {
+    delete headers["Content-Type"];
+  } else if (headers["Content-Type"] === undefined) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (options.session) {
     headers.Authorization = `Bearer ${options.session.AccessToken}`;
@@ -63,10 +70,16 @@ export async function protonFetch<T>(
   }
 
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
+  let body: string | FormData | undefined;
+  if (options.body !== undefined) {
+    body = isFormData
+      ? (options.body as FormData)
+      : JSON.stringify(options.body);
+  }
   const response = await fetchImpl(url, {
     method: options.method ?? (options.body ? "POST" : "GET"),
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body,
   });
 
   const etag = response.headers.get("ETag");

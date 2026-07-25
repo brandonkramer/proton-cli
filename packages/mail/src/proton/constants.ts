@@ -15,7 +15,12 @@ export const LABELS_PATH = "/core/v4/labels";
 export const KEYS_ALL_PATH = "/core/v4/keys/all";
 
 export const MAIL_MESSAGES_PATH = "/mail/v4/messages";
+export const MAIL_ATTACHMENTS_PATH = "/mail/v4/attachments";
 export const MAIL_CONVERSATIONS_PATH = "/mail/v4/conversations";
+
+/** Proton outgoing attachment limits (WebClients). */
+export const MAX_ATTACHMENT_BYTES = 25_000_000;
+export const MAX_ATTACHMENT_COUNT = 100;
 export const MAIL_MESSAGES_LABEL_PATH = `${MAIL_MESSAGES_PATH}/label`;
 export const MAIL_MESSAGES_UNLABEL_PATH = `${MAIL_MESSAGES_PATH}/unlabel`;
 export const MAIL_MESSAGES_READ_PATH = `${MAIL_MESSAGES_PATH}/read`;

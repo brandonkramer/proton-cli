@@ -1,14 +1,23 @@
+import { readFile, stat } from "node:fs/promises";
 import {
   createDraft,
   deleteMessages,
   getMessage,
   sendPackages,
+  uploadAttachment,
 } from "../proton/client.ts";
+import {
+  MAX_ATTACHMENT_BYTES,
+  MAX_ATTACHMENT_COUNT,
+} from "../proton/constants.ts";
 import type { MailRecipient, Session } from "../proton/types.ts";
+import { encryptAttachmentFile } from "../crypto/attachments.ts";
 import {
   assertEncryptedBody,
   encryptForSend,
+  enrichPackagesWithAttachments,
   type EncryptSendResult,
+  type UploadedAttachmentKey,
 } from "../crypto/send.ts";
 import {
   draftActionFor,
@@ -275,9 +284,9 @@ export async function sendMail(
 
   assertSendAllowed();
 
-  if (attach.length > 0) {
+  if (attach.length > MAX_ATTACHMENT_COUNT) {
     throw new CliError(
-      "Attachments are not yet supported on the live send path. Use --dry-run to preview.",
+      `Too many attachments (${attach.length}). Max is ${MAX_ATTACHMENT_COUNT}.`,
     );
   }
 
@@ -333,6 +342,22 @@ export async function sendMail(
     });
     draftId = created.ID;
 
+    const uploaded = await uploadAttachmentsForDraft({
+      paths: attach,
+      messageId: created.ID,
+      senderKey,
+      session: options.session,
+      fetchImpl: options.fetchImpl,
+    });
+
+    if (uploaded.length > 0) {
+      await enrichPackagesWithAttachments({
+        packages: encrypted.packages,
+        attachments: uploaded,
+        recipients: recipientPrefs,
+      });
+    }
+
     await sendPackages({
       session: options.session,
       fetchImpl: options.fetchImpl,
@@ -366,4 +391,54 @@ export async function sendMail(
     }
     throw error;
   }
+}
+
+async function uploadAttachmentsForDraft(options: {
+  paths: string[];
+  messageId: string;
+  senderKey: UnlockedAddressKey;
+  session: Session;
+  fetchImpl?: typeof fetch;
+}): Promise<UploadedAttachmentKey[]> {
+  if (options.paths.length === 0) return [];
+
+  let totalBytes = 0;
+  const uploaded: UploadedAttachmentKey[] = [];
+
+  for (const path of options.paths) {
+    let fileStat;
+    try {
+      fileStat = await stat(path);
+    } catch {
+      throw new CliError(`Attachment not found: ${path}`);
+    }
+    if (!fileStat.isFile()) {
+      throw new CliError(`Attachment is not a file: ${path}`);
+    }
+    totalBytes += fileStat.size;
+    if (totalBytes > MAX_ATTACHMENT_BYTES) {
+      throw new CliError(
+        `Attachments exceed ${Math.floor(MAX_ATTACHMENT_BYTES / 1_000_000)}MB total limit.`,
+      );
+    }
+
+    const bytes = new Uint8Array(await readFile(path));
+    const encrypted = await encryptAttachmentFile({
+      path,
+      bytes,
+      senderKey: options.senderKey,
+    });
+    const attachment = await uploadAttachment({
+      session: options.session,
+      fetchImpl: options.fetchImpl,
+      messageId: options.messageId,
+      file: encrypted,
+    });
+    uploaded.push({
+      id: attachment.ID,
+      sessionKey: encrypted.sessionKey,
+    });
+  }
+
+  return uploaded;
 }

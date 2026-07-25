@@ -91,6 +91,9 @@ export interface MailAttachment {
   Name?: string;
   Size?: number;
   MIMEType?: string;
+  KeyPackets?: string;
+  Signature?: string;
+  Disposition?: string;
 }
 
 export interface Message extends MessageMetadata {

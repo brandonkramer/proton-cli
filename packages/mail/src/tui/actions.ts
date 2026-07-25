@@ -1,3 +1,4 @@
+import { ContactsClient } from "@bkramer/proton-contacts";
 import type { ComposeAction } from "../crypto/mime.ts";
 import { configDir } from "../config/paths.ts";
 import { requireMailRuntime } from "../context.ts";
@@ -109,21 +110,109 @@ export async function actionSearch(): Promise<void> {
   }
 }
 
+async function pickRecipientFromContacts(
+  ensurePassword: () => Promise<string>,
+): Promise<string | null> {
+  const password = await ensurePassword();
+  const contacts = await runTask({
+    title: "Contacts",
+    steps: [
+      { id: "unlock", label: "Unlocking keys" },
+      { id: "list", label: "Loading contacts" },
+    ],
+    run: async (ui) => {
+      ui.updateStep("unlock", { status: "running" });
+      const runtime = await requireMailRuntime({ unlockKeys: true, password });
+      ui.updateStep("unlock", { status: "done" });
+      ui.updateStep("list", { status: "running" });
+      if (!runtime.userKey) {
+        throw new Error("Could not unlock user key for contacts.");
+      }
+      const client = new ContactsClient({
+        // Mail + Contacts share mail-api; session shapes match.
+        session: runtime.session as never,
+        userKey: runtime.userKey,
+      });
+      const list = await client.listAll();
+      ui.updateStep("list", {
+        status: "done",
+        detail: `${list.length}`,
+      });
+      return list;
+    },
+  });
+
+  const options: Array<{ label: string; value: string }> = [];
+  for (const contact of contacts) {
+    const emails = contact.emails.length
+      ? contact.emails
+      : contact.email
+        ? [contact.email]
+        : [];
+    for (const email of emails) {
+      const name = contact.name?.trim();
+      options.push({
+        label: name ? `${name} <${email}>` : email,
+        value: email,
+      });
+    }
+  }
+
+  if (options.length === 0) {
+    await showMessage({
+      variant: "warning",
+      title: "No contacts",
+      body: "No contacts with email addresses. Type an address instead.",
+      holdMs: 1200,
+    });
+    return null;
+  }
+
+  options.push({ label: "Type email instead", value: "__type__" });
+  const picked = await inkPromptSelect(
+    "Pick recipient",
+    options,
+    "Esc/q cancel",
+  );
+  if (!picked || picked === "__type__") return null;
+  return picked;
+}
+
 async function promptComposeFields(options: {
   action: ComposeAction;
   message?: DecryptedMessage;
+  ensurePassword: () => Promise<string>;
 }): Promise<ComposeInput | null> {
-  const { action, message } = options;
+  const { action, message, ensurePassword } = options;
 
   let to: string[] | undefined;
   let subject: string | undefined;
 
   if (action === "send" || action === "forward") {
-    const toRaw = await inkPromptText("To", {
-      placeholder: "you@example.com",
-      hint: "Comma-separated addresses OK",
-    });
-    to = [toRaw];
+    const mode = await inkPromptSelect(
+      "To",
+      [
+        { label: "Type email", value: "type" },
+        { label: "Pick from contacts", value: "contacts" },
+      ],
+      "Esc/q cancel",
+    );
+    if (!mode) return null;
+
+    if (mode === "contacts") {
+      const fromContacts = await pickRecipientFromContacts(ensurePassword);
+      if (fromContacts) {
+        to = [fromContacts];
+      }
+    }
+
+    if (!to) {
+      const toRaw = await inkPromptText("To", {
+        placeholder: "you@example.com",
+        hint: "Comma-separated addresses OK",
+      });
+      to = [toRaw];
+    }
   }
 
   if (action === "send") {
@@ -157,12 +246,24 @@ async function promptComposeFields(options: {
         : "Plain text body",
   });
 
+  const attachRaw = await inkPromptOptionalText("Attachments", {
+    placeholder: "/path/to/file.pdf",
+    hint: "Optional · comma-separated local file paths",
+  });
+  const attach = attachRaw
+    ? attachRaw
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean)
+    : undefined;
+
   const summaryParts = [
     `Action: ${action}`,
     to ? `To: ${to.join(", ")}` : message ? `To: (from original)` : null,
     ccRaw ? `Cc: ${ccRaw}` : null,
     subject ? `Subject: ${subject}` : null,
     `Body: ${body ? `${body.slice(0, 60)}${body.length > 60 ? "…" : ""}` : "(empty)"}`,
+    attach?.length ? `Attach: ${attach.length} file(s)` : null,
   ].filter(Boolean);
 
   const confirm = await inkPromptSelect(
@@ -182,11 +283,15 @@ async function promptComposeFields(options: {
     subject,
     body,
     messageId: message?.id,
+    attach,
   };
 }
 
-async function runSendFlow(input: ComposeInput): Promise<void> {
-  const password = await resolveAccountPassword({});
+async function runSendFlow(
+  input: ComposeInput,
+  password?: string,
+): Promise<void> {
+  const resolvedPassword = password ?? (await resolveAccountPassword({}));
   const result = await runTask({
     title:
       input.action === "send"
@@ -200,12 +305,15 @@ async function runSendFlow(input: ComposeInput): Promise<void> {
     ],
     run: async (ui) => {
       ui.updateStep("unlock", { status: "running" });
-      const runtime = await requireMailRuntime({ unlockKeys: true, password });
+      const runtime = await requireMailRuntime({
+        unlockKeys: true,
+        password: resolvedPassword,
+      });
       ui.updateStep("unlock", { status: "done" });
       ui.updateStep("send", { status: "running" });
       const sent = await sendMail(input, {
         session: runtime.session,
-        password,
+        password: resolvedPassword,
         username: runtime.username,
         addressKeys: runtime.addressKeys,
         addresses: runtime.addresses,
@@ -235,7 +343,14 @@ async function runSendFlow(input: ComposeInput): Promise<void> {
 }
 
 export async function actionCompose(): Promise<void> {
-  const input = await promptComposeFields({ action: "send" });
+  let password: string | undefined;
+  const input = await promptComposeFields({
+    action: "send",
+    ensurePassword: async () => {
+      if (!password) password = await resolveAccountPassword({});
+      return password;
+    },
+  });
   if (!input) {
     await showMessage({
       variant: "info",
@@ -245,12 +360,12 @@ export async function actionCompose(): Promise<void> {
     });
     return;
   }
-  await runSendFlow(input);
+  await runSendFlow(input, password);
 }
 
 export async function actionRead(messageId: string): Promise<void> {
   // Prompt outside the task spinner so Ink UIs do not stack.
-  const password = await resolveAccountPassword({});
+  let password = await resolveAccountPassword({});
 
   const message = await runTask({
     title: "Read message",
@@ -281,6 +396,10 @@ export async function actionRead(messageId: string): Promise<void> {
   const input = await promptComposeFields({
     action: next,
     message,
+    ensurePassword: async () => {
+      if (!password) password = await resolveAccountPassword({});
+      return password;
+    },
   });
   if (!input) {
     await showMessage({
@@ -291,7 +410,7 @@ export async function actionRead(messageId: string): Promise<void> {
     });
     return;
   }
-  await runSendFlow(input);
+  await runSendFlow(input, password);
 }
 
 export async function actionStatus(): Promise<void> {

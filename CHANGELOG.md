@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Mail TUI Compose (to/subject/body) plus Reply / Reply all / Forward after reading a message
+- Mail TUI Compose: pick To from Contacts or type email; optional local file attachments
+- Mail live send supports `--attach` (encrypt + multipart upload to draft, then send packages)
 
 ### Fixed
 - Mail send create-draft no longer sends `AttachmentKeyPackets: {}` (Proton 2001 Invalid input); uses `[]` and omits Parent/Action for new mail

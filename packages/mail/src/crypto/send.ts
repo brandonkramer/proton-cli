@@ -225,3 +225,70 @@ export function assertEncryptedBody(body: string): void {
     );
   }
 }
+
+export interface UploadedAttachmentKey {
+  id: string;
+  sessionKey: SessionKeyMaterial;
+}
+
+/**
+ * Add per-recipient AttachmentKeyPackets (internal) and package-level
+ * AttachmentKeys (clear external) after draft attachment upload.
+ */
+export async function enrichPackagesWithAttachments(options: {
+  packages: SendPackage[];
+  attachments: UploadedAttachmentKey[];
+  recipients: RecipientKeyPref[];
+  cryptoProxy?: EncryptForSendOptions["cryptoProxy"];
+}): Promise<void> {
+  if (options.attachments.length === 0) return;
+
+  const proxy = options.cryptoProxy ?? (await getCryptoProxy());
+  const encryptSessionKey = (
+    proxy as {
+      encryptSessionKey?: (options: Record<string, unknown>) => Promise<string | Uint8Array>;
+    }
+  ).encryptSessionKey;
+  if (!encryptSessionKey) {
+    throw new CliError(
+      "CryptoProxy missing encryptSessionKey for attachment send packages.",
+    );
+  }
+
+  const prefsByEmail = new Map(
+    options.recipients.map((r) => [r.email.trim().toLowerCase(), r] as const),
+  );
+
+  for (const pack of options.packages) {
+    const needsClearKeys =
+      (pack.Type & PACKAGE_TYPE.SEND_CLEAR) !== 0 ||
+      (pack.Type & PACKAGE_TYPE.SEND_CLEAR_MIME) !== 0;
+
+    if (needsClearKeys) {
+      pack.AttachmentKeys = pack.AttachmentKeys ?? {};
+      for (const att of options.attachments) {
+        pack.AttachmentKeys[att.id] = {
+          Key: bytesToBase64(att.sessionKey.data),
+          Algorithm: att.sessionKey.algorithm || "aes256",
+        };
+      }
+    }
+
+    for (const [email, addr] of Object.entries(pack.Addresses)) {
+      if ((addr.Type & PACKAGE_TYPE.SEND_PM) === 0) continue;
+      const pref = prefsByEmail.get(email);
+      if (!pref || pref.publicKeys.length === 0) continue;
+
+      addr.AttachmentKeyPackets = addr.AttachmentKeyPackets ?? {};
+      for (const att of options.attachments) {
+        const keyPacket = await encryptSessionKey({
+          data: att.sessionKey.data,
+          algorithm: att.sessionKey.algorithm,
+          encryptionKeys: pref.publicKeys,
+          format: "binary",
+        });
+        addr.AttachmentKeyPackets[att.id] = bytesToBase64(asBytes(keyPacket));
+      }
+    }
+  }
+}

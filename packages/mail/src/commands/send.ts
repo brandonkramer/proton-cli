@@ -103,7 +103,7 @@ export function registerSend(mail: Command): void {
     .requiredOption("--subject <text>", "Subject line")
     .option("--body <text>", "Plain or HTML body", "")
     .option("--html", "Treat body as text/html")
-    .option("--attach <path>", "Attachment path (repeatable; dry-run only for now)", collect, [])
+    .option("--attach <path>", "Attachment path (repeatable)", collect, [])
     .option("--dry-run", "Plan encrypt+send without any network POST")
     .action(async function (
       this: Command,

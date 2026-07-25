@@ -5,6 +5,7 @@ import {
   LABELS_PATH,
   LABEL_TYPE_FOLDER,
   LABEL_TYPE_LABEL,
+  MAIL_ATTACHMENTS_PATH,
   MAIL_MESSAGES_DELETE_PATH,
   MAIL_MESSAGES_LABEL_PATH,
   MAIL_MESSAGES_PATH,
@@ -21,6 +22,7 @@ import type {
   LabelMessagesRequest,
   LabelResponse,
   LabelsResponse,
+  MailAttachment,
   Message,
   MessageActionRequest,
   MessageMetadata,
@@ -33,6 +35,7 @@ import type {
   UpdateLabelRequest,
 } from "./types.ts";
 import type { ProtonAddress } from "../crypto/unlock.ts";
+import type { EncryptedAttachmentFile } from "../crypto/attachments.ts";
 
 export interface MailClientOptions {
   session: Session;
@@ -262,6 +265,53 @@ export async function sendPackages(
     },
   );
   return data.Message;
+}
+
+/** Upload an encrypted attachment onto a draft (multipart POST /mail/v4/attachments). */
+export async function uploadAttachment(
+  options: MailClientOptions & {
+    messageId: string;
+    file: EncryptedAttachmentFile;
+  },
+): Promise<MailAttachment> {
+  const form = new FormData();
+  form.append("MessageID", options.messageId);
+  form.append("Filename", options.file.filename);
+  form.append("MIMEType", options.file.mimeType);
+  form.append("Disposition", "attachment");
+  form.append("ContentID", "");
+  form.append(
+    "KeyPackets",
+    new Blob([options.file.keyPackets]),
+    "blob",
+  );
+  form.append(
+    "DataPacket",
+    new Blob([options.file.dataPacket]),
+    "blob",
+  );
+  form.append(
+    "Signature",
+    new Blob([options.file.signature]),
+    "blob",
+  );
+
+  const data = await mailApi<{ Attachment?: MailAttachment }>(
+    MAIL_ATTACHMENTS_PATH,
+    {
+      method: "POST",
+      body: form,
+      session: options.session,
+      fetchImpl: options.fetchImpl,
+    },
+  );
+
+  if (!data.Attachment?.ID) {
+    throw new CliError(
+      `Upload attachment failed for ${options.file.filename}: no Attachment.ID.`,
+    );
+  }
+  return data.Attachment;
 }
 
 export interface LabelSummary {
