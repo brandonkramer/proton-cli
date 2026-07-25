@@ -10,6 +10,7 @@ export type TuiIntent =
   | { type: "signout" }
   | { type: "calendars" }
   | { type: "events" }
+  | { type: "create" }
   | { type: "status" };
 
 interface HomeSnapshot {
@@ -64,6 +65,7 @@ export async function showHome(): Promise<TuiIntent> {
       const options = [
         { label: "List calendars", value: "calendars" },
         { label: "List events", value: "events" },
+        { label: "Add event", value: "create" },
         { label: "Status", value: "status" },
         ...(signedIn ? [{ label: "Sign out", value: "signout" }] : []),
         { label: "Back", value: "quit" },
@@ -98,6 +100,9 @@ export async function showHome(): Promise<TuiIntent> {
                     break;
                   case "events":
                     resolve({ type: "events" });
+                    break;
+                  case "create":
+                    resolve({ type: "create" });
                     break;
                   case "status":
                     resolve({ type: "status" });

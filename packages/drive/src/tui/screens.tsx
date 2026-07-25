@@ -9,6 +9,7 @@ export type TuiIntent =
   | { type: "quit" }
   | { type: "signout" }
   | { type: "items" }
+  | { type: "upload" }
   | { type: "trash" }
   | { type: "status" };
 
@@ -63,6 +64,7 @@ export async function showHome(): Promise<TuiIntent> {
       const signedIn = Boolean(snap?.signedIn);
       const options = [
         { label: "List items", value: "items" },
+        { label: "Upload file", value: "upload" },
         { label: "List trash", value: "trash" },
         { label: "Status", value: "status" },
         ...(signedIn ? [{ label: "Sign out", value: "signout" }] : []),
@@ -95,6 +97,9 @@ export async function showHome(): Promise<TuiIntent> {
                 switch (value) {
                   case "items":
                     resolve({ type: "items" });
+                    break;
+                  case "upload":
+                    resolve({ type: "upload" });
                     break;
                   case "trash":
                     resolve({ type: "trash" });

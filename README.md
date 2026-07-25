@@ -121,7 +121,7 @@ proton contacts groups list
 proton contacts pin-key contact-id ./key.asc
 ```
 
-Bare `proton` (TTY) opens a nested Contacts menu (list / groups / status). Prefer `proton contacts … --json` for scripting.
+Bare `proton` (TTY) opens a nested Contacts menu (list / add contact / groups / status). Prefer `proton contacts … --json` for scripting.
 
 ### Calendar (`proton calendar …`)
 
@@ -135,7 +135,7 @@ proton calendar events create --title "Standup" --start 2026-07-24T09:00 --durat
 proton calendar events respond EVENT_REF --status accept
 ```
 
-Bare `proton` (TTY) opens a nested Calendar menu (list calendars / list events / status). Prefer `proton calendar … --json` for scripting. Encrypted event operations need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
+Bare `proton` (TTY) opens a nested Calendar menu (list calendars / list events / add event / status). Prefer `proton calendar … --json` for scripting. Encrypted event operations need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
 
 ### Drive (`proton drive …`)
 
@@ -151,7 +151,7 @@ proton drive trash list
 proton drive photos list
 ```
 
-Bare `proton` (TTY) opens a nested Drive menu (list items / list trash / status). Prefer `proton drive … --json` for scripting. Encrypted operations need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
+Bare `proton` (TTY) opens a nested Drive menu (list items / upload file / list trash / status). Prefer `proton drive … --json` for scripting. Encrypted operations need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
 
 ### Settings (`proton settings …`)
 

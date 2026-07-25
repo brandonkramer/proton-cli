@@ -1,10 +1,14 @@
+import { basename } from "node:path";
+import { stat } from "node:fs/promises";
 import { configDir } from "../config/paths.ts";
 import { DriveService } from "../drive/service.ts";
 import { loadSession, signOut } from "../proton/auth.ts";
 import { showItemList, showTrashList } from "../ui/list-view.tsx";
 import { showMessage } from "../ui/message.tsx";
+import { inkPromptOptionalText, inkPromptText } from "../ui/prompts.tsx";
 import { showStatus } from "../ui/status-view.tsx";
 import { runTask } from "../ui/task.tsx";
+import { normalizeDrivePath } from "../util/paths.ts";
 import { resolveAccountPassword } from "../util/password.ts";
 
 export async function actionSignout(): Promise<void> {
@@ -68,6 +72,81 @@ export async function actionListTrash(): Promise<void> {
   });
 
   await showTrashList(trash);
+}
+
+export async function actionUpload(): Promise<void> {
+  let src: string;
+  let dest: string;
+  try {
+    src = await inkPromptText("Local file", {
+      placeholder: "/path/to/file.pdf",
+      hint: "Absolute or relative path to a local file",
+    });
+    dest = await inkPromptOptionalText("Destination folder", {
+      defaultValue: "/",
+      placeholder: "/",
+      hint: "Drive folder path (default /)",
+    });
+  } catch {
+    await showMessage({
+      variant: "info",
+      title: "Cancelled",
+      body: "Upload cancelled.",
+      holdMs: 700,
+    });
+    return;
+  }
+
+  const destFolder = normalizeDrivePath(dest || "/");
+  const info = await stat(src);
+  if (info.isDirectory()) {
+    await showMessage({
+      variant: "error",
+      title: "Upload failed",
+      body: `${src} is a directory (recursive upload not supported here).`,
+      holdMs: 1500,
+    });
+    return;
+  }
+
+  const fileName = basename(src);
+  const bytes = new Uint8Array(await Bun.file(src).arrayBuffer());
+  const password = await resolveAccountPassword({});
+
+  const result = await runTask({
+    title: "Upload file",
+    steps: [
+      { id: "unlock", label: "Unlocking keys" },
+      { id: "upload", label: `Uploading ${fileName}` },
+    ],
+    run: async (ui) => {
+      ui.updateStep("unlock", { status: "running" });
+      const service = new DriveService();
+      const { client, context } = await service.open({ password });
+      ui.updateStep("unlock", { status: "done" });
+      ui.updateStep("upload", { status: "running" });
+      const uploaded = await service.upload(
+        client,
+        context,
+        destFolder,
+        fileName,
+        bytes,
+        { sizeHint: bytes.length },
+      );
+      if (!uploaded || "action" in uploaded) {
+        throw new Error("Upload did not complete.");
+      }
+      ui.updateStep("upload", { status: "done", detail: uploaded.linkId });
+      return uploaded;
+    },
+  });
+
+  await showMessage({
+    variant: "success",
+    title: "Uploaded",
+    body: `${fileName} → ${destFolder} (${result.linkId})`,
+    holdMs: 1200,
+  });
 }
 
 export async function actionStatus(): Promise<void> {

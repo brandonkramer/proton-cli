@@ -1,13 +1,31 @@
 import { configDir } from "../config/paths.ts";
 import { loadSession, signOut } from "../proton/auth.ts";
 import { listCalendars } from "../service/calendars.ts";
-import { defaultRange, listEvents, resolveCalendarId } from "../service/events.ts";
+import {
+  createEvent,
+  defaultRange,
+  listEvents,
+  resolveCalendarId,
+} from "../service/events.ts";
 import { showMessage } from "../ui/message.tsx";
 import { showCalendarList, showEventList } from "../ui/list-view.tsx";
+import {
+  inkPromptOptionalText,
+  inkPromptSelect,
+  inkPromptText,
+} from "../ui/prompts.tsx";
 import { showStatus } from "../ui/status-view.tsx";
 import { runTask } from "../ui/task.tsx";
+import { parseDuration } from "../util/duration.ts";
+import { parseTime } from "../util/ical.ts";
 import { resolveAccountPassword } from "../util/password.ts";
 import { requireSession } from "../util/session.ts";
+
+function defaultStartLocal(): string {
+  const d = new Date(Date.now() + 3_600_000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export async function actionSignout(): Promise<void> {
   await signOut();
@@ -72,6 +90,102 @@ export async function actionListEvents(): Promise<void> {
   });
 
   await showEventList(events);
+}
+
+export async function actionCreateEvent(): Promise<void> {
+  const saved = await requireSession();
+  const calendars = await listCalendars({ session: saved.session });
+  if (calendars.length === 0) {
+    await showMessage({
+      variant: "error",
+      title: "No calendars",
+      body: "Create a calendar first (proton calendar calendars create).",
+      holdMs: 1500,
+    });
+    return;
+  }
+
+  let calendarId = calendars[0]!.id;
+  if (calendars.length > 1) {
+    const picked = await inkPromptSelect(
+      "Calendar",
+      calendars.map((c) => ({ label: c.name, value: c.id })),
+    );
+    if (!picked) {
+      await showMessage({
+        variant: "info",
+        title: "Cancelled",
+        body: "Event not created.",
+        holdMs: 700,
+      });
+      return;
+    }
+    calendarId = picked;
+  }
+
+  let title: string;
+  let startRaw: string;
+  let durationRaw: string;
+  let location: string;
+  try {
+    title = await inkPromptText("Title", {
+      placeholder: "Standup",
+    });
+    startRaw = await inkPromptText("Start", {
+      defaultValue: defaultStartLocal(),
+      hint: "Formats: YYYY-MM-DDTHH:mm or YYYY-MM-DD HH:mm",
+    });
+    durationRaw = await inkPromptText("Duration", {
+      defaultValue: "1h",
+      hint: "e.g. 30m, 1h, 1d",
+    });
+    location = await inkPromptOptionalText("Location");
+  } catch {
+    await showMessage({
+      variant: "info",
+      title: "Cancelled",
+      body: "Event not created.",
+      holdMs: 700,
+    });
+    return;
+  }
+
+  const start = parseTime(startRaw);
+  const end = new Date(start.getTime() + parseDuration(durationRaw));
+  const password = await resolveAccountPassword({});
+
+  const result = await runTask({
+    title: "Add event",
+    steps: [
+      { id: "unlock", label: "Unlocking calendar keys" },
+      { id: "create", label: "Creating event" },
+    ],
+    run: async (ui) => {
+      ui.updateStep("unlock", { status: "running" });
+      ui.updateStep("unlock", { status: "done" });
+      ui.updateStep("create", { status: "running" });
+      const created = await createEvent({
+        session: saved.session,
+        calendarId,
+        password,
+        input: {
+          title,
+          location: location || undefined,
+          start,
+          end,
+        },
+      });
+      ui.updateStep("create", { status: "done", detail: created.id });
+      return created;
+    },
+  });
+
+  await showMessage({
+    variant: "success",
+    title: "Event created",
+    body: `"${title}" (${result.id})`,
+    holdMs: 1200,
+  });
 }
 
 export async function actionStatus(): Promise<void> {

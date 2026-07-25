@@ -4,6 +4,7 @@ import {
   actionListTrash,
   actionSignout,
   actionStatus,
+  actionUpload,
 } from "./actions.ts";
 import { showHome, type TuiIntent } from "./screens.tsx";
 
@@ -16,6 +17,9 @@ async function handleIntent(intent: TuiIntent): Promise<"home" | "quit"> {
       return "home";
     case "items":
       await actionListItems();
+      return "home";
+    case "upload":
+      await actionUpload();
       return "home";
     case "trash":
       await actionListTrash();

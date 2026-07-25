@@ -4,6 +4,7 @@ import { loadSession } from "../proton/auth.ts";
 import { signOut } from "../proton/auth.ts";
 import { showContactList, showGroupList } from "../ui/list-view.tsx";
 import { showMessage } from "../ui/message.tsx";
+import { inkPromptOptionalText, inkPromptText } from "../ui/prompts.tsx";
 import { showStatus } from "../ui/status-view.tsx";
 import { runTask } from "../ui/task.tsx";
 
@@ -39,6 +40,66 @@ export async function actionList(): Promise<void> {
   });
 
   await showContactList(contacts);
+}
+
+export async function actionCreate(): Promise<void> {
+  let name: string;
+  let email: string;
+  let phone: string;
+  try {
+    name = await inkPromptText("Name", {
+      placeholder: "Ada Lovelace",
+      hint: "Display name for the contact",
+    });
+    email = await inkPromptText("Email", {
+      placeholder: "ada@example.com",
+    });
+    phone = await inkPromptOptionalText("Phone", {
+      placeholder: "+1 555 0100",
+    });
+  } catch {
+    await showMessage({
+      variant: "info",
+      title: "Cancelled",
+      body: "Contact not created.",
+      holdMs: 700,
+    });
+    return;
+  }
+
+  const id = await runTask({
+    title: "Add contact",
+    steps: [
+      { id: "unlock", label: "Unlocking keys" },
+      { id: "create", label: "Creating contact" },
+    ],
+    run: async (ui) => {
+      ui.updateStep("unlock", { status: "running" });
+      const runtime = await requireContactsRuntime();
+      ui.updateStep("unlock", { status: "done" });
+      ui.updateStep("create", { status: "running" });
+      const createdId = await runtime.client.create({
+        name,
+        emails: [email],
+        phones: phone ? [phone] : [],
+        title: "",
+        org: "",
+        note: "",
+        birthday: "",
+        address: "",
+        url: "",
+      });
+      ui.updateStep("create", { status: "done", detail: createdId });
+      return createdId;
+    },
+  });
+
+  await showMessage({
+    variant: "success",
+    title: "Contact created",
+    body: `${name} <${email}> (${id})`,
+    holdMs: 1200,
+  });
 }
 
 export async function actionGroups(): Promise<void> {
