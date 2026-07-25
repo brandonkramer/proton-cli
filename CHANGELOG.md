@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mail send create-draft no longer sends `AttachmentKeyPackets: {}` (Proton 2001 Invalid input); uses `[]` and omits Parent/Action for new mail
 - Contacts client tests match `mail-api.proton.me` host (mocks no longer hardcode contacts-api)
 - Mail locked-scope unlock uses `PUT /core/v4/users/unlock` (not `/users/password`, which returned 2001)
+- External (non-Proton) sends use unsigned clear packages so Gmail shows plain text instead of PGP clearsigned armor
 - Parent TUI multi-product sign-in keeps successful sessions when a later product fails (e.g. Drive CAPTCHA) and continues minting the rest
 - SRP/CryptoProxy init no longer hits "endpoint not initialized" when Bun nested a second `@protontech/crypto` under `packages/*/node_modules`
 - Drive/VPN/Calendar/Contacts/Settings/Mail open the shared macOS CAPTCHA helper on human verification (same as Authenticator), instead of only pointing at account.proton.me

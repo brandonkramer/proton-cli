@@ -13,6 +13,7 @@ export const PACKAGE_TYPE = {
 } as const;
 
 export const SIGNATURE_TYPE = {
+  /** External cleartext without PGP clearsign armor (readable in Gmail). */
   NONE: 0,
   DETACHED: 1,
   ATTACHED: 2,
@@ -131,6 +132,8 @@ export async function encryptForSend(
     throw new CliError("Draft encryption failed: plaintext would be uploaded.");
   }
 
+  const hasInternal = uniqueRecipients.some((r) => r.publicKeys.length > 0);
+
   const encryptionKeysForSession = [
     options.senderKey.publicKey,
     ...uniqueRecipients.flatMap((r) => r.publicKeys),
@@ -140,10 +143,14 @@ export async function encryptForSend(
     recipientKeys: encryptionKeysForSession,
   });
 
+  // Sign only when at least one Proton recipient needs a detached signature.
+  // Cleartext-signed external mail shows "BEGIN PGP SIGNED MESSAGE" in Gmail.
   const encrypted = await proxy.encryptMessage({
     textData: options.plaintext,
     sessionKey,
-    signingKeys: [options.senderKey.privateKey],
+    ...(hasInternal
+      ? { signingKeys: [options.senderKey.privateKey] }
+      : {}),
     format: "binary",
   } as never);
   const dataPacket = asBytes(
@@ -174,9 +181,10 @@ export async function encryptForSend(
       };
       packageType |= PACKAGE_TYPE.SEND_PM;
     } else {
+      // Unsigned clear — readable in Gmail/Outlook (not PGP clearsigned armor).
       addresses[email] = {
         Type: PACKAGE_TYPE.SEND_CLEAR,
-        Signature: SIGNATURE_TYPE.DETACHED,
+        Signature: SIGNATURE_TYPE.NONE,
       };
       packageType |= PACKAGE_TYPE.SEND_CLEAR;
       needsClearBodyKey = true;

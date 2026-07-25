@@ -5,6 +5,7 @@ import { configureAgentFlags } from "../src/util/agent.ts";
 import {
   assertEncryptedBody,
   PACKAGE_TYPE,
+  SIGNATURE_TYPE,
 } from "../src/crypto/send.ts";
 import {
   ensureForwardSubject,
@@ -133,9 +134,57 @@ describe("encryptForSend / INV-E2EE-001", () => {
     expect(pack.Type & PACKAGE_TYPE.SEND_PM).toBeTruthy();
     expect(pack.Type & PACKAGE_TYPE.SEND_CLEAR).toBeTruthy();
     expect(pack.Addresses["bob@proton.me"]?.BodyKeyPacket).toBeTruthy();
+    expect(pack.Addresses["bob@proton.me"]?.Signature).toBe(
+      SIGNATURE_TYPE.DETACHED,
+    );
+    expect(pack.Addresses["ext@example.com"]?.Signature).toBe(
+      SIGNATURE_TYPE.NONE,
+    );
     expect(pack.BodyKey?.Key).toBeTruthy();
     // Full active key ring — not only publicKeys[0].
     expect(encryptSessionKeys).toEqual([{ kind: "bob-1" }, { kind: "bob-2" }]);
+  });
+
+  test("external-only clear packages are unsigned (no PGP clearsign)", async () => {
+    const sessionKey = {
+      data: new Uint8Array([1, 2, 3, 4]),
+      algorithm: "aes256",
+    };
+    let sawSigningKeys = false;
+    const cryptoProxy = {
+      encryptMessage: async (opts: Record<string, unknown>) => {
+        if (opts.signingKeys) sawSigningKeys = true;
+        if (opts.format === "armored") {
+          return {
+            message:
+              "-----BEGIN PGP MESSAGE-----\nDRAFT\n-----END PGP MESSAGE-----",
+          };
+        }
+        return { message: new Uint8Array([9, 9, 9]) };
+      },
+      generateSessionKey: async () => sessionKey,
+      encryptSessionKey: async () => new Uint8Array([7, 7]),
+    };
+
+    const result = await encryptForSend({
+      plaintext: "hello gmail",
+      senderKey: {
+        addressId: "addr-1",
+        email: "me@proton.me",
+        privateKey: { kind: "private" },
+        publicKey: { kind: "public" },
+      },
+      recipients: [{ email: "ext@gmail.com", publicKeys: [] }],
+      cryptoProxy: cryptoProxy as never,
+    });
+
+    const pack = result.packages[0]!;
+    expect(pack.Type).toBe(PACKAGE_TYPE.SEND_CLEAR);
+    expect(pack.Addresses["ext@gmail.com"]?.Signature).toBe(
+      SIGNATURE_TYPE.NONE,
+    );
+    expect(pack.BodyKey?.Key).toBeTruthy();
+    expect(sawSigningKeys).toBe(false);
   });
 });
 
