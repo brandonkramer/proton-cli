@@ -1,3 +1,4 @@
+import { HumanVerificationError } from "@bkramer/proton-core";
 import {
   API_CODE_APP_VERSION_BAD,
   API_CODE_HUMAN_VERIFICATION,
@@ -51,7 +52,9 @@ export function messageForApiCode(code: number, fallback?: string): string {
 
 /** Redact values that must never appear in logs or error dumps. */
 export function safeErrorMessage(error: unknown): string {
-  if (error instanceof CliError) return error.message;
+  if (error instanceof CliError || error instanceof HumanVerificationError) {
+    return error.message;
+  }
   if (error instanceof Error) {
     return error.message
       .replace(/otpauth:\/\/[^\s]+/gi, "[redacted-otpauth]")
@@ -62,5 +65,6 @@ export function safeErrorMessage(error: unknown): string {
 
 export function errorCodeOf(error: unknown): string {
   if (error instanceof CliError) return error.code;
+  if (error instanceof HumanVerificationError) return error.code;
   return "error";
 }

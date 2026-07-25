@@ -13,6 +13,11 @@ export interface RequestOptions {
   apiUrl?: string;
   headers?: Record<string, string>;
   fetchImpl?: typeof fetch;
+  /** Solved human-verification headers from CAPTCHA challenge. */
+  humanVerification?: {
+    token: string;
+    tokenType: string;
+  };
 }
 
 export interface ProtonFetchResult<T> {
@@ -38,6 +43,13 @@ export async function protonFetch<T>(
   if (options.session) {
     headers.Authorization = `Bearer ${options.session.AccessToken}`;
     headers["x-pm-uid"] = options.session.UID;
+  }
+
+  if (options.humanVerification) {
+    headers["x-pm-human-verification-token"] =
+      options.humanVerification.token;
+    headers["x-pm-human-verification-token-type"] =
+      options.humanVerification.tokenType;
   }
 
   let url = `${apiUrl}${path}`;

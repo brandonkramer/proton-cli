@@ -19,7 +19,7 @@ export function messageForApiCode(code: number, fallback?: string): string {
     case API_CODE_HUMAN_VERIFICATION:
       return (
         "CAPTCHA / human verification required.\n" +
-        "Sign in once at https://account.proton.me from this network, then retry."
+        "Re-run signin interactively — the CLI opens a native CAPTCHA window."
       );
     case API_CODE_APP_VERSION_BAD:
       return (

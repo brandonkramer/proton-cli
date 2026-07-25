@@ -58,3 +58,12 @@ export type {
   Session,
   SignInCredentials,
 } from "./types.ts";
+export {
+  API_CODE_HUMAN_VERIFICATION,
+  HumanVerificationError,
+  humanVerificationHeaders,
+  isHumanVerificationError,
+  solveCaptchaInBrowser,
+  type HumanVerificationDetails,
+  type HumanVerificationResult,
+} from "./human-verification.ts";

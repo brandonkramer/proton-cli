@@ -1,3 +1,10 @@
+import {
+  HumanVerificationError,
+  isHumanVerificationError,
+  solveCaptchaInBrowser,
+  type HumanVerificationDetails,
+  type HumanVerificationResult,
+} from "@bkramer/proton-core";
 import { clearSession, loadSession, saveSession } from "../config/store.ts";
 import { getSrp } from "../shims/proton-srp.ts";
 import { CliError, messageForApiCode } from "../util/errors.ts";
@@ -98,11 +105,21 @@ export async function refreshSession(session: Session): Promise<Session> {
   return data;
 }
 
-export async function loginWithPassword(options: {
+type AuthAttemptResult = {
+  status: number;
+  data: Session & {
+    Details?: Partial<HumanVerificationDetails>;
+    Error?: string;
+  };
+  expectedServerProof: string;
+};
+
+async function srpAuthAttempt(options: {
   username: string;
   password: string;
   totp?: string;
-}): Promise<Session> {
+  humanVerification?: HumanVerificationResult;
+}): Promise<AuthAttemptResult> {
   const info = await getAuthInfo(options.username);
   if (authInfoRequiresTotp(info) && !options.totp) {
     throw new CliError("2FA code required.");
@@ -128,22 +145,74 @@ export async function loginWithPassword(options: {
     body.TwoFactorCode = options.totp;
   }
 
-  const { status, data } = await protonFetch<Session>(AUTH_PATH, {
+  const { status, data } = await protonFetch<AuthAttemptResult["data"]>(AUTH_PATH, {
     method: "POST",
     body,
+    humanVerification: options.humanVerification,
   });
+
+  return {
+    status,
+    data,
+    expectedServerProof: proofs.expectedServerProof,
+  };
+}
+
+export async function loginWithPassword(options: {
+  username: string;
+  password: string;
+  totp?: string;
+  /** Called when a native CAPTCHA challenge is opened. */
+  onHumanVerification?: (info: { url: string; webUrl?: string }) => void;
+}): Promise<Session> {
+  let { status, data, expectedServerProof } = await srpAuthAttempt(options);
+
+  if (isHumanVerificationError(data)) {
+    const details = data.Details;
+    let hv: HumanVerificationResult;
+    try {
+      hv = await solveCaptchaInBrowser(details, {
+        onReady: (url) => {
+          options.onHumanVerification?.({
+            url,
+            webUrl: details.WebUrl,
+          });
+        },
+      });
+    } catch (error) {
+      if (error instanceof HumanVerificationError) {
+        throw new CliError(error.message);
+      }
+      throw error;
+    }
+
+    // Fresh SRP challenge + solved CAPTCHA token (challenge tokens are one-shot).
+    ({ status, data, expectedServerProof } = await srpAuthAttempt({
+      ...options,
+      humanVerification: hv,
+    }));
+  }
 
   if (data.Code === API_CODE_MAILBOX_PASSWORD) {
     throw new CliError(messageForApiCode(API_CODE_MAILBOX_PASSWORD));
   }
 
   if (status !== 200 || !isSuccessCode(data.Code)) {
+    if (isHumanVerificationError(data)) {
+      throw new CliError(
+        "CAPTCHA was completed but Proton still requires human verification.\n" +
+          "Retry signin, or sign in once at https://account.protonvpn.com from this network.",
+      );
+    }
     throw new CliError(
-      messageForApiCode(data.Code, data.Error ?? `Authentication failed (HTTP ${status}).`),
+      messageForApiCode(
+        data.Code,
+        data.Error ?? `Authentication failed (HTTP ${status}).`,
+      ),
     );
   }
 
-  if (data.ServerProof && data.ServerProof !== proofs.expectedServerProof) {
+  if (data.ServerProof && data.ServerProof !== expectedServerProof) {
     throw new CliError("Server proof verification failed. Aborting login.");
   }
 
