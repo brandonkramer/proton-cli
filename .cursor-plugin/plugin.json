@@ -1,0 +1,20 @@
+{
+  "name": "proton",
+  "version": "0.4.1",
+  "description": "Proton CLI via MCP — VPN, Authenticator, Mail, Drive, Calendar, Contacts, Settings, plus proton_cli for full coverage",
+  "author": {
+    "name": "brandonkramer"
+  },
+  "homepage": "https://github.com/brandonkramer/proton-cli#readme",
+  "repository": "https://github.com/brandonkramer/proton-cli",
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "proton",
+    "protonvpn",
+    "proton-mail",
+    "mcp",
+    "cli"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "mcp.json"
+}

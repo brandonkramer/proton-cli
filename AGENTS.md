@@ -22,8 +22,13 @@ End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
 | `packages/settings` | `@bkramer/proton-settings` | Account and mail settings (`proton settings …`) |
 | `packages/mail` | `@bkramer/proton-mail` | E2EE Mail list/read/search/send (`proton mail …`) |
 | `src/` | root bins | `proton` router, `protonvpn` / `protonauth` / `protondrive` / `protoncontacts` / `protoncal` / `protonsettings` wrappers |
+| `src/mcp/` | MCP | `proton mcp` stdio server + allowlisted CLI runner |
 | `scripts/` | install helpers | workspace links, OpenPGP patch, postinstall |
-| `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents |
+| `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents / MCP |
+| `.cursor-plugin/` | Cursor plugin | manifest + `mcp.json` |
+| `.codex-plugin/` | Codex plugin | manifest + MCP server launch |
+| `.claude-plugin/` | Claude plugin | manifest + local marketplace.json |
+| `package.json` `"pi"` | Pi package | skills entry for `pi install` |
 
 User data: `~/.config/proton-cli/` (or `%APPDATA%\proton-cli\`) with `sessions/*.json` and product subdirs.
 
@@ -74,6 +79,13 @@ Do not commit secrets, session files, or resolved Pass material.
 - Logicals (`/vpn/v1/logicals`): 10m memory + disk TTL, `ETag` / `If-None-Match` / `304`, stale fallback on network failure.
 - Session verify: lightweight `GET /vpn` (not a full logicals fetch).
 - WireGuard keypair reuse until Proton `RefreshTime`; cleared on sign-out / session clear.
+
+### Agent plugins / MCP
+
+- This repo is a Cursor/Codex/Claude plugin (`.cursor-plugin`, `.codex-plugin`, `.claude-plugin`) and a Pi package (`"pi": { "skills": ["./skills"] }`).
+- Agents should use MCP (`proton mcp`) rather than driving the TUI. Auth remains `proton signin` on a human TTY.
+- Wire hosts with `proton install-mcp` (`--scope user|project|local`, `--host cursor|codex|claude|pi|all`).
+- After editing plugin manifests or the skill, keep versions in `.cursor-plugin/plugin.json` / `.codex-plugin/plugin.json` / `.claude-plugin/plugin.json` aligned with `package.json`.
 
 ### Agent / scripting mode
 

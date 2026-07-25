@@ -8,6 +8,8 @@ import { registerSettingsCommands } from "@bkramer/proton-settings";
 import { registerVpnCommands } from "@bkramer/proton-vpn";
 import { Command } from "commander";
 import { registerAccount } from "./commands/account.ts";
+import { registerInstallMcp } from "./commands/install-mcp.ts";
+import { registerMcp } from "./commands/mcp.ts";
 import { registerSignin } from "./commands/signin.ts";
 import { registerSignout } from "./commands/signout.ts";
 import { registerStatus } from "./commands/status.ts";
@@ -76,6 +78,8 @@ registerSignin(program);
 registerSignout(program);
 registerStatus(program);
 registerUpdate(program);
+registerMcp(program, pkg.version);
+registerInstallMcp(program);
 
 const vpn = program
   .command("vpn")

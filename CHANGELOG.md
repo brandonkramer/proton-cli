@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Agent plugins: `.cursor-plugin` / `.codex-plugin` / `.claude-plugin` manifests, Pi `"pi"` skills package field
+- `proton mcp` stdio MCP server (curated tools + allowlisted `proton_cli`)
+- `proton install-mcp` to wire Cursor / Codex / Claude / Pi (`--scope user|project|local`)
+
 ## [0.4.1] - 2026-07-25
 
 ### Added

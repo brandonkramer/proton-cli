@@ -6,7 +6,7 @@ description: >-
   Authenticator E2EE TOTP/Steam sync and codes, Contacts E2EE cards/groups,
   Calendar E2EE calendars/events, Drive E2EE files/folders/photos,
   Settings account/mail API preferences, Mail E2EE list/read/search/send/organize,
-  status/signout, update, and agent scripting
+  status/signout, update, MCP tools (proton mcp), and agent scripting
   with --json / pass:// / pass-cli. Use when the user wants to run proton,
   protonvpn, protonauth, protoncontacts, protoncal, protonmail, automate Proton VPN,
   Authenticator, Contacts, Calendar, Drive, Settings, or Mail from a terminal or AI agent, or set up
@@ -21,6 +21,35 @@ short-description: Unified Proton CLI (VPN + Authenticator + Contacts + Calendar
 Unofficial unified Proton CLI (**VPN + Authenticator + Contacts + Calendar + Drive + Settings + Mail**) with shared sign-in UX. Not an official Proton product.
 
 Requires **Bun** ≥ 1.1 at runtime (even if installed via npm).
+
+## Agent MCP (Cursor / Codex / Claude / Pi)
+
+Humans use the `proton` CLI / TUI. Agents should prefer **MCP tools** from `proton mcp` (JSON/agent mode). Sign-in and CAPTCHA stay on a human TTY — never via MCP.
+
+```bash
+proton install-mcp --scope project --host all   # wire Cursor/Codex/Claude (+ Pi hint)
+proton install-mcp --scope user --host claude   # prints Claude marketplace install steps
+# Pi package/skills:
+pi install git:github.com/brandonkramer/proton-cli
+# or from a checkout: pi install . -l
+```
+
+### Routing
+
+1. Prefer curated tools: `proton_status`, `proton_vpn_status`, `proton_auth_code`, `proton_mail_list`, `proton_drive_list`.
+2. Other allowlisted CLI → `proton_cli` with `args` (argv after `proton`). Mutating commands need `confirm=true`.
+3. Never pass `--password` / `--totp` into MCP; use `proton account` / env / a prior interactive sign-in.
+
+### Curated tools → CLI
+
+| MCP tool | Behind it |
+|----------|-----------|
+| `proton_status` | `status --json` |
+| `proton_vpn_status` | `vpn status --json` |
+| `proton_auth_code` | `auth code <query> --json` |
+| `proton_mail_list` | `mail list [--label] --json` |
+| `proton_drive_list` | `drive items list [path] --json` |
+| `proton_cli` | `<args…>` allowlisted tops only |
 
 ## Install
 

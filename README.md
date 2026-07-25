@@ -46,6 +46,25 @@ On macOS, VPN connect/disconnect may ask for your **Mac login password** (sudo),
 
 CAPTCHA (if Proton requires it on sign-in): solve it in the **native WKWebView window**, not Safari/`verify.proton.me`.
 
+## Agent plugins (Cursor / Codex / Claude / Pi)
+
+This repo ships host plugin manifests and a thin MCP server (`proton mcp`) that shells out to the CLI in JSON/agent mode.
+
+```bash
+proton install-mcp --scope project --host all   # Cursor/Codex/Claude MCP + skill + Pi hint
+proton install-mcp --scope user --host cursor
+proton mcp                                      # stdio MCP (used by hosts)
+```
+
+| Host | Install |
+|------|---------|
+| Cursor | `proton install-mcp --host cursor` (user or project) — or load `.cursor-plugin/` |
+| Codex | `proton install-mcp --host codex` — or load `.codex-plugin/` |
+| Claude | `proton install-mcp --host claude` (project → `.mcp.json`; user → `claude plugin marketplace add` / install) — or load `.claude-plugin/` |
+| Pi | `pi install git:github.com/brandonkramer/proton-cli` (skills via `"pi"` in package.json); wire `proton mcp` through your MCP adapter |
+
+Sign-in / CAPTCHA stay interactive on a human TTY. Prefer curated MCP tools (`proton_status`, `proton_auth_code`, …) or `proton_cli` with `confirm=true` for mutations. See `skills/proton-cli/SKILL.md`.
+
 ## Commands
 
 Run `proton` with no args (TTY) for the interactive menu (VPN / Authenticator / Contacts / Calendar / Drive / Settings / Mail / sign-in).
@@ -67,6 +86,8 @@ proton status --json
 proton signout
 proton update --check
 proton update
+proton mcp                        # MCP stdio server for agents
+proton install-mcp                # wire Cursor/Codex/Pi
 ```
 
 With 2FA, `proton signin` / TUI **Sign in** need a **fresh TOTP per product** being minted. Prefer `proton account pass://Vault/Item` (or `--pass` / `PROTON_PASS`) so Pass supplies a new code for each mint. Requires `pass-cli` logged in. Sign-out keeps the saved Pass ref.

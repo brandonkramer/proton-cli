@@ -1,0 +1,17 @@
+{
+  "name": "proton-local",
+  "owner": {
+    "name": "brandonkramer"
+  },
+  "metadata": {
+    "description": "Local proton-cli plugin marketplace (Claude Code)"
+  },
+  "plugins": [
+    {
+      "name": "proton",
+      "description": "Proton CLI + MCP tools",
+      "source": "./.",
+      "category": "developer-tools"
+    }
+  ]
+}

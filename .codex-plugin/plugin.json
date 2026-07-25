@@ -1,0 +1,40 @@
+{
+  "name": "proton",
+  "version": "0.4.1",
+  "description": "Proton CLI via thin MCP tools — status, VPN, Authenticator codes, Mail/Drive list, plus proton_cli for full CLI coverage",
+  "author": {
+    "name": "brandonkramer",
+    "url": "https://github.com/brandonkramer"
+  },
+  "homepage": "https://github.com/brandonkramer/proton-cli#readme",
+  "repository": "https://github.com/brandonkramer/proton-cli",
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "proton",
+    "protonvpn",
+    "proton-mail",
+    "mcp",
+    "cli"
+  ],
+  "skills": "./skills/",
+  "mcpServers": {
+    "proton": {
+      "command": "proton",
+      "args": ["mcp"]
+    }
+  },
+  "interface": {
+    "displayName": "proton",
+    "shortDescription": "Proton VPN, Mail, Drive, and Authenticator from Codex",
+    "longDescription": "Thin MCP facade over the proton CLI (proton mcp). Prefer curated tools for common ops; use proton_cli for the rest. Auth once with proton signin on a human TTY.",
+    "developerName": "brandonkramer",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/brandonkramer/proton-cli",
+    "defaultPrompt": [
+      "Show my Proton CLI status.",
+      "List my Proton Mail inbox.",
+      "Get an Authenticator code for GitHub."
+    ]
+  }
+}

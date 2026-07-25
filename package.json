@@ -26,8 +26,15 @@
     "bun",
     "wireguard",
     "totp",
-    "tui"
+    "tui",
+    "mcp",
+    "pi-package"
   ],
+  "pi": {
+    "skills": [
+      "./skills"
+    ]
+  },
   "bin": {
     "proton": "./src/index.ts",
     "protonvpn": "./src/bins/protonvpn.ts",
@@ -51,6 +58,9 @@
     "README.md",
     "CHANGELOG.md",
     "skills",
+    ".cursor-plugin",
+    ".codex-plugin",
+    ".claude-plugin",
     "package.json",
     "tsconfig.json"
   ],
