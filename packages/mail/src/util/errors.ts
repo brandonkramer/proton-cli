@@ -42,6 +42,11 @@ export function messageForApiCode(code: number, fallback?: string): string {
         "This account uses legacy two-password mode, which is not supported.\n" +
         "Switch to one-password mode at account.proton.me → Account and password."
       );
+    case 2001:
+      return (
+        fallback ??
+        "Invalid input (Proton API 2001). Check recipients, draft fields, and try again."
+      );
     default:
       return fallback ?? `Proton API error (code ${code}).`;
   }

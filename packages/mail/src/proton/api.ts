@@ -17,9 +17,12 @@ export async function mailApi<T>(
 
   const code = (data as { Code?: number }).Code;
   if (code !== undefined && !isSuccessCode(code)) {
-    throw new CliError(
-      messageForApiCode(code, (data as { Error?: string }).Error ?? `API error (HTTP ${status})`),
-    );
+    const apiError = (data as { Error?: string }).Error;
+    const detail =
+      apiError && code
+        ? `${apiError} (${path}, code ${code})`
+        : apiError ?? `API error (HTTP ${status})`;
+    throw new CliError(messageForApiCode(code, detail));
   }
 
   if (status < 200 || status >= 300) {

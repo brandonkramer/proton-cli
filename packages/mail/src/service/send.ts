@@ -303,31 +303,40 @@ export async function sendMail(
 
   let draftId: string | undefined;
   try {
-    const draft = await createDraft({
+    const draft: Parameters<typeof createDraft>[0]["draft"] = {
+      Message: {
+        AddressID: senderKey.addressId,
+        Subject: composed.subject,
+        Sender: { Name: "", Address: senderKey.email },
+        ToList: composed.to,
+        CCList: composed.cc,
+        BCCList: composed.bcc,
+        Body: encrypted.draftBody,
+        MIMEType: encrypted.mimeType,
+        Unread: 0,
+      },
+    };
+    // Parent/Action only for reply/forward — omit for new mail.
+    if (composed.parentId) {
+      draft.ParentID = composed.parentId;
+    }
+    if (composed.draftAction !== undefined) {
+      draft.Action = composed.draftAction;
+    }
+    // Proton expects a string[] (or omission), not `{}` — empty object → 2001 Invalid input.
+    draft.AttachmentKeyPackets = [];
+
+    const created = await createDraft({
       session: options.session,
       fetchImpl: options.fetchImpl,
-      draft: {
-        Message: {
-          AddressID: senderKey.addressId,
-          Subject: composed.subject,
-          Sender: { Name: "", Address: senderKey.email },
-          ToList: composed.to,
-          CCList: composed.cc,
-          BCCList: composed.bcc,
-          Body: encrypted.draftBody,
-          MIMEType: encrypted.mimeType,
-        },
-        ParentID: composed.parentId,
-        Action: composed.draftAction,
-        AttachmentKeyPackets: {},
-      },
+      draft,
     });
-    draftId = draft.ID;
+    draftId = created.ID;
 
     await sendPackages({
       session: options.session,
       fetchImpl: options.fetchImpl,
-      messageId: draft.ID,
+      messageId: created.ID,
       request: {
         Packages: encrypted.packages,
         AutoSaveContacts: 0,
@@ -337,7 +346,7 @@ export async function sendMail(
 
     return {
       action: input.action,
-      messageId: draft.ID,
+      messageId: created.ID,
       subject: composed.subject,
       to: composed.to.map((r) => r.Address),
       cc: composed.cc.map((r) => r.Address),

@@ -278,9 +278,17 @@ describe("CASE-SEND-DRYRUN", () => {
     expect(posts).toHaveLength(2);
     expect(posts[0]?.path).toBe(MAIL_MESSAGES_PATH);
     expect(posts[1]?.path).toBe(`${MAIL_MESSAGES_PATH}/draft-1`);
-    const draftMessage = posts[0]?.body.Message as { Body: string };
-    expect(draftMessage.Body).toContain("BEGIN PGP MESSAGE");
-    expect(draftMessage.Body).not.toContain("secret");
+    const draftBody = posts[0]?.body as {
+      Message: { Body: string };
+      AttachmentKeyPackets?: unknown;
+      Action?: unknown;
+      ParentID?: unknown;
+    };
+    expect(draftBody.Message.Body).toContain("BEGIN PGP MESSAGE");
+    expect(draftBody.Message.Body).not.toContain("secret");
+    expect(draftBody.AttachmentKeyPackets).toEqual([]);
+    expect(draftBody.Action).toBeUndefined();
+    expect(draftBody.ParentID).toBeUndefined();
   });
 
   test("safety gate blocks live send before POST", async () => {

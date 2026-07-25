@@ -150,7 +150,8 @@ export interface CreateDraftRequest {
   Message: CreateDraftMessage;
   ParentID?: string;
   Action?: number;
-  AttachmentKeyPackets?: Record<string, string>;
+  /** Base64 key packets per attachment; empty list when none (must be an array, not `{}`). */
+  AttachmentKeyPackets?: string[];
 }
 
 export interface SendPackageRecipient {

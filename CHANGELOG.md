@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mail TUI Compose (to/subject/body) plus Reply / Reply all / Forward after reading a message
 
 ### Fixed
+- Mail send create-draft no longer sends `AttachmentKeyPackets: {}` (Proton 2001 Invalid input); uses `[]` and omits Parent/Action for new mail
 - Parent TUI multi-product sign-in keeps successful sessions when a later product fails (e.g. Drive CAPTCHA) and continues minting the rest
 - SRP/CryptoProxy init no longer hits "endpoint not initialized" when Bun nested a second `@protontech/crypto` under `packages/*/node_modules`
 - Drive/VPN/Calendar/Contacts/Settings/Mail open the shared macOS CAPTCHA helper on human verification (same as Authenticator), instead of only pointing at account.proton.me
