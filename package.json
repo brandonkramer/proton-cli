@@ -1,7 +1,7 @@
 {
   "name": "@bkramer/proton-cli",
   "version": "0.4.0",
-  "description": "Unofficial unified Proton CLI (VPN, Authenticator, shared sign-in)",
+  "description": "Unofficial unified Proton CLI (VPN, Authenticator, Contacts, Calendar, Drive, Settings, Mail) with shared Pass-aware sign-in",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "private": false,
@@ -17,11 +17,16 @@
   "keywords": [
     "proton",
     "protonvpn",
+    "proton-mail",
+    "proton-drive",
+    "proton-calendar",
+    "proton-contacts",
     "authenticator",
     "cli",
     "bun",
     "wireguard",
-    "totp"
+    "totp",
+    "tui"
   ],
   "bin": {
     "proton": "./src/index.ts",
