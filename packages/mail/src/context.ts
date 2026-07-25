@@ -56,6 +56,7 @@ export async function requireMailRuntime(options: {
       session,
       password,
       options.fetchImpl,
+      saved.username,
     );
     const userKey = unlocked.userKeys[0];
     if (!userKey) {

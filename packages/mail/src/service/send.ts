@@ -47,6 +47,8 @@ export interface ComposeInput {
 export interface SendServiceOptions {
   session: Session;
   password?: string;
+  /** Local-part username for password-scope unlock. */
+  username?: string;
   fetchImpl?: typeof fetch;
   addressKeys?: Map<string, UnlockedAddressKey>;
   addresses?: UnlockedMailKeys["addresses"];
@@ -99,6 +101,7 @@ async function ensureKeys(
     options.session,
     options.password,
     options.fetchImpl,
+    options.username,
   );
   return {
     addressKeys: unlocked.addressKeys,

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - After CAPTCHA, prompt for a fresh TOTP before retrying SRP (stale codes were misreported as wrong password)
 - Mail TUI/CLI prompts for the account password when unlocking keys to read/decrypt (no longer requires pre-set `$PROTON_PASSWORD`)
 - Mail TUI/`proton mail read` convert `text/html` bodies to plain text for the terminal (`--raw` keeps HTML; `--json` unchanged)
+- Mail unlocks password scope (SRP re-auth) before `/keys/salts` so reading encrypted messages works on locked sessions
 
 ## [0.3.0] - 2026-07-24
 

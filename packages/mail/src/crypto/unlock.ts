@@ -3,14 +3,16 @@ import {
   unlockUserKeysWithFetch,
   type DecryptedUserKey,
 } from "@bkramer/proton-core";
-import { getCryptoProxy } from "./proxy.ts";
+import { loadSession } from "../config/store.ts";
+import { mailApi } from "../proton/api.ts";
 import {
   ADDRESSES_PATH,
   KEYS_SALTS_PATH,
   USERS_PATH,
 } from "../proton/constants.ts";
-import { mailApi } from "../proton/api.ts";
 import type { Session } from "../proton/types.ts";
+import { unlockPasswordScope } from "./password-scope.ts";
+import { getCryptoProxy } from "./proxy.ts";
 
 export interface AddressKey {
   ID: string;
@@ -47,6 +49,8 @@ export interface UnlockedMailKeys {
 interface UnlockFetchOptions {
   session: Session;
   password: string;
+  /** Local-part username for SRP password-scope unlock. */
+  username?: string;
   fetchImpl?: typeof fetch;
 }
 
@@ -151,13 +155,32 @@ export async function unlockMailKeys(
   session: Session,
   password: string,
   fetchImpl?: typeof fetch,
+  username?: string,
 ): Promise<UnlockedMailKeys> {
-  return unlockMailKeysWithOptions({ session, password, fetchImpl });
+  return unlockMailKeysWithOptions({ session, password, fetchImpl, username });
 }
 
 export async function unlockMailKeysWithOptions(
   options: UnlockFetchOptions,
 ): Promise<UnlockedMailKeys> {
+  let username = options.username?.trim();
+  if (!username) {
+    username = (await loadSession())?.username;
+  }
+  if (!username) {
+    throw new Error(
+      "Username required to unlock mailbox keys (password scope). Re-run `proton signin --products mail`.",
+    );
+  }
+
+  // Session includes `locked` until SRP re-auth; keys/salts returns 9101 otherwise.
+  await unlockPasswordScope({
+    session: options.session,
+    username,
+    password: options.password,
+    fetchImpl: options.fetchImpl,
+  });
+
   const userKeys = await unlockUserKeysWithFetch({
     password: options.password,
     fetchUser: () => fetchUser(options.session, options.fetchImpl),

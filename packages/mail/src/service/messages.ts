@@ -56,6 +56,8 @@ export interface MessageServiceOptions {
   session: Session;
   fetchImpl?: typeof fetch;
   addressKeys?: Map<string, UnlockedAddressKey>;
+  /** Local-part username for password-scope unlock when address keys are absent. */
+  username?: string;
 }
 
 export interface ListMessagesForCommandOptions extends MessageServiceOptions {
@@ -170,6 +172,7 @@ export async function getAndDecryptMessage(
       options.session,
       options.password,
       options.fetchImpl,
+      options.username,
     );
     addressKeys = unlocked.addressKeys;
   }

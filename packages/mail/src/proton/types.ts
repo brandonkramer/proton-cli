@@ -38,6 +38,8 @@ export const API_CODE_OK = 1000;
 export const API_CODE_MULTI = 1001;
 export const API_CODE_PASSWORD_WRONG = 8002;
 export const API_CODE_HUMAN_VERIFICATION = 9001;
+/** Locked session — password scope required (e.g. `/keys/salts`). */
+export const API_CODE_INSUFFICIENT_SCOPE = 9101;
 export const API_CODE_APP_VERSION_BAD = 5003;
 export const API_CODE_MAILBOX_PASSWORD = 10013;
 

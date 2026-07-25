@@ -3,6 +3,7 @@ import { ExitCode, type ExitCodeValue } from "./exit.ts";
 import {
   API_CODE_APP_VERSION_BAD,
   API_CODE_HUMAN_VERIFICATION,
+  API_CODE_INSUFFICIENT_SCOPE,
   API_CODE_MAILBOX_PASSWORD,
   API_CODE_PASSWORD_WRONG,
 } from "../proton/types.ts";
@@ -25,6 +26,11 @@ export function messageForApiCode(code: number, fallback?: string): string {
       return (
         "CAPTCHA / human verification required.\n" +
         "Re-run signin interactively — the CLI opens a native CAPTCHA window."
+      );
+    case API_CODE_INSUFFICIENT_SCOPE:
+      return (
+        "Access token does not have sufficient scope.\n" +
+        "Mailbox key unlock needs a password-scope re-auth — retry reading the message, or sign in again with `proton signin --products mail`."
       );
     case API_CODE_APP_VERSION_BAD:
       return (
