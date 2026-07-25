@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-07-25
+
 ### Added
 - MCP curated tools for high-frequency agent paths: mail get/search/send/reply, contacts list/create, calendar upcoming/create, drive get/upload, settings get, vpn list
 
@@ -130,7 +132,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI + Release workflows; migration guide from standalone CLIs
 - Publish as **`@bkramer/proton-cli`** (npm); GitHub repo `brandonkramer/proton-cli`
 
-[Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/brandonkramer/proton-cli/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/brandonkramer/proton-cli/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/brandonkramer/proton-cli/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/brandonkramer/proton-cli/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/brandonkramer/proton-cli/compare/v0.3.0...v0.4.0

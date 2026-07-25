@@ -1,6 +1,6 @@
 {
   "name": "@bkramer/proton-cli",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Unofficial unified Proton CLI (VPN, Authenticator, Contacts, Calendar, Drive, Settings, Mail) with shared Pass-aware sign-in",
   "license": "GPL-3.0-or-later",
   "type": "module",
