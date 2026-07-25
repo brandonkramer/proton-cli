@@ -257,6 +257,51 @@ export async function resolvePassTotp(ref: string): Promise<string | null> {
   return viewField(itemRef, "totp", { optional: true });
 }
 
+/** Milliseconds until the next standard 30s TOTP window (plus a small buffer). */
+export function msUntilNextTotpWindow(
+  now = Date.now(),
+  periodMs = 30_000,
+  bufferMs = 750,
+): number {
+  return periodMs - (now % periodMs) + bufferMs;
+}
+
+function normalizeTotpCode(code: string): string {
+  return code.replace(/\s+/g, "");
+}
+
+/**
+ * Read a TOTP from Pass. If it matches `avoidCode` (already consumed / same
+ * 30s window as the pre-CAPTCHA code), wait for the next window and retry.
+ */
+export async function resolveFreshPassTotp(
+  ref: string,
+  options: { avoidCode?: string; maxWaitMs?: number } = {},
+): Promise<string | null> {
+  const avoid = options.avoidCode
+    ? normalizeTotpCode(options.avoidCode)
+    : undefined;
+  const maxWaitMs = options.maxWaitMs ?? 35_000;
+  const started = Date.now();
+
+  for (;;) {
+    const totp = await resolvePassTotp(ref);
+    if (!totp) return null;
+    if (!avoid || normalizeTotpCode(totp) !== avoid) return totp;
+
+    const elapsed = Date.now() - started;
+    if (elapsed >= maxWaitMs) return totp;
+
+    const waitMs = Math.min(
+      msUntilNextTotpWindow(),
+      maxWaitMs - elapsed,
+    );
+    if (waitMs > 0) {
+      await Bun.sleep(waitMs);
+    }
+  }
+}
+
 /** Sync: CLI option, then env (`PROTON_PASS`, …). Does not read account.json. */
 export function resolvePassRefFromEnv(optionValue?: string): string | undefined {
   const fromOption = optionValue?.trim();

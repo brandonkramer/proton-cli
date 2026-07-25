@@ -46,8 +46,10 @@ export {
 export {
   canonicalizePassItemRef,
   looksLikePassId,
+  msUntilNextTotpWindow,
   normalizePassItemRef,
   PASS_ENV_CANDIDATES,
+  resolveFreshPassTotp,
   resolvePassLogin,
   resolvePassRef,
   resolvePassRefFromEnv,

@@ -163,7 +163,7 @@ export async function loginWithPassword(options: {
   password: string;
   totp?: string;
   /** After CAPTCHA, obtain a fresh TOTP (pre-CAPTCHA codes are stale). */
-  refreshTotp?: () => Promise<string | undefined>;
+  refreshTotp?: (previous?: string) => Promise<string | undefined>;
   /** Called when a native CAPTCHA challenge is opened. */
   onHumanVerification?: (info: { url: string; webUrl?: string }) => void;
 }): Promise<Session> {
@@ -191,7 +191,7 @@ export async function loginWithPassword(options: {
     // Fresh SRP + CAPTCHA token. Re-prompt TOTP — the pre-CAPTCHA code is stale.
     let totp = options.totp;
     if (options.refreshTotp) {
-      totp = await options.refreshTotp();
+      totp = await options.refreshTotp(totp);
     } else {
       totp = undefined;
     }

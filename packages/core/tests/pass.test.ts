@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   looksLikePassId,
+  msUntilNextTotpWindow,
   normalizePassItemRef,
   resolvePassRef,
   resolvePassRefFromEnv,
@@ -29,6 +30,12 @@ describe("pass helpers", () => {
     ).toBe(true);
     expect(looksLikePassId("proton.me")).toBe(false);
     expect(looksLikePassId("Personal")).toBe(false);
+  });
+
+  test("msUntilNextTotpWindow lands in the next period", () => {
+    const wait = msUntilNextTotpWindow(30_000 * 10 + 1_000);
+    expect(wait).toBeGreaterThan(29_000);
+    expect(wait).toBeLessThanOrEqual(30_750);
   });
 
   test("resolvePassRefFromEnv prefers option then env candidates", () => {

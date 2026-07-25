@@ -46,8 +46,9 @@ export interface SignInCredentials {
   /**
    * After CAPTCHA, obtain a fresh TOTP. The code entered before CAPTCHA is
    * typically consumed or expired by the time the challenge finishes.
+   * `previous` is the code used for the pre-CAPTCHA attempt (avoid reusing it).
    */
-  refreshTotp?: () => Promise<string | undefined>;
+  refreshTotp?: (previous?: string) => Promise<string | undefined>;
 }
 
 export interface ProductAuthResult {

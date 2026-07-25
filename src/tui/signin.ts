@@ -7,6 +7,7 @@ import { authenticateContacts, clearContactsState } from "@bkramer/proton-contac
 import {
   dualMintSignIn,
   PRODUCTS,
+  resolveFreshPassTotp,
   resolvePassLogin,
   resolvePassRef,
   resolvePassTotp,
@@ -117,6 +118,7 @@ async function totpForProduct(
 async function mintProduct(
   product: ProductId,
   credentials: SignInCredentials,
+  passRef?: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     await runTask({
@@ -133,11 +135,21 @@ async function mintProduct(
         const result = await dualMintSignIn({
           credentials: {
             ...credentials,
-            refreshTotp: async () =>
-              (await inkPromptTotp(
-                `Fresh TOTP for ${productLabel(product)}`,
-                "CAPTCHA done — enter a new code (the previous one expired)",
-              )) || undefined,
+            refreshTotp: async (previous?: string) => {
+              if (passRef) {
+                ui.setNote("CAPTCHA done — fetching fresh TOTP from Pass…");
+                const fromPass = await resolveFreshPassTotp(passRef, {
+                  avoidCode: previous ?? credentials.totp,
+                });
+                if (fromPass) return fromPass;
+              }
+              return (
+                (await inkPromptTotp(
+                  `Fresh TOTP for ${productLabel(product)}`,
+                  "CAPTCHA done — enter a new code (the previous one expired)",
+                )) || undefined
+              );
+            },
           },
           products: [product],
           authenticators: {
@@ -187,7 +199,11 @@ export async function runParentSignin(): Promise<void> {
   for (const product of PRODUCTS) {
     // Prompt / Pass TOTP immediately before this product's mint (codes expire).
     const totp = await totpForProduct(product, passRef);
-    const outcome = await mintProduct(product, { ...credentials, totp });
+    const outcome = await mintProduct(
+      product,
+      { ...credentials, totp },
+      passRef,
+    );
     if (outcome.ok) {
       succeeded.push(product);
     } else {

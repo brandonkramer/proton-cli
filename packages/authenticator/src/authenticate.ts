@@ -21,7 +21,7 @@ export const authenticateAuthenticator: ProductAuthenticator = async (
     totp,
     refreshTotp: credentials.refreshTotp
       ? async () => {
-          totp = await credentials.refreshTotp!();
+          totp = await credentials.refreshTotp!(totp);
           return totp;
         }
       : undefined,

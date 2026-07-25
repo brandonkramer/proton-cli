@@ -19,7 +19,7 @@ export const authenticateContacts: ProductAuthenticator = async (credentials) =>
     totp,
     refreshTotp: credentials.refreshTotp
       ? async () => {
-          totp = await credentials.refreshTotp!();
+          totp = await credentials.refreshTotp!(totp);
           return totp;
         }
       : undefined,

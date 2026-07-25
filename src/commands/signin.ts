@@ -8,6 +8,7 @@ import {
   dualMintSignIn,
   parseProductList,
   resolvePassLogin,
+  resolveFreshPassTotp,
   resolvePassRef,
   resolvePassTotp,
   type ProductId,
@@ -179,9 +180,13 @@ export function registerSignin(program: Command): void {
         const result = await dualMintSignIn({
           credentials: {
             ...credentials,
-            refreshTotp: async () => {
+            refreshTotp: async (previous?: string) => {
               if (passRef && !(opts.totp ?? process.env.PROTON_TOTP)) {
-                return (await resolvePassTotp(passRef)) ?? undefined;
+                return (
+                  (await resolveFreshPassTotp(passRef, {
+                    avoidCode: previous,
+                  })) ?? undefined
+                );
               }
               if (!process.stdin.isTTY || !process.stdout.isTTY) {
                 return undefined;
