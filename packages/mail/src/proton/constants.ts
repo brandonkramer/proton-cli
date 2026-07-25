@@ -60,5 +60,9 @@ export function resolveLabelId(label?: string): string {
 export const PACKAGE_VERSION = "0.1.0";
 
 /** Honest third-party Mail client id. */
-export const APP_VERSION = "external-mail-proton_cli@0.1.0-stable";
+/**
+ * `external-mail-*` is not allowlisted (5002). Use a current web-mail client id
+ * (probed: web-mail@5.0.70.0 → 1000 on mail-api).
+ */
+export const APP_VERSION = "web-mail@5.0.70.0";
 export const USER_AGENT = `@bkramer/proton-cli/${PACKAGE_VERSION}`;

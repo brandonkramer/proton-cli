@@ -16,6 +16,10 @@ export const KEYS_ALL_PATH = "/core/v4/keys/all";
 
 export const PACKAGE_VERSION = "0.1.0";
 
-/** Honest third-party Calendar client id (Proton external-drive-* policy). */
-export const APP_VERSION = "external-calendar-proton_cli@0.1.0-stable";
+/**
+ * Calendar API rejects `external-calendar-*` (5002 Invalid app version).
+ * `external-drive-*` is allowlisted broadly, but prefer an honest web-calendar
+ * client id that calendar-api accepts (probed: web-calendar@5.0.50.0 → 1000).
+ */
+export const APP_VERSION = "web-calendar@5.0.50.0";
 export const USER_AGENT = `@bkramer/proton-cli/${PACKAGE_VERSION}`;

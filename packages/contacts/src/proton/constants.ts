@@ -1,5 +1,8 @@
-/** Proton Contacts API host. */
-export const DEFAULT_API_URL = "https://contacts-api.proton.me";
+/**
+ * Contacts live on the Mail API host (`/contacts/v4/*`).
+ * `contacts-api.proton.me` does not accept connections.
+ */
+export const DEFAULT_API_URL = "https://mail-api.proton.me";
 
 export const AUTH_INFO_PATH = "/auth/v4/info";
 export const AUTH_PATH = "/auth/v4";
@@ -23,6 +26,9 @@ export const DEFAULT_PAGE_SIZE = 50;
 
 export const PACKAGE_VERSION = "0.1.0";
 
-/** Honest third-party Contacts client id. */
-export const APP_VERSION = "external-contacts-proton_cli@0.1.0-stable";
+/**
+ * `external-contacts-*` is not allowlisted (5002). Use web-contacts id that
+ * mail-api accepts for `/contacts/v4/*` auth and CRUD.
+ */
+export const APP_VERSION = "web-contacts@5.0.50.0";
 export const USER_AGENT = `@bkramer/proton-cli/${PACKAGE_VERSION}`;

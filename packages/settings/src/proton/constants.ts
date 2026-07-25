@@ -19,6 +19,9 @@ export const SETTINGS_MAIL_PATH = "/mail/v4/settings";
 
 export const PACKAGE_VERSION = "0.1.0";
 
-/** Honest third-party Settings client id. */
-export const APP_VERSION = "external-settings-proton_cli@0.1.0-stable";
+/**
+ * `external-settings-*` is rejected on mail-api. Settings share mail-api with
+ * Mail; use a current web-mail client id (probed: web-mail@5.0.70.0 → 1000).
+ */
+export const APP_VERSION = "web-mail@5.0.70.0";
 export const USER_AGENT = `@bkramer/proton-cli/${PACKAGE_VERSION}`;
