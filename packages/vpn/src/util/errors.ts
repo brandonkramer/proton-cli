@@ -29,7 +29,7 @@ export function messageForApiCode(code: number, fallback?: string): string {
     case API_CODE_APP_VERSION_BAD:
       return (
         "Proton rejected this CLI app version header (5003).\n" +
-        "Update APP_VERSION in src/proton/constants.ts to a current linux-vpn@X.Y.Z value."
+        "Update APP_VERSION in packages/vpn/src/proton/constants.ts to a current linux-vpn@X.Y.Z value."
       );
     case API_CODE_MAILBOX_PASSWORD:
       return (

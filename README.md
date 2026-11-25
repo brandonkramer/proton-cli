@@ -37,14 +37,16 @@ bun link
 - **VPN — WireGuard tools** (install tries this via Homebrew / winget; or `proton vpn setup`)
   - **macOS:** Homebrew → `wireguard-tools` (sudo for connect/disconnect)
   - **Windows:** WireGuard app via winget (Administrator terminal for connect/disconnect)
-- **Authenticator — CAPTCHA (macOS):** native WKWebView helper, built on `postinstall` when possible (`bun run build:captcha` to retry; needs Xcode CLT)
+- **CAPTCHA (sign-in):** native helper, built on `postinstall` when possible (`bun run build:captcha` to retry)
+  - **macOS:** WKWebView (needs Xcode CLT)
+  - **Windows:** WebView2 (needs .NET SDK to build once + WebView2 Runtime)
 - Optional: [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`) for credential injection
 
 Close the Proton VPN desktop app before connecting so tunnels do not conflict.
 
 On macOS, VPN connect/disconnect may ask for your **Mac login password** (sudo), not your Proton password.
 
-CAPTCHA (if Proton requires it on sign-in): solve it in the **native WKWebView window**, not Safari/`verify.proton.me`.
+CAPTCHA (if Proton requires it on sign-in): solve it in the **native helper window**, not a normal browser/`verify.proton.me`.
 
 ## Agent plugins (Cursor / Codex / Claude / Pi)
 

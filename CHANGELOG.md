@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Windows CAPTCHA helper via WebView2 (same CLI contract as macOS WKWebView); `bun run build:captcha` uses `dotnet publish` on win32
+
+### Changed
+
+- Sign-in CAPTCHA supported on macOS and Windows; Linux still reports `captcha_unsupported`
+
 ## [0.4.3] - 2026-07-25
 
 ### Added

@@ -83,7 +83,7 @@ Bins: `proton`, `protonvpn`, `protonauth`, `protondrive`, `protoncontacts`, `pro
 
 - Proton account in [Single Password Mode](https://proton.me/support/single-password); TOTP 2FA OK; FIDO2 not supported
 - **VPN:** WireGuard tools (`proton vpn setup`; macOS Homebrew `wireguard-tools` + sudo; Windows winget WireGuard + Admin). Close the Proton VPN desktop app before connect.
-- **Authenticator CAPTCHA (macOS):** native WKWebView helper (`bun run build:captcha` if postinstall skipped; needs Xcode CLT). Solve CAPTCHA in that window, not Safari.
+- **CAPTCHA (sign-in):** native helper (`bun run build:captcha` if postinstall skipped). macOS: WKWebView (Xcode CLT). Windows: WebView2 (.NET SDK + WebView2 Runtime). Solve CAPTCHA in that window, not a normal browser.
 - Optional: [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`)
 
 ## Quick start
@@ -181,7 +181,7 @@ proton auth code github
 proton auth status --output json
 ```
 
-CAPTCHA (if required) needs a human on macOS; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`. Encrypted sync/code ops need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
+CAPTCHA (if required) needs a human on macOS or Windows; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`. Encrypted sync/code ops need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
 
 ## Contacts (`proton contacts …`)
 
