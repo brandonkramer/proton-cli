@@ -1,8 +1,5 @@
 import type { Command } from "commander";
-import {
-  clearActiveTunnel,
-  loadActiveTunnel,
-} from "../config/store.ts";
+import { clearActiveTunnel, loadActiveTunnel } from "../config/store.ts";
 import { wireguardConfPath } from "../config/paths.ts";
 import { showMessage } from "../ui/message.tsx";
 import { runTask } from "../ui/task.tsx";

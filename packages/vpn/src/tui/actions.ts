@@ -7,10 +7,7 @@ import { wireguardConfPath } from "../config/paths.ts";
 import { requireSession, tryExistingSession } from "../proton/auth.ts";
 import { fetchLogicalServers, prepareConnection } from "../proton/client.ts";
 import { TUNNEL_INTERFACE } from "../proton/constants.ts";
-import {
-  listCountries,
-  type ServerFilter,
-} from "../proton/servers.ts";
+import { listCountries, type ServerFilter } from "../proton/servers.ts";
 import {
   FEATURE_P2P,
   FEATURE_SECURE_CORE,

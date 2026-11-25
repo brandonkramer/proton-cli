@@ -118,7 +118,8 @@ export function registerSend(mail: Command): void {
       },
     ) {
       try {
-        const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         await runCompose("send", { ...options, passRef: globals?.pass });
       } catch (error) {
         reportCommandError(error);
@@ -151,7 +152,8 @@ export function registerSend(mail: Command): void {
       },
     ) {
       try {
-        const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         await runCompose(options.all ? "reply-all" : "reply", {
           ...options,
           messageId,
@@ -186,7 +188,8 @@ export function registerSend(mail: Command): void {
       },
     ) {
       try {
-        const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         await runCompose("forward", {
           ...options,
           messageId,

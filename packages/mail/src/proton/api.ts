@@ -6,10 +6,9 @@ export async function mailApi<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { status, data } = await protonFetch<{ Code?: number; Error?: string } & T>(
-    path,
-    options,
-  );
+  const { status, data } = await protonFetch<
+    { Code?: number; Error?: string } & T
+  >(path, options);
 
   if (status === 204) {
     return data as T;
@@ -21,7 +20,7 @@ export async function mailApi<T>(
     const detail =
       apiError && code
         ? `${apiError} (${path}, code ${code})`
-        : apiError ?? `API error (HTTP ${status})`;
+        : (apiError ?? `API error (HTTP ${status})`);
     throw new CliError(messageForApiCode(code, detail));
   }
 

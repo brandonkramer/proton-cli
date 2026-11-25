@@ -8,10 +8,7 @@ import {
   resolveEventRef,
   updateEvent,
 } from "../service/events.ts";
-import {
-  parseRespondStatus,
-  respondToEvent,
-} from "../service/respond.ts";
+import { parseRespondStatus, respondToEvent } from "../service/respond.ts";
 import { parseDateOnly, parseTime } from "../util/ical.ts";
 import { parseDuration, formatDuration } from "../util/duration.ts";
 import {
@@ -25,7 +22,9 @@ import {
 import { resolveAccountPassword } from "../util/password.ts";
 import { requireSession } from "../util/session.ts";
 
-function printEventsTable(events: Awaited<ReturnType<typeof listEvents>>): void {
+function printEventsTable(
+  events: Awaited<ReturnType<typeof listEvents>>,
+): void {
   if (events.length === 0) {
     process.stdout.write("No events.\n");
     return;
@@ -103,7 +102,8 @@ export async function runEventsGet(
   process.stdout.write(`Start:    ${event.start}\n`);
   process.stdout.write(`End:      ${event.end}\n`);
   if (event.location) process.stdout.write(`Location: ${event.location}\n`);
-  if (event.description) process.stdout.write(`Description: ${event.description}\n`);
+  if (event.description)
+    process.stdout.write(`Description: ${event.description}\n`);
   if (event.rrule) process.stdout.write(`Recurrence: ${event.rrule}\n`);
   process.stdout.write(`ID:       ${event.id}\n`);
   process.stdout.write(`Calendar: ${event.calendarId}\n`);
@@ -214,7 +214,9 @@ export async function runEventsUpdate(
     !options.start &&
     !options.duration
   ) {
-    fail("Nothing to update: pass --title, --location, --description, and/or --start");
+    fail(
+      "Nothing to update: pass --title, --location, --description, and/or --start",
+    );
   }
 
   if (options.duration && !options.start) {
@@ -330,7 +332,9 @@ export async function runEventsRespond(
     fail("--status is required (accept, tentative, or decline)");
   }
   if (args.length === 0) {
-    fail("Usage: calendar events respond {CALENDAR_ID EVENT_ID | TITLE} --status accept|tentative|decline");
+    fail(
+      "Usage: calendar events respond {CALENDAR_ID EVENT_ID | TITLE} --status accept|tentative|decline",
+    );
   }
 
   const apiStatus = parseRespondStatus(options.status);
@@ -397,5 +401,7 @@ export async function runEventsRespond(
     return;
   }
 
-  process.stdout.write(`Responded "${result.status}" to event ${result.eventId}.\n`);
+  process.stdout.write(
+    `Responded "${result.status}" to event ${result.eventId}.\n`,
+  );
 }

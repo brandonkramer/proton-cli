@@ -63,6 +63,8 @@ describe("mail safety gates", () => {
       /-y\/--yes/,
     );
     configureAgentFlags({ yes: true });
-    expect(() => assertYesConfirmed("Permanently delete messages")).not.toThrow();
+    expect(() =>
+      assertYesConfirmed("Permanently delete messages"),
+    ).not.toThrow();
   });
 });

@@ -72,10 +72,7 @@ export async function bootstrapCryptoProxy(
     );
   } catch (error) {
     // Same instance may already be initialised; reuse it.
-    if (
-      !(error instanceof Error) ||
-      error.message !== "already initialised"
-    ) {
+    if (!(error instanceof Error) || error.message !== "already initialised") {
       throw error;
     }
   }

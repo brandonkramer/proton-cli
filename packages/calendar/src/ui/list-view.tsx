@@ -37,7 +37,9 @@ function CalendarListApp({
         </Box>
       )}
       <Box marginTop={1}>
-        <Text dimColor>q / Esc close · CLI: `proton calendar calendars list --json`</Text>
+        <Text dimColor>
+          q / Esc close · CLI: `proton calendar calendars list --json`
+        </Text>
       </Box>
     </Box>
   );
@@ -76,7 +78,9 @@ function EventListApp({ events }: { events: EventSummary[] }): ReactNode {
         </Box>
       )}
       <Box marginTop={1}>
-        <Text dimColor>q / Esc close · CLI: `proton calendar events list --json`</Text>
+        <Text dimColor>
+          q / Esc close · CLI: `proton calendar events list --json`
+        </Text>
       </Box>
     </Box>
   );

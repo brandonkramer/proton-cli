@@ -29,7 +29,10 @@ export class DriveApiClient {
     this.fetchImpl = options.fetchImpl;
   }
 
-  private fetch<T>(path: string, options: Parameters<typeof protonFetch>[1] = {}) {
+  private fetch<T>(
+    path: string,
+    options: Parameters<typeof protonFetch>[1] = {},
+  ) {
     return protonFetch<T>(path, {
       ...options,
       session: this.session,
@@ -134,9 +137,9 @@ export class DriveApiClient {
     };
   }
 
-  async requestBlockLinks(body: Record<string, unknown>): Promise<
-    { token: string; bareUrl: string }[]
-  > {
+  async requestBlockLinks(
+    body: Record<string, unknown>,
+  ): Promise<{ token: string; bareUrl: string }[]> {
     const { status, data } = await this.fetch<{
       UploadLinks: { Token: string; BareURL: string }[];
     }>(DRIVE_BLOCKS_PATH, {
@@ -177,7 +180,9 @@ export class DriveApiClient {
     });
     if (response.status < 200 || response.status >= 300) {
       const text = await response.text();
-      throw new Error(`Block upload failed (HTTP ${response.status}): ${text.slice(0, 200)}`);
+      throw new Error(
+        `Block upload failed (HTTP ${response.status}): ${text.slice(0, 200)}`,
+      );
     }
   }
 
@@ -347,9 +352,7 @@ export class DriveApiClient {
   ): Promise<{ shareId: string; linkIds: string[] }[]> {
     const { status, data } = await this.fetch<{
       Trash: { ShareID: string; LinkIDs: string[] }[];
-    }>(
-      `/drive/volumes/${volumeId}/trash?Page=${page}&PageSize=${pageSize}`,
-    );
+    }>(`/drive/volumes/${volumeId}/trash?Page=${page}&PageSize=${pageSize}`);
     if (status !== 200) {
       throw new Error(`Trash list failed (HTTP ${status}).`);
     }
@@ -370,10 +373,9 @@ export class DriveApiClient {
   }
 
   async emptyTrash(volumeId: string): Promise<void> {
-    const { status } = await this.fetch(
-      `/drive/volumes/${volumeId}/trash`,
-      { method: "DELETE" },
-    );
+    const { status } = await this.fetch(`/drive/volumes/${volumeId}/trash`, {
+      method: "DELETE",
+    });
     if (status !== 200) {
       throw new Error(`Trash empty failed (HTTP ${status}).`);
     }
@@ -511,7 +513,12 @@ export class DriveApiClient {
   }
 
   async listMembers(shareId: string): Promise<
-    { memberId: string; email: string; permissions: number; createTime: number }[]
+    {
+      memberId: string;
+      email: string;
+      permissions: number;
+      createTime: number;
+    }[]
   > {
     const { status, data } = await this.fetch<{
       Members: {
@@ -761,9 +768,9 @@ export class DriveApiClient {
     }));
   }
 
-  async listAlbums(volumeId: string): Promise<
-    { linkId: string; photoCount: number }[]
-  > {
+  async listAlbums(
+    volumeId: string,
+  ): Promise<{ linkId: string; photoCount: number }[]> {
     const { status, data } = await this.fetch<{
       Albums: { LinkID: string; PhotoCount: number }[];
     }>(`/drive/photos/volumes/${volumeId}/albums`);

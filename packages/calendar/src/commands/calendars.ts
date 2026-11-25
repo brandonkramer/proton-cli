@@ -4,10 +4,7 @@ import {
   listCalendars,
   renameCalendar,
 } from "../service/calendars.ts";
-import {
-  DEFAULT_CALENDAR_COLOR,
-  validateAccentColor,
-} from "../util/colors.ts";
+import { DEFAULT_CALENDAR_COLOR, validateAccentColor } from "../util/colors.ts";
 import {
   agentFlags,
   emitJson,
@@ -58,7 +55,13 @@ export async function runCalendarsCreate(options: {
 
   if (isDryRun()) {
     if (wantsJson()) {
-      emitJson({ ok: true, dryRun: true, action: "create", name: options.name, color });
+      emitJson({
+        ok: true,
+        dryRun: true,
+        action: "create",
+        name: options.name,
+        color,
+      });
     } else {
       process.stdout.write(
         `[dry-run] would create calendar "${options.name}" (${color})\n`,
@@ -157,7 +160,11 @@ export async function runCalendarsDelete(
   try {
     password = await resolveAccountPassword(options);
   } catch (error) {
-    fail(error instanceof Error ? error.message : "Password required for calendar delete.");
+    fail(
+      error instanceof Error
+        ? error.message
+        : "Password required for calendar delete.",
+    );
   }
 
   if (!options.yes && !agentFlags().yes) {

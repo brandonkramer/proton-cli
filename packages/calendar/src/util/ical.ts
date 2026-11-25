@@ -64,7 +64,9 @@ export function eventUid(): string {
 }
 
 export function attendeeToken(uid: string, email: string): string {
-  return createHash("sha1").update(uid + canonicalEmail(email)).digest("hex");
+  return createHash("sha1")
+    .update(uid + canonicalEmail(email))
+    .digest("hex");
 }
 
 function eventDates(
@@ -99,8 +101,15 @@ export function signedVevent(options: {
   rrule?: string;
   organizer?: string;
 }): string {
-  const dtstamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
-  const { dtstart, dtend } = eventDates(options.start, options.end, options.allDay);
+  const dtstamp = new Date()
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}Z$/, "Z");
+  const { dtstart, dtend } = eventDates(
+    options.start,
+    options.end,
+    options.allDay,
+  );
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -118,7 +127,11 @@ export function signedVevent(options: {
   if (options.rrule) {
     lines.push(`RRULE:${options.rrule}`);
   }
-  lines.push(`SEQUENCE:${options.sequence ?? 0}`, "END:VEVENT", "END:VCALENDAR");
+  lines.push(
+    `SEQUENCE:${options.sequence ?? 0}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  );
   return lines.join("\r\n");
 }
 
@@ -183,7 +196,9 @@ export function parseTime(input: string): Date {
       const [y, m, d] = trimmed.split("-").map(Number);
       return new Date(y!, m! - 1, d!, 0, 0, 0, 0);
     }
-    const normalized = trimmed.includes(" ") ? trimmed.replace(" ", "T") : trimmed;
+    const normalized = trimmed.includes(" ")
+      ? trimmed.replace(" ", "T")
+      : trimmed;
     const withZone = /[zZ]|[+-]\d{2}:\d{2}$/.test(normalized)
       ? normalized
       : `${normalized}:00`;
@@ -198,5 +213,13 @@ export function parseDateOnly(input: string): Date {
   if (!match) {
     throw new Error(`Invalid date: ${input}`);
   }
-  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 0, 0, 0, 0);
+  return new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    0,
+    0,
+    0,
+    0,
+  );
 }

@@ -4,7 +4,10 @@ import {
   refreshSession,
   verifySession,
 } from "../proton/auth.ts";
-import { SETTINGS_ACCOUNT_PATH, SETTINGS_MAIL_PATH } from "../proton/constants.ts";
+import {
+  SETTINGS_ACCOUNT_PATH,
+  SETTINGS_MAIL_PATH,
+} from "../proton/constants.ts";
 import { settingsApi } from "../proton/api.ts";
 import type { Session } from "../proton/types.ts";
 import { CliError } from "../util/errors.ts";
@@ -25,9 +28,7 @@ export async function requireSettingsRuntime(
 ): Promise<SettingsRuntime> {
   const saved = await loadSession();
   if (!saved) {
-    throw new CliError(
-      "Not signed in — use proton signin --products settings",
-    );
+    throw new CliError("Not signed in — use proton signin --products settings");
   }
   let session = saved.session;
   if (!(await verifySession(session))) {
@@ -44,11 +45,14 @@ export async function requireSettingsRuntime(
 export async function getAccountSettings(
   runtime: SettingsRuntime,
 ): Promise<Record<string, unknown>> {
-  const data = await settingsApi<Record<string, unknown>>(SETTINGS_ACCOUNT_PATH, {
-    method: "GET",
-    session: runtime.session,
-    fetchImpl: runtime.fetchImpl,
-  });
+  const data = await settingsApi<Record<string, unknown>>(
+    SETTINGS_ACCOUNT_PATH,
+    {
+      method: "GET",
+      session: runtime.session,
+      fetchImpl: runtime.fetchImpl,
+    },
+  );
   return data;
 }
 

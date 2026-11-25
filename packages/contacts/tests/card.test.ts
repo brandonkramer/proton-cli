@@ -2,7 +2,9 @@ import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import type { DecryptedUserKey } from "@bkramer/proton-core";
 import { CardEncryptedSigned, CardSigned } from "../src/vcard/vcard.ts";
 
-const mockSignMessage = mock(async () => "-----BEGIN PGP SIGNATURE-----\nsig\n-----END PGP SIGNATURE-----");
+const mockSignMessage = mock(
+  async () => "-----BEGIN PGP SIGNATURE-----\nsig\n-----END PGP SIGNATURE-----",
+);
 const mockEncryptMessage = mock(async () => ({
   message: "-----BEGIN PGP MESSAGE-----\ncipher\n-----END PGP MESSAGE-----",
 }));
@@ -24,7 +26,8 @@ mock.module("../src/crypto/proxy.ts", () => ({
   }),
 }));
 
-const { signCard, encryptAndSignCard, decryptCards } = await import("../src/crypto/card.ts");
+const { signCard, encryptAndSignCard, decryptCards } =
+  await import("../src/crypto/card.ts");
 
 const userKey: DecryptedUserKey = {
   ID: "key-1",
@@ -42,7 +45,9 @@ describe("contact card crypto", () => {
     mockEncryptMessage.mockClear();
     mockDecryptMessage.mockClear();
     mockVerifyMessage.mockClear();
-    mockVerifyMessage.mockImplementation(async () => ({ verificationStatus: 1 }));
+    mockVerifyMessage.mockImplementation(async () => ({
+      verificationStatus: 1,
+    }));
     mockDecryptMessage.mockImplementation(async () => ({
       data: new TextEncoder().encode("decrypted"),
       verificationStatus: 1,
@@ -58,7 +63,10 @@ describe("contact card crypto", () => {
   });
 
   test("encryptAndSignCard produces encrypted+signed card type 3", async () => {
-    const card = await encryptAndSignCard("BEGIN:VCARD\nTEL:123\nEND:VCARD", userKey);
+    const card = await encryptAndSignCard(
+      "BEGIN:VCARD\nTEL:123\nEND:VCARD",
+      userKey,
+    );
     expect(card.Type).toBe(CardEncryptedSigned);
     expect(card.Data).toContain("PGP MESSAGE");
     expect(card.Signature).toContain("PGP SIGNATURE");
@@ -85,7 +93,9 @@ describe("contact card crypto", () => {
   });
 
   test("decryptCards rejects failed signed-card verification", async () => {
-    mockVerifyMessage.mockImplementation(async () => ({ verificationStatus: 2 }));
+    mockVerifyMessage.mockImplementation(async () => ({
+      verificationStatus: 2,
+    }));
     await expect(
       decryptCards(
         [{ Type: CardSigned, Data: "plain", Signature: "bad-sig" }],

@@ -100,7 +100,9 @@ function TaskApp({
       setSteps,
       updateStep: (id, patch) => {
         setSteps((current) =>
-          current.map((step) => (step.id === id ? { ...step, ...patch } : step)),
+          current.map((step) =>
+            step.id === id ? { ...step, ...patch } : step,
+          ),
         );
       },
       setNote,

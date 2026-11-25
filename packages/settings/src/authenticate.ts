@@ -11,7 +11,9 @@ import {
 /**
  * Dual-mint authenticator for Settings API (mail-api.proton.me).
  */
-export const authenticateSettings: ProductAuthenticator = async (credentials) => {
+export const authenticateSettings: ProductAuthenticator = async (
+  credentials,
+) => {
   const username = normalizeUsername(credentials.username);
   const existing = await tryExistingSession(username);
   if (existing) {

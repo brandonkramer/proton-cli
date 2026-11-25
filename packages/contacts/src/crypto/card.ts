@@ -48,7 +48,9 @@ async function crypto(): Promise<CryptoWithSign> {
   return (await getCryptoProxy()) as unknown as CryptoWithSign;
 }
 
-function armoredSignature(result: string | { signature?: string; message?: string }): string {
+function armoredSignature(
+  result: string | { signature?: string; message?: string },
+): string {
   if (typeof result === "string") return result;
   return result.signature ?? result.message ?? "";
 }
@@ -159,7 +161,10 @@ export async function decryptCards(
           format: "binary",
           expectSigned: true,
         });
-        if (verificationStatus !== undefined && verificationStatus !== SIGNED_AND_VALID) {
+        if (
+          verificationStatus !== undefined &&
+          verificationStatus !== SIGNED_AND_VALID
+        ) {
           throw new Error("Contact card signature verification failed.");
         }
         out.push(typeof data === "string" ? data : bytesToText(data));
@@ -172,7 +177,9 @@ export async function decryptCards(
   return out;
 }
 
-export function cardsFromApi(raw: Array<Record<string, unknown>>): ContactCard[] {
+export function cardsFromApi(
+  raw: Array<Record<string, unknown>>,
+): ContactCard[] {
   return raw.map((entry) => ({
     Type: Number(entry.Type ?? CardClear),
     Data: String(entry.Data ?? ""),

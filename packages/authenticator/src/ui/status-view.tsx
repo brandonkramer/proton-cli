@@ -38,12 +38,13 @@ function StatusApp({ info }: { info: StatusInfo }): ReactNode {
         <Text>
           Authenticator key:{" "}
           <Text dimColor>
-            {info.authenticatorKeyId ? "present (not stored plaintext)" : "none"}
+            {info.authenticatorKeyId
+              ? "present (not stored plaintext)"
+              : "none"}
           </Text>
         </Text>
         <Text>
-          Last sync:{" "}
-          <Text dimColor>{info.lastSyncAt ?? "never"}</Text>
+          Last sync: <Text dimColor>{info.lastSyncAt ?? "never"}</Text>
         </Text>
         <Text dimColor>Config: {info.configDir}</Text>
       </Box>

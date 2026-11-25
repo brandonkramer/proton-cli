@@ -51,14 +51,15 @@ function mockFetch(routes: Record<string, (init?: RequestInit) => unknown>) {
 
 describe("respond helpers", () => {
   test("parseRespondStatus maps CLI words to API values", async () => {
-    const { parseRespondStatus, ATTENDEE_STATUS, respondStatusLabel } = await import(
-      "../src/service/respond.ts"
-    );
+    const { parseRespondStatus, ATTENDEE_STATUS, respondStatusLabel } =
+      await import("../src/service/respond.ts");
     expect(parseRespondStatus("accept")).toBe(ATTENDEE_STATUS.ACCEPTED);
     expect(parseRespondStatus("Tentative")).toBe(ATTENDEE_STATUS.TENTATIVE);
     expect(parseRespondStatus("decline")).toBe(ATTENDEE_STATUS.DECLINED);
     expect(respondStatusLabel(ATTENDEE_STATUS.ACCEPTED)).toBe("accepted");
-    expect(respondStatusLabel(ATTENDEE_STATUS.TENTATIVE)).toBe("tentatively accepted");
+    expect(respondStatusLabel(ATTENDEE_STATUS.TENTATIVE)).toBe(
+      "tentatively accepted",
+    );
     expect(respondStatusLabel(ATTENDEE_STATUS.DECLINED)).toBe("declined");
     expect(() => parseRespondStatus("maybe")).toThrow(/invalid --status/);
   });
@@ -97,7 +98,8 @@ describe("respond service", () => {
       },
     });
 
-    const { respondToEvent, ATTENDEE_STATUS } = await import("../src/service/respond.ts");
+    const { respondToEvent, ATTENDEE_STATUS } =
+      await import("../src/service/respond.ts");
     const result = await respondToEvent({
       session: mockSession,
       calendarId: "cal-1",
@@ -109,8 +111,12 @@ describe("respond service", () => {
     expect(result.status).toBe("accepted");
     expect(result.attendeeId).toBe("att-1");
     expect(putCalls).toHaveLength(1);
-    expect(putCalls[0]?.body).toMatchObject({ Status: ATTENDEE_STATUS.ACCEPTED });
-    expect(typeof (putCalls[0]?.body as { UpdateTime: number }).UpdateTime).toBe("number");
+    expect(putCalls[0]?.body).toMatchObject({
+      Status: ATTENDEE_STATUS.ACCEPTED,
+    });
+    expect(
+      typeof (putCalls[0]?.body as { UpdateTime: number }).UpdateTime,
+    ).toBe("number");
   });
 
   test("respondToEvent supports tentative and decline", async () => {
@@ -141,7 +147,8 @@ describe("respond service", () => {
       },
     });
 
-    const { respondToEvent, ATTENDEE_STATUS } = await import("../src/service/respond.ts");
+    const { respondToEvent, ATTENDEE_STATUS } =
+      await import("../src/service/respond.ts");
 
     await respondToEvent({
       session: mockSession,
@@ -158,7 +165,10 @@ describe("respond service", () => {
       fetchImpl,
     });
 
-    expect(statuses).toEqual([ATTENDEE_STATUS.TENTATIVE, ATTENDEE_STATUS.DECLINED]);
+    expect(statuses).toEqual([
+      ATTENDEE_STATUS.TENTATIVE,
+      ATTENDEE_STATUS.DECLINED,
+    ]);
   });
 
   test("respondToEvent rejects organizer events", async () => {
@@ -174,7 +184,8 @@ describe("respond service", () => {
       }),
     });
 
-    const { respondToEvent, ATTENDEE_STATUS } = await import("../src/service/respond.ts");
+    const { respondToEvent, ATTENDEE_STATUS } =
+      await import("../src/service/respond.ts");
     await expect(
       respondToEvent({
         session: mockSession,
@@ -213,10 +224,13 @@ describe("respond service", () => {
         Attendees: [{ ID: "att-self", Token: token, Status: 0 }],
         MoreAttendees: 0,
       }),
-      "/calendar/v1/cal-1/events/ev-4/attendees/att-self": () => ({ Code: 1000 }),
+      "/calendar/v1/cal-1/events/ev-4/attendees/att-self": () => ({
+        Code: 1000,
+      }),
     });
 
-    const { respondToEvent, ATTENDEE_STATUS } = await import("../src/service/respond.ts");
+    const { respondToEvent, ATTENDEE_STATUS } =
+      await import("../src/service/respond.ts");
     const result = await respondToEvent({
       session: mockSession,
       calendarId: "cal-1",

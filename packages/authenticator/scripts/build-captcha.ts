@@ -42,9 +42,7 @@ if (exitCode !== 0) {
   if (stderr.trim() || stdout.trim()) {
     console.log(stderr.trim() || stdout.trim());
   }
-  console.log(
-    "@bkramer/proton-cli: retry later with: bun run build:captcha",
-  );
+  console.log("@bkramer/proton-cli: retry later with: bun run build:captcha");
   process.exit(0);
 }
 

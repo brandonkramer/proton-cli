@@ -121,7 +121,9 @@ export function parseMailSettingValue(
   if (spec.isInt) {
     const parsed = Number.parseInt(value, 10);
     if (Number.isNaN(parsed) || String(parsed) !== value.trim()) {
-      throw new Error(`setting ${JSON.stringify(key)} expects an integer value`);
+      throw new Error(
+        `setting ${JSON.stringify(key)} expects an integer value`,
+      );
     }
     validateMailSettingRange(key, parsed);
     return { [spec.field]: parsed };

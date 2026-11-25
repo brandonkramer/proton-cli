@@ -86,9 +86,12 @@ const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
     });
   }
 
-  return new Response(JSON.stringify({ Code: 9999, Error: "unexpected path" }), {
-    status: 404,
-  });
+  return new Response(
+    JSON.stringify({ Code: 9999, Error: "unexpected path" }),
+    {
+      status: 404,
+    },
+  );
 });
 
 mock.module("../src/config/store.ts", () => ({
@@ -117,9 +120,8 @@ const {
   requireSettingsRuntime,
 } = await import("../src/settings/client.ts");
 
-const { formatAccountSettings, formatMailSettings } = await import(
-  "../src/settings/format.ts"
-);
+const { formatAccountSettings, formatMailSettings } =
+  await import("../src/settings/format.ts");
 
 const mockFetchImpl = mockFetch as unknown as typeof fetch;
 
@@ -172,9 +174,9 @@ describe("settings API client", () => {
 
   test("updateMailSetting rejects non-integer for integer keys", async () => {
     const runtime = await requireSettingsRuntime(mockFetchImpl);
-    await expect(updateMailSetting(runtime, "view-mode", "abc")).rejects.toThrow(
-      /integer value/,
-    );
+    await expect(
+      updateMailSetting(runtime, "view-mode", "abc"),
+    ).rejects.toThrow(/integer value/);
   });
 });
 
@@ -259,9 +261,12 @@ describe("settings set dry-run", () => {
     }) as typeof process.stdout.write;
 
     try {
-      await root.parseAsync(["node", "test", "settings", "set", "view-mode", "1", "--dry-run"], {
-        from: "node",
-      });
+      await root.parseAsync(
+        ["node", "test", "settings", "set", "view-mode", "1", "--dry-run"],
+        {
+          from: "node",
+        },
+      );
     } finally {
       process.stdout.write = original;
     }

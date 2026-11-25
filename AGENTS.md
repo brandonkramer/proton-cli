@@ -11,24 +11,24 @@ End-user skill: [skills/proton-cli/SKILL.md](skills/proton-cli/SKILL.md).
 
 ## Layout
 
-| Path | Package | Owns |
-|---|---|---|
-| `packages/core` | `@bkramer/proton-core` | Shared config root, multi-product sessions, dual-mint sign-in, Pass helpers |
-| `packages/vpn` | `@bkramer/proton-vpn` | VPN API + WireGuard commands (`proton vpn …`) |
-| `packages/authenticator` | `@bkramer/proton-authenticator` | E2EE Authenticator sync/codes (`proton auth …`) |
-| `packages/contacts` | `@bkramer/proton-contacts` | Contacts cards/groups (`proton contacts …`) |
-| `packages/calendar` | `@bkramer/proton-calendar` | Calendar calendars/events (`proton calendar …`) |
-| `packages/drive` | `@bkramer/proton-drive` | Drive files/folders/photos (`proton drive …`) |
-| `packages/settings` | `@bkramer/proton-settings` | Account and mail settings (`proton settings …`) |
-| `packages/mail` | `@bkramer/proton-mail` | E2EE Mail list/read/search/send (`proton mail …`) |
-| `src/` | root bins | `proton` router, `protonvpn` / `protonauth` / `protondrive` / `protoncontacts` / `protoncal` / `protonsettings` wrappers |
-| `src/mcp/` | MCP | `proton mcp` stdio server + allowlisted CLI runner |
-| `scripts/` | install helpers | workspace links, OpenPGP patch, postinstall |
-| `skills/proton-cli/` | end-user skill | How to install/use `proton` for agents / MCP |
-| `.cursor-plugin/` | Cursor plugin | manifest + `mcp.json` |
-| `.codex-plugin/` | Codex plugin | manifest + MCP server launch |
-| `.claude-plugin/` | Claude plugin | manifest + local marketplace.json |
-| `package.json` `"pi"` | Pi package | skills entry for `pi install` |
+| Path                     | Package                         | Owns                                                                                                                     |
+| ------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `packages/core`          | `@bkramer/proton-core`          | Shared config root, multi-product sessions, dual-mint sign-in, Pass helpers                                              |
+| `packages/vpn`           | `@bkramer/proton-vpn`           | VPN API + WireGuard commands (`proton vpn …`)                                                                            |
+| `packages/authenticator` | `@bkramer/proton-authenticator` | E2EE Authenticator sync/codes (`proton auth …`)                                                                          |
+| `packages/contacts`      | `@bkramer/proton-contacts`      | Contacts cards/groups (`proton contacts …`)                                                                              |
+| `packages/calendar`      | `@bkramer/proton-calendar`      | Calendar calendars/events (`proton calendar …`)                                                                          |
+| `packages/drive`         | `@bkramer/proton-drive`         | Drive files/folders/photos (`proton drive …`)                                                                            |
+| `packages/settings`      | `@bkramer/proton-settings`      | Account and mail settings (`proton settings …`)                                                                          |
+| `packages/mail`          | `@bkramer/proton-mail`          | E2EE Mail list/read/search/send (`proton mail …`)                                                                        |
+| `src/`                   | root bins                       | `proton` router, `protonvpn` / `protonauth` / `protondrive` / `protoncontacts` / `protoncal` / `protonsettings` wrappers |
+| `src/mcp/`               | MCP                             | `proton mcp` stdio server + allowlisted CLI runner                                                                       |
+| `scripts/`               | install helpers                 | workspace links, OpenPGP patch, postinstall                                                                              |
+| `skills/proton-cli/`     | end-user skill                  | How to install/use `proton` for agents / MCP                                                                             |
+| `.cursor-plugin/`        | Cursor plugin                   | manifest + `mcp.json`                                                                                                    |
+| `.codex-plugin/`         | Codex plugin                    | manifest + MCP server launch                                                                                             |
+| `.claude-plugin/`        | Claude plugin                   | manifest + local marketplace.json                                                                                        |
+| `package.json` `"pi"`    | Pi package                      | skills entry for `pi install`                                                                                            |
 
 User data: `~/.config/proton-cli/` (or `%APPDATA%\proton-cli\`) with `sessions/*.json` and product subdirs.
 

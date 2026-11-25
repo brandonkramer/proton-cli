@@ -48,7 +48,9 @@ function successPayload(
     messageIds,
     count: messageIds.length,
     ...extra,
-    ...(wantsJson() ? {} : { message: `${action}: ${messageIds.length} message(s)` }),
+    ...(wantsJson()
+      ? {}
+      : { message: `${action}: ${messageIds.length} message(s)` }),
   });
 }
 
@@ -236,7 +238,8 @@ function registerMessageIdsCommand(
     options: { to?: string; from?: string; label?: string },
   ) {
     try {
-      const globals = this.parent?.parent?.optsWithGlobals() as { pass?: string } | undefined;
+      const globals = this.parent?.parent?.optsWithGlobals() as
+        { pass?: string } | undefined;
       await handler(ids, {
         messageIds: ids,
         passRef: globals?.pass,
@@ -283,7 +286,10 @@ export function registerOrganize(mail: Command): void {
     "Apply a label to messages",
     async (ids, options) => {
       if (!options.label) throw new Error("--label is required");
-      await runMailLabel(ids, { label: options.label, passRef: options.passRef });
+      await runMailLabel(ids, {
+        label: options.label,
+        passRef: options.passRef,
+      });
     },
     (cmd) => {
       cmd.requiredOption("--label <id>", "Label ID or system name");
@@ -296,32 +302,60 @@ export function registerOrganize(mail: Command): void {
     "Remove a label from messages",
     async (ids, options) => {
       if (!options.label) throw new Error("--label is required");
-      await runMailUnlabel(ids, { label: options.label, passRef: options.passRef });
+      await runMailUnlabel(ids, {
+        label: options.label,
+        passRef: options.passRef,
+      });
     },
     (cmd) => {
       cmd.requiredOption("--label <id>", "Label ID or system name");
     },
   );
 
-  registerMessageIdsCommand(organize, "star", "Star messages", async (ids, options) => {
-    await runMailStar(ids, { passRef: options.passRef });
-  });
+  registerMessageIdsCommand(
+    organize,
+    "star",
+    "Star messages",
+    async (ids, options) => {
+      await runMailStar(ids, { passRef: options.passRef });
+    },
+  );
 
-  registerMessageIdsCommand(organize, "unstar", "Unstar messages", async (ids, options) => {
-    await runMailUnstar(ids, { passRef: options.passRef });
-  });
+  registerMessageIdsCommand(
+    organize,
+    "unstar",
+    "Unstar messages",
+    async (ids, options) => {
+      await runMailUnstar(ids, { passRef: options.passRef });
+    },
+  );
 
-  registerMessageIdsCommand(organize, "read", "Mark messages as read", async (ids, options) => {
-    await runMailRead(ids, { passRef: options.passRef });
-  });
+  registerMessageIdsCommand(
+    organize,
+    "read",
+    "Mark messages as read",
+    async (ids, options) => {
+      await runMailRead(ids, { passRef: options.passRef });
+    },
+  );
 
-  registerMessageIdsCommand(organize, "unread", "Mark messages as unread", async (ids, options) => {
-    await runMailUnread(ids, { passRef: options.passRef });
-  });
+  registerMessageIdsCommand(
+    organize,
+    "unread",
+    "Mark messages as unread",
+    async (ids, options) => {
+      await runMailUnread(ids, { passRef: options.passRef });
+    },
+  );
 
-  registerMessageIdsCommand(organize, "trash", "Move messages to trash", async (ids, options) => {
-    await runMailTrash(ids, { passRef: options.passRef });
-  });
+  registerMessageIdsCommand(
+    organize,
+    "trash",
+    "Move messages to trash",
+    async (ids, options) => {
+      await runMailTrash(ids, { passRef: options.passRef });
+    },
+  );
 
   registerMessageIdsCommand(
     organize,

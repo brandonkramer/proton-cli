@@ -1,9 +1,6 @@
 import type { Command } from "commander";
 import { signOut } from "../proton/auth.ts";
-import {
-  handleCommandError,
-  setCommandOutputFormat,
-} from "../util/command.ts";
+import { handleCommandError, setCommandOutputFormat } from "../util/command.ts";
 import {
   addOutputOption,
   resolveOutputFormat,

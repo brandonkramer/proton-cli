@@ -7,7 +7,9 @@ export function Brand({ subtitle }: { subtitle?: string }): ReactNode {
       <Text bold color="cyan">
         Proton Mail
       </Text>
-      <Text dimColor>proton-cli · REST API · not affiliated with Proton AG</Text>
+      <Text dimColor>
+        proton-cli · REST API · not affiliated with Proton AG
+      </Text>
       {subtitle ? <Text color="white">{subtitle}</Text> : null}
     </Box>
   );

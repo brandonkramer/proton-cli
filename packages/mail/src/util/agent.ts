@@ -35,9 +35,7 @@ function envTruthy(name: string): boolean {
 
 export function wantsJson(): boolean {
   return (
-    flags.json ||
-    envTruthy("PROTONMAIL_JSON") ||
-    envTruthy("PROTONMAIL_AGENT")
+    flags.json || envTruthy("PROTONMAIL_JSON") || envTruthy("PROTONMAIL_AGENT")
   );
 }
 

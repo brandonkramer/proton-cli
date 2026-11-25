@@ -30,10 +30,7 @@ type ProtonFetch = <T>(
   path: string,
   options?: Parameters<typeof protonFetch>[1],
 ) => Promise<ProtonFetchResult<T>>;
-import {
-  generateKeyPair,
-  type WireGuardKeyPair,
-} from "../wireguard/keys.ts";
+import { generateKeyPair, type WireGuardKeyPair } from "../wireguard/keys.ts";
 import { renderWireGuardConfig } from "../wireguard/config.ts";
 import {
   bestPhysicalServer,
@@ -176,7 +173,8 @@ export async function createCertificate(
     throw new CliError(
       messageForApiCode(
         data.Code,
-        data.Error ?? `Failed to create WireGuard certificate (HTTP ${status}).`,
+        data.Error ??
+          `Failed to create WireGuard certificate (HTTP ${status}).`,
       ),
     );
   }
@@ -198,7 +196,11 @@ async function resolveKeyPair(
   const keyPair = generateKeyPair();
   const deviceName =
     existing?.deviceName ?? `proton-vpn-cli-${username}-${Date.now()}`;
-  const cert = await createCertificate(session, keyPair.publicKeyPem, deviceName);
+  const cert = await createCertificate(
+    session,
+    keyPair.publicKeyPem,
+    deviceName,
+  );
 
   await saveWireGuardCredentials({
     username,

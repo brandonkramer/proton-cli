@@ -40,7 +40,9 @@ function run(
     }
 
     const child = spawn(finalCommand, finalArgs, {
-      stdio: inherit ? ["inherit", "pipe", "inherit"] : ["ignore", "pipe", "pipe"],
+      stdio: inherit
+        ? ["inherit", "pipe", "inherit"]
+        : ["ignore", "pipe", "pipe"],
     });
 
     let stdout = "";
@@ -204,7 +206,10 @@ export async function bringDown(confPath: string): Promise<void> {
   if (process.platform === "win32") {
     const wireguard = await findWireGuardWindows();
     const tunnelName = basename(confPath, ".conf");
-    const result = await run(wireguard, ["/uninstalltunnelservice", tunnelName]);
+    const result = await run(wireguard, [
+      "/uninstalltunnelservice",
+      tunnelName,
+    ]);
     if (result.code !== 0) {
       const detail = (result.stderr || result.stdout).trim();
       if (
@@ -228,7 +233,11 @@ export async function bringDown(confPath: string): Promise<void> {
   const result = await runWgQuick(confPath, "down");
   if (result.code !== 0) {
     const combined = `${result.stderr}\n${result.stdout}`.trim();
-    if (/is not a WireGuard interface|does not exist|Unable to access interface/i.test(combined)) {
+    if (
+      /is not a WireGuard interface|does not exist|Unable to access interface/i.test(
+        combined,
+      )
+    ) {
       return;
     }
     throw new CliError(
@@ -238,9 +247,7 @@ export async function bringDown(confPath: string): Promise<void> {
   }
 }
 
-export async function tunnelStatus(
-  confPath: string,
-): Promise<TunnelStatus> {
+export async function tunnelStatus(confPath: string): Promise<TunnelStatus> {
   if (process.platform === "win32") {
     const tunnelName = basename(confPath, ".conf") || TUNNEL_INTERFACE;
     // Best-effort: query sc for the tunnel service.

@@ -92,13 +92,15 @@ export interface SendResult {
   bcc: string[];
 }
 
-async function ensureKeys(
-  options: SendServiceOptions,
-): Promise<{
+async function ensureKeys(options: SendServiceOptions): Promise<{
   addressKeys: Map<string, UnlockedAddressKey>;
   addresses: UnlockedMailKeys["addresses"];
 }> {
-  if (options.addressKeys && options.addressKeys.size > 0 && options.addresses) {
+  if (
+    options.addressKeys &&
+    options.addressKeys.size > 0 &&
+    options.addresses
+  ) {
     return { addressKeys: options.addressKeys, addresses: options.addresses };
   }
   if (!options.password) {

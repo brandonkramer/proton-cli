@@ -15,7 +15,9 @@ export interface ShareHashPasswordOptions {
   modulus: Uint8Array;
 }
 
-type HashPasswordFn = (options: ShareHashPasswordOptions) => Promise<Uint8Array>;
+type HashPasswordFn = (
+  options: ShareHashPasswordOptions,
+) => Promise<Uint8Array>;
 type VerifyAndGetModulusFn = (modulus: string) => Promise<Uint8Array>;
 type GetRandomSrpVerifierFn = (
   serverModulus: { Modulus: string },
@@ -41,7 +43,9 @@ async function loadShareSrpModule(): Promise<ShareSrpModule> {
     import(pathToFileURL(path.join(srpDir, "passwords.ts")).href) as Promise<{
       hashPassword: HashPasswordFn;
     }>,
-    import(pathToFileURL(path.join(srpDir, "utils/modulus.ts")).href) as Promise<{
+    import(
+      pathToFileURL(path.join(srpDir, "utils/modulus.ts")).href
+    ) as Promise<{
       verifyAndGetModulus: VerifyAndGetModulusFn;
     }>,
     import(srpId) as Promise<{ getRandomSrpVerifier: GetRandomSrpVerifierFn }>,

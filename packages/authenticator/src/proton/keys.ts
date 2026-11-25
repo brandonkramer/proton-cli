@@ -56,7 +56,11 @@ export async function ensureAuthenticatorKey(
     return forPrimary;
   }
 
-  if (userKeys.length <= active.length && parsed.length === 0 && active.length > 0) {
+  if (
+    userKeys.length <= active.length &&
+    parsed.length === 0 &&
+    active.length > 0
+  ) {
     throw new CliError(
       "Authenticator Keys exist on the server but could not be decrypted.\n" +
         "This can happen after a password reset. Recover keys in the official Authenticator app.",

@@ -35,9 +35,7 @@ function StatusApp({
             : "Not signed in — use proton menu Sign in"}
         </StatusMessage>
         <StatusMessage variant={contactCount > 0 ? "success" : "warning"}>
-          {contactCount > 0
-            ? `${contactCount} contacts`
-            : "No contacts loaded"}
+          {contactCount > 0 ? `${contactCount} contacts` : "No contacts loaded"}
         </StatusMessage>
         <StatusMessage variant={groupCount > 0 ? "success" : "warning"}>
           {groupCount > 0 ? `${groupCount} groups` : "No groups"}

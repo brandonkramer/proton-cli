@@ -23,7 +23,10 @@ import {
   fetchUser,
   type DecryptedUserKey,
 } from "../proton/users.ts";
-import { decryptEntries, type AuthenticatorEntryModel } from "../wasm/service.ts";
+import {
+  decryptEntries,
+  type AuthenticatorEntryModel,
+} from "../wasm/service.ts";
 import { CliError } from "../util/errors.ts";
 
 export interface UnlockContext {
@@ -137,9 +140,7 @@ export async function syncEntries(password: string): Promise<SyncResult> {
 
   const remote = await fetchAllEntries(ctx.session);
   const existingByEntryId = new Map(
-    local.entries
-      .filter((e) => e.entryId)
-      .map((e) => [e.entryId, e] as const),
+    local.entries.filter((e) => e.entryId).map((e) => [e.entryId, e] as const),
   );
 
   const parsed: LocalEntry[] = [];

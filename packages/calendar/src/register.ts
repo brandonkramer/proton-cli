@@ -59,21 +59,24 @@ export function registerCalendarCommands(calendar: Command): void {
     .option("--password <password>", "Account password (or PROTON_PASSWORD)")
     .option("--pass <ref>", "Pass item for account password")
     .option("--dry-run", "Print intent without calling the API")
-    .action(async (opts: {
-      name: string;
-      color: string;
-      password?: string;
-      pass?: string;
-      dryRun?: boolean;
-    }) => {
-      try {
-        await runCalendarsCreate(opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    .action(
+      async (opts: {
+        name: string;
+        color: string;
+        password?: string;
+        pass?: string;
+        dryRun?: boolean;
+      }) => {
+        try {
+          await runCalendarsCreate(opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
+      },
+    );
 
   calendars
     .command("rename")
@@ -84,24 +87,27 @@ export function registerCalendarCommands(calendar: Command): void {
     .option("--password <password>", "Account password (or PROTON_PASSWORD)")
     .option("--pass <ref>", "Pass item for account password")
     .option("--dry-run", "Print intent without calling the API")
-    .action(async (
-      calendarId: string,
-      opts: {
-        name?: string;
-        color?: string;
-        password?: string;
-        pass?: string;
-        dryRun?: boolean;
+    .action(
+      async (
+        calendarId: string,
+        opts: {
+          name?: string;
+          color?: string;
+          password?: string;
+          pass?: string;
+          dryRun?: boolean;
+        },
+      ) => {
+        try {
+          await runCalendarsRename(calendarId, opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
       },
-    ) => {
-      try {
-        await runCalendarsRename(calendarId, opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    );
 
   calendars
     .command("delete")
@@ -111,23 +117,26 @@ export function registerCalendarCommands(calendar: Command): void {
     .option("--pass <ref>", "Pass item for account password")
     .option("--dry-run", "Print intent without calling the API")
     .option("-y, --yes", "Skip confirmation prompt")
-    .action(async (
-      calendarId: string,
-      opts: {
-        password?: string;
-        pass?: string;
-        dryRun?: boolean;
-        yes?: boolean;
+    .action(
+      async (
+        calendarId: string,
+        opts: {
+          password?: string;
+          pass?: string;
+          dryRun?: boolean;
+          yes?: boolean;
+        },
+      ) => {
+        try {
+          await runCalendarsDelete(calendarId, opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
       },
-    ) => {
-      try {
-        await runCalendarsDelete(calendarId, opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    );
 
   const events = calendar.command("events").description("Manage events");
 
@@ -139,21 +148,24 @@ export function registerCalendarCommands(calendar: Command): void {
     .option("--end <date>", "End date YYYY-MM-DD")
     .option("--password <password>", "Account password (or PROTON_PASSWORD)")
     .option("--pass <ref>", "Pass item for account password")
-    .action(async (opts: {
-      calendar?: string;
-      start?: string;
-      end?: string;
-      password?: string;
-      pass?: string;
-    }) => {
-      try {
-        await runEventsList(opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    .action(
+      async (opts: {
+        calendar?: string;
+        start?: string;
+        end?: string;
+        password?: string;
+        pass?: string;
+      }) => {
+        try {
+          await runEventsList(opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
+      },
+    );
 
   events
     .command("get")
@@ -161,15 +173,18 @@ export function registerCalendarCommands(calendar: Command): void {
     .argument("[args...]", "CALENDAR_ID EVENT_ID or TITLE")
     .option("--password <password>", "Account password (or PROTON_PASSWORD)")
     .option("--pass <ref>", "Pass item for account password")
-    .action(async (args: string[], opts: { password?: string; pass?: string }) => {
-      try {
-        await runEventsGet(args, opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    .action(
+      async (args: string[], opts: { password?: string; pass?: string }) => {
+        try {
+          await runEventsGet(args, opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
+      },
+    );
 
   events
     .command("create")
@@ -178,7 +193,10 @@ export function registerCalendarCommands(calendar: Command): void {
     .requiredOption("--title <title>", "Event title")
     .option("--location <text>", "Event location")
     .option("--description <text>", "Event description")
-    .requiredOption("--start <time>", "Start time (RFC3339 or YYYY-MM-DDTHH:MM)")
+    .requiredOption(
+      "--start <time>",
+      "Start time (RFC3339 or YYYY-MM-DDTHH:MM)",
+    )
     .option("--duration <dur>", "Duration (e.g. 1h, 30m)", "1h")
     .option("--all-day", "All-day event")
     .option("--rrule <rule>", "Recurrence rule (iCal RRULE)")
@@ -187,29 +205,32 @@ export function registerCalendarCommands(calendar: Command): void {
     .option("--password <password>", "Account password (or PROTON_PASSWORD)")
     .option("--pass <ref>", "Pass item for account password")
     .option("--dry-run", "Print intent without calling the API")
-    .action(async (opts: {
-      calendar?: string;
-      title: string;
-      location?: string;
-      description?: string;
-      start: string;
-      duration?: string;
-      allDay?: boolean;
-      rrule?: string;
-      remind?: string[];
-      attendee?: string[];
-      password?: string;
-      pass?: string;
-      dryRun?: boolean;
-    }) => {
-      try {
-        await runEventsCreate(opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    .action(
+      async (opts: {
+        calendar?: string;
+        title: string;
+        location?: string;
+        description?: string;
+        start: string;
+        duration?: string;
+        allDay?: boolean;
+        rrule?: string;
+        remind?: string[];
+        attendee?: string[];
+        password?: string;
+        pass?: string;
+        dryRun?: boolean;
+      }) => {
+        try {
+          await runEventsCreate(opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
+      },
+    );
 
   events
     .command("update")
@@ -224,28 +245,31 @@ export function registerCalendarCommands(calendar: Command): void {
     .option("--password <password>", "Account password (or PROTON_PASSWORD)")
     .option("--pass <ref>", "Pass item for account password")
     .option("--dry-run", "Print intent without calling the API")
-    .action(async (
-      calendarId: string,
-      eventId: string,
-      opts: {
-        title?: string;
-        location?: string;
-        description?: string;
-        start?: string;
-        duration?: string;
-        password?: string;
-        pass?: string;
-        dryRun?: boolean;
+    .action(
+      async (
+        calendarId: string,
+        eventId: string,
+        opts: {
+          title?: string;
+          location?: string;
+          description?: string;
+          start?: string;
+          duration?: string;
+          password?: string;
+          pass?: string;
+          dryRun?: boolean;
+        },
+      ) => {
+        try {
+          await runEventsUpdate(calendarId, eventId, opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
       },
-    ) => {
-      try {
-        await runEventsUpdate(calendarId, eventId, opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    );
 
   events
     .command("delete")
@@ -255,47 +279,56 @@ export function registerCalendarCommands(calendar: Command): void {
     .option("--pass <ref>", "Pass item for account password")
     .option("--dry-run", "Print intent without calling the API")
     .option("-y, --yes", "Skip confirmation prompt")
-    .action(async (
-      args: string[],
-      opts: {
-        password?: string;
-        pass?: string;
-        dryRun?: boolean;
-        yes?: boolean;
+    .action(
+      async (
+        args: string[],
+        opts: {
+          password?: string;
+          pass?: string;
+          dryRun?: boolean;
+          yes?: boolean;
+        },
+      ) => {
+        try {
+          await runEventsDelete(args, opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
       },
-    ) => {
-      try {
-        await runEventsDelete(args, opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    );
 
   events
     .command("respond")
     .description("Reply to an invitation (accept, tentative, or decline)")
     .argument("[args...]", "CALENDAR_ID EVENT_ID or TITLE")
-    .requiredOption("--status <status>", "Response: accept, tentative, or decline")
+    .requiredOption(
+      "--status <status>",
+      "Response: accept, tentative, or decline",
+    )
     .option("--password <password>", "Account password (or PROTON_PASSWORD)")
     .option("--pass <ref>", "Pass item for account password")
     .option("--dry-run", "Print intent without calling the API")
-    .action(async (
-      args: string[],
-      opts: {
-        status: string;
-        password?: string;
-        pass?: string;
-        dryRun?: boolean;
+    .action(
+      async (
+        args: string[],
+        opts: {
+          status: string;
+          password?: string;
+          pass?: string;
+          dryRun?: boolean;
+        },
+      ) => {
+        try {
+          await runEventsRespond(args, opts);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          console.error(message);
+          process.exit(1);
+        }
       },
-    ) => {
-      try {
-        await runEventsRespond(args, opts);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(message);
-        process.exit(1);
-      }
-    });
+    );
 }

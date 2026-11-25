@@ -1,14 +1,8 @@
 import type { Command } from "commander";
 import { loadLocalEntries } from "../config/store.ts";
-import {
-  filterEntriesByType,
-  parseEntryTypeFilter,
-} from "../sync/filter.ts";
+import { filterEntriesByType, parseEntryTypeFilter } from "../sync/filter.ts";
 import { actionList } from "../tui/actions.ts";
-import {
-  handleCommandError,
-  setCommandOutputFormat,
-} from "../util/command.ts";
+import { handleCommandError, setCommandOutputFormat } from "../util/command.ts";
 import { CliError } from "../util/errors.ts";
 import {
   addOutputOption,
@@ -73,8 +67,7 @@ export function registerList(program: Command): void {
       }
       writePlain(
         entries.map(
-          (e) =>
-            `${e.issuer || "—"}\t${e.name || "(unnamed)"}\t${e.entryType}`,
+          (e) => `${e.issuer || "—"}\t${e.name || "(unnamed)"}\t${e.entryType}`,
         ),
       );
     } catch (error) {

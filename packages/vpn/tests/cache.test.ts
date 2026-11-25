@@ -122,9 +122,8 @@ describe("fetchLogicalServers caching", () => {
   });
 
   test("uses network once then serves from memory/disk within TTL", async () => {
-    const { fetchLogicalServers, resetLogicalsMemoryCache } = await import(
-      "../src/proton/client.ts"
-    );
+    const { fetchLogicalServers, resetLogicalsMemoryCache } =
+      await import("../src/proton/client.ts");
 
     const first = await fetchLogicalServers(session, { fetch: fetchMock });
     expect(first[0]?.Name).toBe("US#1");
@@ -180,9 +179,8 @@ describe("fetchLogicalServers caching", () => {
   });
 
   test("returns stale cache when network fails", async () => {
-    const { fetchLogicalServers, resetLogicalsMemoryCache } = await import(
-      "../src/proton/client.ts"
-    );
+    const { fetchLogicalServers, resetLogicalsMemoryCache } =
+      await import("../src/proton/client.ts");
     const { saveLogicalsCache } = await import("../src/config/store.ts");
 
     await saveLogicalsCache({
@@ -213,7 +211,8 @@ describe("verifySession", () => {
     );
 
     const { verifySession } = await import("../src/proton/auth.ts");
-    const fetchApi = fetchMock as unknown as typeof import("../src/proton/http.ts").protonFetch;
+    const fetchApi =
+      fetchMock as unknown as typeof import("../src/proton/http.ts").protonFetch;
     await expect(verifySession(session, fetchApi)).resolves.toBe(true);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const call = fetchMock.mock.calls[0] as unknown as [string, unknown];

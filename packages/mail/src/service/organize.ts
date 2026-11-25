@@ -24,7 +24,9 @@ export interface MoveMessagesOptions extends OrganizeServiceOptions {
 }
 
 /** Label messages with a folder/label (optionally unlabel source). */
-export async function moveMessages(options: MoveMessagesOptions): Promise<void> {
+export async function moveMessages(
+  options: MoveMessagesOptions,
+): Promise<void> {
   const toLabelId = resolveLabelId(options.toLabel);
   await labelMessages({
     session: options.session,
@@ -64,7 +66,9 @@ export async function removeLabel(
   });
 }
 
-export async function starMessages(options: OrganizeServiceOptions): Promise<void> {
+export async function starMessages(
+  options: OrganizeServiceOptions,
+): Promise<void> {
   await labelMessages({
     session: options.session,
     fetchImpl: options.fetchImpl,
@@ -73,7 +77,9 @@ export async function starMessages(options: OrganizeServiceOptions): Promise<voi
   });
 }
 
-export async function unstarMessages(options: OrganizeServiceOptions): Promise<void> {
+export async function unstarMessages(
+  options: OrganizeServiceOptions,
+): Promise<void> {
   await unlabelMessages({
     session: options.session,
     fetchImpl: options.fetchImpl,
@@ -82,7 +88,9 @@ export async function unstarMessages(options: OrganizeServiceOptions): Promise<v
   });
 }
 
-export async function trashMessages(options: OrganizeServiceOptions): Promise<void> {
+export async function trashMessages(
+  options: OrganizeServiceOptions,
+): Promise<void> {
   await labelMessages({
     session: options.session,
     fetchImpl: options.fetchImpl,
@@ -91,7 +99,9 @@ export async function trashMessages(options: OrganizeServiceOptions): Promise<vo
   });
 }
 
-export async function readMessages(options: OrganizeServiceOptions): Promise<void> {
+export async function readMessages(
+  options: OrganizeServiceOptions,
+): Promise<void> {
   await markMessagesRead({
     session: options.session,
     fetchImpl: options.fetchImpl,
@@ -99,7 +109,9 @@ export async function readMessages(options: OrganizeServiceOptions): Promise<voi
   });
 }
 
-export async function unreadMessages(options: OrganizeServiceOptions): Promise<void> {
+export async function unreadMessages(
+  options: OrganizeServiceOptions,
+): Promise<void> {
   await markMessagesUnread({
     session: options.session,
     fetchImpl: options.fetchImpl,

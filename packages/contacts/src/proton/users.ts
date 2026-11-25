@@ -22,16 +22,22 @@ export async function fetchUser(session: Session): Promise<ProtonUser> {
   });
   if (status !== 200 || !isSuccessCode(data.Code) || !data.User) {
     throw new CliError(
-      messageForApiCode(data.Code, data.Error ?? `Failed to fetch user (HTTP ${status}).`),
+      messageForApiCode(
+        data.Code,
+        data.Error ?? `Failed to fetch user (HTTP ${status}).`,
+      ),
     );
   }
   return data.User;
 }
 
 export async function fetchKeySalts(session: Session): Promise<KeySalt[]> {
-  const { status, data } = await protonFetch<KeySaltsResponse>(KEYS_SALTS_PATH, {
-    session,
-  });
+  const { status, data } = await protonFetch<KeySaltsResponse>(
+    KEYS_SALTS_PATH,
+    {
+      session,
+    },
+  );
   if (status !== 200 || !isSuccessCode(data.Code) || !data.KeySalts) {
     throw new CliError(
       messageForApiCode(

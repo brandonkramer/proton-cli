@@ -101,7 +101,11 @@ export async function unlockUserKeys(
     throw new Error("Account has no primary User Key.");
   }
 
-  const primaryPassphrase = await passphraseForKey(password, primary.ID, keySalts);
+  const primaryPassphrase = await passphraseForKey(
+    password,
+    primary.ID,
+    keySalts,
+  );
   const primaryDecrypted = await decryptOneUserKey(primary, primaryPassphrase);
   if (!primaryDecrypted) {
     throw new Error(

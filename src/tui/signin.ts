@@ -2,8 +2,14 @@ import {
   authenticateAuthenticator,
   clearAuthenticatorState,
 } from "@bkramer/proton-authenticator";
-import { authenticateCalendar, clearCalendarState } from "@bkramer/proton-calendar";
-import { authenticateContacts, clearContactsState } from "@bkramer/proton-contacts";
+import {
+  authenticateCalendar,
+  clearCalendarState,
+} from "@bkramer/proton-calendar";
+import {
+  authenticateContacts,
+  clearContactsState,
+} from "@bkramer/proton-contacts";
 import {
   dualMintSignIn,
   PRODUCTS,
@@ -14,15 +20,14 @@ import {
   type SignInCredentials,
 } from "@bkramer/proton-core";
 import { authenticateMail, clearMailState } from "@bkramer/proton-mail";
-import { authenticateSettings, clearSettingsState } from "@bkramer/proton-settings";
+import {
+  authenticateSettings,
+  clearSettingsState,
+} from "@bkramer/proton-settings";
 import { authenticateDrive, clearDriveState } from "@bkramer/proton-drive";
 import { authenticateVpn, clearVpnSession } from "@bkramer/proton-vpn";
 import { showMessage } from "./message.tsx";
-import {
-  inkPromptPassword,
-  inkPromptText,
-  inkPromptTotp,
-} from "./prompts.tsx";
+import { inkPromptPassword, inkPromptText, inkPromptTotp } from "./prompts.tsx";
 import { runTask } from "./task.tsx";
 
 function productLabel(product: ProductId): string {

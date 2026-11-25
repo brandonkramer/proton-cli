@@ -1,9 +1,6 @@
 import type { Command } from "commander";
 import { requireContactsRuntime } from "../context.ts";
-import {
-  DEFAULT_GROUP_COLOR,
-  validateAccentColor,
-} from "../util/colors.ts";
+import { DEFAULT_GROUP_COLOR, validateAccentColor } from "../util/colors.ts";
 import { emitOk, isDryRun } from "../util/agent.ts";
 import { reportCommandError } from "../util/errors.ts";
 
@@ -43,7 +40,10 @@ export function registerGroups(contacts: Command): void {
           return;
         }
         const runtime = await requireContactsRuntime();
-        const id = await runtime.client.createGroup(options.name, options.color);
+        const id = await runtime.client.createGroup(
+          options.name,
+          options.color,
+        );
         emitOk({
           action: "groups-create",
           id,

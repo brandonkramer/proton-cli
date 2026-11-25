@@ -13,7 +13,11 @@ export interface WireGuardKeyPair {
 }
 
 function toPem(der: Buffer, label: string): string {
-  const body = der.toString("base64").match(/.{1,64}/g)?.join("\n") ?? "";
+  const body =
+    der
+      .toString("base64")
+      .match(/.{1,64}/g)
+      ?.join("\n") ?? "";
   return `-----BEGIN ${label}-----\n${body}\n-----END ${label}-----\n`;
 }
 

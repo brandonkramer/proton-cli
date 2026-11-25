@@ -2,12 +2,7 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-const DENY_TOP = new Set([
-  "mcp",
-  "install-mcp",
-  "completion",
-  "help",
-]);
+const DENY_TOP = new Set(["mcp", "install-mcp", "completion", "help"]);
 
 const ALLOW_TOP = new Set([
   "account",
@@ -24,11 +19,7 @@ const ALLOW_TOP = new Set([
   "mail",
 ]);
 
-const SECRET_FLAGS = new Set([
-  "--password",
-  "--totp",
-  "--token",
-]);
+const SECRET_FLAGS = new Set(["--password", "--totp", "--token"]);
 
 /** Flags that do not consume a following value when stripping for command matching. */
 const BOOLEAN_FLAGS = new Set([

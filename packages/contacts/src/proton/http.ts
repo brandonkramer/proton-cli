@@ -1,8 +1,4 @@
-import {
-  APP_VERSION,
-  DEFAULT_API_URL,
-  USER_AGENT,
-} from "./constants.ts";
+import { APP_VERSION, DEFAULT_API_URL, USER_AGENT } from "./constants.ts";
 import type { Session } from "./types.ts";
 
 export interface RequestOptions {
@@ -45,8 +41,7 @@ export async function protonFetch<T>(
   }
 
   if (options.humanVerification) {
-    headers["x-pm-human-verification-token"] =
-      options.humanVerification.token;
+    headers["x-pm-human-verification-token"] = options.humanVerification.token;
     headers["x-pm-human-verification-token-type"] =
       options.humanVerification.tokenType;
   }

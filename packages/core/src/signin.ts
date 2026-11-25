@@ -138,7 +138,8 @@ export async function dualMintSignIn(
     onProgress?.({ type: "start", product });
 
     let lastError: string | undefined;
-    let session: Awaited<ReturnType<ProductAuthenticator>>["session"] | undefined;
+    let session:
+      Awaited<ReturnType<ProductAuthenticator>>["session"] | undefined;
     let username = credentials.username;
 
     for (let attempt = 0; attempt <= rateLimitRetries; attempt++) {

@@ -4,10 +4,7 @@ import { handleCommandError } from "../util/command.ts";
 import { normalizeDrivePath } from "../util/paths.ts";
 import { DriveService } from "../drive/service.ts";
 import type { DryRunAction } from "../drive/types.ts";
-import {
-  addDriveMutationOptions,
-  applyDriveGlobals,
-} from "./common.ts";
+import { addDriveMutationOptions, applyDriveGlobals } from "./common.ts";
 
 function emitDryRun(plan: DryRunAction): void {
   if (wantsJson()) {
@@ -25,30 +22,30 @@ export function registerFoldersCommands(folders: Command): void {
     .option("--json", "Machine-readable JSON output");
   addDriveMutationOptions(create);
   create.action(async (path: string, _options, command) => {
-      const opts = applyDriveGlobals(command);
-      try {
-        const service = new DriveService();
-        const { client, context } = await service.open({
-          password: opts.password,
-          passRef: opts.pass,
-        });
-        const result = await service.createFolder(
-          client,
-          context,
-          path,
-          isDryRun(),
-        );
-        if (result && "action" in result) {
-          emitDryRun(result);
-          return;
-        }
-        if (wantsJson()) {
-          emitOk({ created: true, path: normalizeDrivePath(path) });
-          return;
-        }
-        emitPlain(`Created folder ${normalizeDrivePath(path)}`);
-      } catch (error) {
-        await handleCommandError(error);
+    const opts = applyDriveGlobals(command);
+    try {
+      const service = new DriveService();
+      const { client, context } = await service.open({
+        password: opts.password,
+        passRef: opts.pass,
+      });
+      const result = await service.createFolder(
+        client,
+        context,
+        path,
+        isDryRun(),
+      );
+      if (result && "action" in result) {
+        emitDryRun(result);
+        return;
       }
-    });
+      if (wantsJson()) {
+        emitOk({ created: true, path: normalizeDrivePath(path) });
+        return;
+      }
+      emitPlain(`Created folder ${normalizeDrivePath(path)}`);
+    } catch (error) {
+      await handleCommandError(error);
+    }
+  });
 }

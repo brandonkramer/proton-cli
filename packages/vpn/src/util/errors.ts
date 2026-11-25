@@ -43,9 +43,7 @@ export function messageForApiCode(code: number, fallback?: string): string {
         "  proton signin --products drive,ctc,settings,mail --partial-ok"
       );
     case API_CODE_SCOPE:
-      return (
-        "VPN scope missing from session. Sign out and sign in again with TOTP 2FA enabled."
-      );
+      return "VPN scope missing from session. Sign out and sign in again with TOTP 2FA enabled.";
     default:
       return fallback ?? `Proton API error (code ${code}).`;
   }

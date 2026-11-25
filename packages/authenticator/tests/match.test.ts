@@ -7,7 +7,9 @@ import {
   scoreEntry,
 } from "../src/sync/match.ts";
 
-function entry(partial: Partial<LocalEntry> & Pick<LocalEntry, "issuer" | "name">): LocalEntry {
+function entry(
+  partial: Partial<LocalEntry> & Pick<LocalEntry, "issuer" | "name">,
+): LocalEntry {
   return {
     entryId: partial.entryId ?? "e1",
     localId: partial.localId ?? "l1",

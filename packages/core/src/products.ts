@@ -12,13 +12,7 @@ export const PRODUCTS = [
 export type ProductId = (typeof PRODUCTS)[number];
 
 export type ProductNamespace =
-  | "vpn"
-  | "auth"
-  | "drive"
-  | "cal"
-  | "contacts"
-  | "settings"
-  | "mail";
+  "vpn" | "auth" | "drive" | "cal" | "contacts" | "settings" | "mail";
 
 export function isProductId(value: string): value is ProductId {
   return (PRODUCTS as readonly string[]).includes(value);
@@ -76,7 +70,10 @@ export function parseProductList(
   if (!raw || raw.trim() === "" || raw.trim() === "all") {
     return [...fallback];
   }
-  const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
+  const parts = raw
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
   const out: ProductId[] = [];
   for (const part of parts) {
     const normalized = PRODUCT_ALIASES[part] ?? null;

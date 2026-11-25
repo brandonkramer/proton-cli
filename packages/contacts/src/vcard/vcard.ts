@@ -71,11 +71,19 @@ function groupScopedText(text: string, group: string): string {
     .join("\n");
 }
 
-export function groupVcardField(text: string, group: string, name: string): string {
+export function groupVcardField(
+  text: string,
+  group: string,
+  name: string,
+): string {
   return vcardField(groupScopedText(text, group), name);
 }
 
-export function groupVcardFields(text: string, group: string, name: string): string[] {
+export function groupVcardFields(
+  text: string,
+  group: string,
+  name: string,
+): string[] {
   return vcardFields(groupScopedText(text, group), name);
 }
 
@@ -100,10 +108,12 @@ function splitLines(text: string): string[] {
 }
 
 function joinVCardLines(lines: string[]): string {
-  return lines.filter((line, index, all) => {
-    if (line !== "") return true;
-    return index > 0 && index < all.length - 1;
-  }).join("\r\n");
+  return lines
+    .filter((line, index, all) => {
+      if (line !== "") return true;
+      return index > 0 && index < all.length - 1;
+    })
+    .join("\r\n");
 }
 
 function propertyName(line: string): string {
@@ -144,7 +154,9 @@ export function setSimpleVCardProperty(
     next.push(line);
   }
   if (!replaced && value) {
-    const endIdx = next.findIndex((line) => line.trim().toUpperCase() === "END:VCARD");
+    const endIdx = next.findIndex(
+      (line) => line.trim().toUpperCase() === "END:VCARD",
+    );
     const insertAt = endIdx >= 0 ? endIdx : next.length;
     next.splice(insertAt, 0, `${upper}:${escapeVCardValue(value)}`);
   }
@@ -168,11 +180,15 @@ export function setMultiVCardProperty(
     if (propertyName(trimmed) === upper && !isItemGroupLine(trimmed)) continue;
     kept.push(line);
   }
-  const endIdx = kept.findIndex((line) => line.trim().toUpperCase() === "END:VCARD");
+  const endIdx = kept.findIndex(
+    (line) => line.trim().toUpperCase() === "END:VCARD",
+  );
   const insertAt = endIdx >= 0 ? endIdx : kept.length;
   const inserted = values
     .filter(Boolean)
-    .map((value, index) => `${upper};PREF=${index + 1}:${escapeVCardValue(value)}`);
+    .map(
+      (value, index) => `${upper};PREF=${index + 1}:${escapeVCardValue(value)}`,
+    );
   kept.splice(insertAt, 0, ...inserted);
   return joinVCardLines(kept);
 }
@@ -205,13 +221,19 @@ export function patchSignedVCardEmails(
       emailLines.push(`${group}.X-PM-SCHEME:${email.scheme}`);
     }
   }
-  const endIdx = kept.findIndex((line) => line.trim().toUpperCase() === "END:VCARD");
+  const endIdx = kept.findIndex(
+    (line) => line.trim().toUpperCase() === "END:VCARD",
+  );
   const insertAt = endIdx >= 0 ? endIdx : kept.length;
   kept.splice(insertAt, 0, ...emailLines);
   return joinVCardLines(kept);
 }
 
-export function signedVCard(name: string, emails: string[], uid: string): string {
+export function signedVCard(
+  name: string,
+  emails: string[],
+  uid: string,
+): string {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:4.0",
@@ -240,7 +262,9 @@ export function buildSignedVCard(contact: SignedContact): string {
     if (!email.address) continue;
     index += 1;
     const group = `item${index}`;
-    lines.push(`${group}.EMAIL;PREF=${index}:${escapeVCardValue(email.address)}`);
+    lines.push(
+      `${group}.EMAIL;PREF=${index}:${escapeVCardValue(email.address)}`,
+    );
     email.keyValues.forEach((keyValue, keyIndex) => {
       lines.push(`${group}.KEY;PREF=${keyIndex + 1}:${keyValue}`);
     });
@@ -279,7 +303,14 @@ export function encryptedVCard(fields: VCardFields): string {
 export function hasEncryptedFields(fields: VCardFields): boolean {
   return (
     fields.phones.some(Boolean) ||
-    Boolean(fields.note || fields.org || fields.title || fields.birthday || fields.address || fields.url)
+    Boolean(
+      fields.note ||
+      fields.org ||
+      fields.title ||
+      fields.birthday ||
+      fields.address ||
+      fields.url,
+    )
   );
 }
 
@@ -355,16 +386,17 @@ export function parseSignedVCard(text: string): SignedContact {
       keyValues: groupVcardFields(text, group, "KEY"),
       scheme: groupVcardField(text, group, "X-PM-SCHEME") || undefined,
       encrypt:
-        encryptRaw === ""
-          ? undefined
-          : encryptRaw.toLowerCase() === "true",
+        encryptRaw === "" ? undefined : encryptRaw.toLowerCase() === "true",
       sign: signRaw === "" ? undefined : signRaw.toLowerCase() === "true",
     });
   }
   return contact;
 }
 
-export function contactFromCards(id: string, cards: string[]): {
+export function contactFromCards(
+  id: string,
+  cards: string[],
+): {
   id: string;
   name: string;
   email?: string;

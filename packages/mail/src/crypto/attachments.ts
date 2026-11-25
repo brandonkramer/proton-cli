@@ -59,8 +59,12 @@ export async function encryptAttachmentFile(options: {
   bytes: Uint8Array;
   senderKey: UnlockedAddressKey;
   cryptoProxy?: Awaited<ReturnType<typeof getCryptoProxy>> & {
-    generateSessionKey?: (options?: Record<string, unknown>) => Promise<SessionKeyMaterial>;
-    encryptSessionKey?: (options: Record<string, unknown>) => Promise<string | Uint8Array>;
+    generateSessionKey?: (
+      options?: Record<string, unknown>,
+    ) => Promise<SessionKeyMaterial>;
+    encryptSessionKey?: (
+      options: Record<string, unknown>,
+    ) => Promise<string | Uint8Array>;
   };
 }): Promise<EncryptedAttachmentFile> {
   const filename = basename(options.path);
@@ -68,12 +72,16 @@ export async function encryptAttachmentFile(options: {
   const proxy = options.cryptoProxy ?? (await getCryptoProxy());
   const generateSessionKey = (
     proxy as {
-      generateSessionKey?: (options?: Record<string, unknown>) => Promise<SessionKeyMaterial>;
+      generateSessionKey?: (
+        options?: Record<string, unknown>,
+      ) => Promise<SessionKeyMaterial>;
     }
   ).generateSessionKey;
   const encryptSessionKey = (
     proxy as {
-      encryptSessionKey?: (options: Record<string, unknown>) => Promise<string | Uint8Array>;
+      encryptSessionKey?: (
+        options: Record<string, unknown>,
+      ) => Promise<string | Uint8Array>;
     }
   ).encryptSessionKey;
 

@@ -4,7 +4,11 @@ import type { ContactGroupSummary, ContactSummary } from "../proton/client.ts";
 import { Brand } from "./brand.tsx";
 import { renderUntilExit } from "./render.tsx";
 
-function ContactListApp({ contacts }: { contacts: ContactSummary[] }): ReactNode {
+function ContactListApp({
+  contacts,
+}: {
+  contacts: ContactSummary[];
+}): ReactNode {
   const { exit } = useApp();
 
   useInput((input, key) => {
@@ -38,7 +42,11 @@ function ContactListApp({ contacts }: { contacts: ContactSummary[] }): ReactNode
   );
 }
 
-function GroupListApp({ groups }: { groups: ContactGroupSummary[] }): ReactNode {
+function GroupListApp({
+  groups,
+}: {
+  groups: ContactGroupSummary[];
+}): ReactNode {
   const { exit } = useApp();
 
   useInput((input, key) => {
@@ -63,16 +71,22 @@ function GroupListApp({ groups }: { groups: ContactGroupSummary[] }): ReactNode 
         </Box>
       )}
       <Box marginTop={1}>
-        <Text dimColor>q / Esc close · CLI: `proton contacts groups list --json`</Text>
+        <Text dimColor>
+          q / Esc close · CLI: `proton contacts groups list --json`
+        </Text>
       </Box>
     </Box>
   );
 }
 
-export async function showContactList(contacts: ContactSummary[]): Promise<void> {
+export async function showContactList(
+  contacts: ContactSummary[],
+): Promise<void> {
   await renderUntilExit(<ContactListApp contacts={contacts} />);
 }
 
-export async function showGroupList(groups: ContactGroupSummary[]): Promise<void> {
+export async function showGroupList(
+  groups: ContactGroupSummary[],
+): Promise<void> {
   await renderUntilExit(<GroupListApp groups={groups} />);
 }

@@ -48,9 +48,7 @@ function findInBunStore(nodeModules: string): string | null {
   return null;
 }
 
-export function findOpenpgpPackageJson(
-  startDir = scriptDir,
-): string | null {
+export function findOpenpgpPackageJson(startDir = scriptDir): string | null {
   let dir = startDir;
   for (let i = 0; i < 12; i++) {
     for (const candidate of classicCandidates(dir)) {
@@ -83,8 +81,7 @@ export function patchOpenpgp(packagePath?: string): boolean {
     return false;
   }
 
-  const target =
-    lightweight.browser ?? "./dist/lightweight/openpgp.min.mjs";
+  const target = lightweight.browser ?? "./dist/lightweight/openpgp.min.mjs";
   let changed = false;
   for (const key of ["import", "require", "default"] as const) {
     if (!lightweight[key]) {

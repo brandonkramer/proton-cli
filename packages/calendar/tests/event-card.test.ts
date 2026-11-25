@@ -44,7 +44,9 @@ describe("event card crypto", () => {
   beforeEach(() => {
     mockVerifyMessage.mockClear();
     mockDecryptMessage.mockClear();
-    mockVerifyMessage.mockImplementation(async () => ({ verificationStatus: 1 }));
+    mockVerifyMessage.mockImplementation(async () => ({
+      verificationStatus: 1,
+    }));
     mockDecryptMessage.mockImplementation(async () => ({
       data: "SUMMARY:Meeting",
       verificationStatus: 1,
@@ -76,7 +78,9 @@ describe("event card crypto", () => {
   });
 
   test("decryptCards rejects failed signed verification", async () => {
-    mockVerifyMessage.mockImplementation(async () => ({ verificationStatus: 2 }));
+    mockVerifyMessage.mockImplementation(async () => ({
+      verificationStatus: 2,
+    }));
     await expect(
       decryptCards(
         [{ Type: CardSigned, Data: "BEGIN:VEVENT", Signature: "bad" }],

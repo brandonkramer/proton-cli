@@ -13,7 +13,9 @@ function toolText(text: string, isError = false): unknown {
   };
 }
 
-function formatResult(result: Awaited<ReturnType<typeof runProtonCli>>): unknown {
+function formatResult(
+  result: Awaited<ReturnType<typeof runProtonCli>>,
+): unknown {
   const body = [
     result.stdout.trim(),
     result.stderr.trim() ? `stderr:\n${result.stderr.trim()}` : "",
@@ -119,7 +121,8 @@ export const TOOLS: McpToolDef[] = [
   },
   {
     name: "proton_mail_get",
-    description: "Read and decrypt a mail message (proton mail read <id> --json).",
+    description:
+      "Read and decrypt a mail message (proton mail read <id> --json).",
     inputSchema: {
       type: "object",
       properties: {
@@ -228,7 +231,10 @@ export const TOOLS: McpToolDef[] = [
       type: "object",
       properties: {
         calendar: { type: "string", description: "Calendar ID or name" },
-        start: { type: "string", description: "Start YYYY-MM-DD (default today)" },
+        start: {
+          type: "string",
+          description: "Start YYYY-MM-DD (default today)",
+        },
         end: {
           type: "string",
           description: "End YYYY-MM-DD (default start+7 days)",
@@ -328,7 +334,7 @@ export const TOOLS: McpToolDef[] = [
   {
     name: "proton_cli",
     description:
-      "Run an allowlisted proton CLI subcommand with JSON/agent mode. Pass args after `proton` (e.g. [\"mail\",\"list\"]). Non-read commands require confirm=true. Never pass --password/--totp.",
+      'Run an allowlisted proton CLI subcommand with JSON/agent mode. Pass args after `proton` (e.g. ["mail","list"]). Non-read commands require confirm=true. Never pass --password/--totp.',
     inputSchema: {
       type: "object",
       properties: {

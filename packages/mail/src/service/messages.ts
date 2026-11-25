@@ -11,10 +11,7 @@ import {
 } from "../proton/client.ts";
 import type { Session } from "../proton/types.ts";
 import { decryptMessageBody } from "../crypto/decrypt.ts";
-import {
-  unlockMailKeys,
-  type UnlockedAddressKey,
-} from "../crypto/unlock.ts";
+import { unlockMailKeys, type UnlockedAddressKey } from "../crypto/unlock.ts";
 import { CliError } from "../util/errors.ts";
 
 export interface MessageSummary {

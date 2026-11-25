@@ -1,8 +1,5 @@
 import { getCalendarCrypto } from "./proxy.ts";
-import {
-  unlockCalendarKeys,
-  type UnlockedCalendarKeys,
-} from "./unlock.ts";
+import { unlockCalendarKeys, type UnlockedCalendarKeys } from "./unlock.ts";
 import { calendarApi } from "../proton/api.ts";
 import type { Session } from "../proton/types.ts";
 
@@ -41,15 +38,21 @@ export async function unlockCalendarForEvents(
     fetchImpl: options.fetchImpl,
   });
 
-  const member = members.Members.find((m) => unlocked.addressKeys.has(m.AddressID));
+  const member = members.Members.find((m) =>
+    unlocked.addressKeys.has(m.AddressID),
+  );
   if (!member) {
-    throw new Error(`No matching address key for calendar ${options.calendarId}`);
+    throw new Error(
+      `No matching address key for calendar ${options.calendarId}`,
+    );
   }
 
   // Prefer the calendar member address key (secondary-address calendars).
   const addr = unlocked.addressKeys.get(member.AddressID);
   if (!addr) {
-    throw new Error(`No unlocked address key for member address ${member.AddressID}`);
+    throw new Error(
+      `No unlocked address key for member address ${member.AddressID}`,
+    );
   }
 
   const passData = await calendarApi<{

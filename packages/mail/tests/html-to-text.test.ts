@@ -26,7 +26,9 @@ describe("htmlToPlainText", () => {
     const text = htmlToPlainText(html);
     expect(text).toContain("Get ready for Rainbow Season!");
     expect(text).toContain("Unsubscribe here <https://example.com/unsub>");
-    expect(text).toContain("Rebecca Zamolo | P.O. Box 567 Independence, Oregon 97351");
+    expect(text).toContain(
+      "Rebecca Zamolo | P.O. Box 567 Independence, Oregon 97351",
+    );
     expect(text).not.toMatch(/<\/?(?:p|div|table|html|body|a|img)\b/i);
     expect(text).not.toContain("mj-column");
     expect(text).not.toContain("ctrk.klclick1.com");

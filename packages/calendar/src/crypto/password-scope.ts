@@ -1,6 +1,9 @@
 import { getSrp } from "../shims/proton-srp.ts";
 import { calendarApi } from "../proton/api.ts";
-import { CORE_AUTH_INFO_PATH, USERS_PASSWORD_PATH } from "../proton/constants.ts";
+import {
+  CORE_AUTH_INFO_PATH,
+  USERS_PASSWORD_PATH,
+} from "../proton/constants.ts";
 import type { Session } from "../proton/types.ts";
 
 /** SRP re-auth within session — unlocks password scope for calendar delete. */

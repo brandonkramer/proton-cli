@@ -28,10 +28,7 @@ async function run(label: string, args: string[]): Promise<void> {
 
 await run("link-packages", ["run", "scripts/link-packages.ts"]);
 await run("patch-openpgp", ["run", "scripts/patch-openpgp.ts"]);
-await run("vpn wireguard", [
-  "run",
-  "packages/vpn/scripts/ensure-wireguard.ts",
-]);
+await run("vpn wireguard", ["run", "packages/vpn/scripts/ensure-wireguard.ts"]);
 await run("auth captcha", [
   "run",
   "packages/authenticator/scripts/build-captcha.ts",

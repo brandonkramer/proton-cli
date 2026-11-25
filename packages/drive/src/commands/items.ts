@@ -82,7 +82,9 @@ export function registerItemsCommands(items: Command): void {
             emitOk({ item: info });
             return;
           }
-          emitPlain(`${info.name}\t${info.type === 1 ? "folder" : "file"}\t${info.size}`);
+          emitPlain(
+            `${info.name}\t${info.type === 1 ? "folder" : "file"}\t${info.size}`,
+          );
           emitPlain(`link_id: ${info.linkId}`);
         });
       } catch (error) {
@@ -98,74 +100,78 @@ export function registerItemsCommands(items: Command): void {
     .option("--json", "Machine-readable JSON output");
   addDriveMutationOptions(upload);
   upload.action(async (src: string, dest: string, _options, command) => {
-      const opts = applyDriveGlobals(command);
-      try {
-        await withService(opts, async (service) => {
-          const { client, context } = await service.open({
-            password: opts.password,
-            passRef: opts.pass,
-          });
-
-          let fileName: string;
-          let bytes: Uint8Array;
-          let destFolder = dest;
-
-          if (src === "-") {
-            fileName = `stdin-${Date.now()}`;
-            const buffer = await Bun.stdin.arrayBuffer();
-            bytes = new Uint8Array(buffer);
-            try {
-              const resolved = await service.resolvePath(client, context, dest);
-              if (!resolved.isFolder) {
-                fileName = basename(dest);
-                destFolder = normalizeDrivePath(dest).replace(/\/[^/]+$/, "") || "/";
-              }
-            } catch {
-              fileName = basename(dest);
-              destFolder = normalizeDrivePath(dest).replace(/\/[^/]+$/, "") || "/";
-            }
-          } else {
-            const info = await stat(src);
-            if (info.isDirectory()) {
-              throw new Error(`${src} is a directory (recursive upload not in PH1).`);
-            }
-            fileName = basename(src);
-            bytes = new Uint8Array(await Bun.file(src).arrayBuffer());
-          }
-
-          const result = await service.upload(
-            client,
-            context,
-            destFolder,
-            fileName,
-            bytes,
-            {
-              dryRun: isDryRun(),
-              sizeHint: bytes.length,
-            },
-          );
-
-          if (result && "action" in result) {
-            emitDryRun(result);
-            return;
-          }
-
-          if (wantsJson()) {
-            emitOk({
-              uploaded: true,
-              name: fileName,
-              dest: normalizeDrivePath(destFolder),
-              linkId: result.linkId,
-              revisionId: result.revisionId,
-            });
-            return;
-          }
-          emitPlain(`Uploaded ${fileName}`);
+    const opts = applyDriveGlobals(command);
+    try {
+      await withService(opts, async (service) => {
+        const { client, context } = await service.open({
+          password: opts.password,
+          passRef: opts.pass,
         });
-      } catch (error) {
-        await handleCommandError(error);
-      }
-    });
+
+        let fileName: string;
+        let bytes: Uint8Array;
+        let destFolder = dest;
+
+        if (src === "-") {
+          fileName = `stdin-${Date.now()}`;
+          const buffer = await Bun.stdin.arrayBuffer();
+          bytes = new Uint8Array(buffer);
+          try {
+            const resolved = await service.resolvePath(client, context, dest);
+            if (!resolved.isFolder) {
+              fileName = basename(dest);
+              destFolder =
+                normalizeDrivePath(dest).replace(/\/[^/]+$/, "") || "/";
+            }
+          } catch {
+            fileName = basename(dest);
+            destFolder =
+              normalizeDrivePath(dest).replace(/\/[^/]+$/, "") || "/";
+          }
+        } else {
+          const info = await stat(src);
+          if (info.isDirectory()) {
+            throw new Error(
+              `${src} is a directory (recursive upload not in PH1).`,
+            );
+          }
+          fileName = basename(src);
+          bytes = new Uint8Array(await Bun.file(src).arrayBuffer());
+        }
+
+        const result = await service.upload(
+          client,
+          context,
+          destFolder,
+          fileName,
+          bytes,
+          {
+            dryRun: isDryRun(),
+            sizeHint: bytes.length,
+          },
+        );
+
+        if (result && "action" in result) {
+          emitDryRun(result);
+          return;
+        }
+
+        if (wantsJson()) {
+          emitOk({
+            uploaded: true,
+            name: fileName,
+            dest: normalizeDrivePath(destFolder),
+            linkId: result.linkId,
+            revisionId: result.revisionId,
+          });
+          return;
+        }
+        emitPlain(`Uploaded ${fileName}`);
+      });
+    } catch (error) {
+      await handleCommandError(error);
+    }
+  });
 
   const download = items
     .command("download")
@@ -176,63 +182,87 @@ export function registerItemsCommands(items: Command): void {
     .option("--force", "Overwrite existing local file");
   addDriveMutationOptions(download);
   download.action(async (path: string, out: string, _options, command) => {
-      const opts = applyDriveGlobals(command);
-      try {
-        await withService(opts, async (service) => {
-          const { client, context } = await service.open({
-            password: opts.password,
-            passRef: opts.pass,
-          });
-          const result = await service.download(
-            client,
-            context,
-            path,
-            isDryRun(),
-          );
-          if (result && typeof result === "object" && "action" in result) {
-            emitDryRun(result);
-            return;
-          }
-
-          const data = result as Uint8Array;
-          if (out === "-") {
-            process.stdout.write(data);
-            return;
-          }
-
-          if (!_options.force && (await Bun.file(out).exists())) {
-            throw new Error(`Refusing to overwrite ${out} (use --force).`);
-          }
-          await Bun.write(out, data);
-          if (wantsJson()) {
-            emitOk({ downloaded: true, path, out, bytes: data.length });
-            return;
-          }
-          emitPlain(`Downloaded ${path} → ${out}`);
+    const opts = applyDriveGlobals(command);
+    try {
+      await withService(opts, async (service) => {
+        const { client, context } = await service.open({
+          password: opts.password,
+          passRef: opts.pass,
         });
-      } catch (error) {
-        await handleCommandError(error);
-      }
-    });
+        const result = await service.download(
+          client,
+          context,
+          path,
+          isDryRun(),
+        );
+        if (result && typeof result === "object" && "action" in result) {
+          emitDryRun(result);
+          return;
+        }
 
-  registerMutatingItemCommand(items, "rename", "Rename an item", async (service, client, context, args, dryRun) => {
-    const [path, newName] = args;
-    return service.rename(client, context, path!, newName!, dryRun);
-  }, 2);
+        const data = result as Uint8Array;
+        if (out === "-") {
+          process.stdout.write(data);
+          return;
+        }
 
-  registerMutatingItemCommand(items, "move", "Move an item to a folder", async (service, client, context, args, dryRun) => {
-    const [source, dest] = args;
-    return service.move(client, context, source!, dest!, dryRun);
-  }, 2);
+        if (!_options.force && (await Bun.file(out).exists())) {
+          throw new Error(`Refusing to overwrite ${out} (use --force).`);
+        }
+        await Bun.write(out, data);
+        if (wantsJson()) {
+          emitOk({ downloaded: true, path, out, bytes: data.length });
+          return;
+        }
+        emitPlain(`Downloaded ${path} → ${out}`);
+      });
+    } catch (error) {
+      await handleCommandError(error);
+    }
+  });
 
-  registerMutatingItemCommand(items, "copy", "Copy a file to another folder", async (service, client, context, args, dryRun) => {
-    const [source, dest] = args;
-    return service.copy(client, context, source!, dest!, dryRun);
-  }, 2);
+  registerMutatingItemCommand(
+    items,
+    "rename",
+    "Rename an item",
+    async (service, client, context, args, dryRun) => {
+      const [path, newName] = args;
+      return service.rename(client, context, path!, newName!, dryRun);
+    },
+    2,
+  );
 
-  registerMutatingItemCommand(items, "trash", "Move an item to trash", async (service, client, context, args, dryRun) => {
-    return service.trash(client, context, args[0]!, dryRun);
-  }, 1);
+  registerMutatingItemCommand(
+    items,
+    "move",
+    "Move an item to a folder",
+    async (service, client, context, args, dryRun) => {
+      const [source, dest] = args;
+      return service.move(client, context, source!, dest!, dryRun);
+    },
+    2,
+  );
+
+  registerMutatingItemCommand(
+    items,
+    "copy",
+    "Copy a file to another folder",
+    async (service, client, context, args, dryRun) => {
+      const [source, dest] = args;
+      return service.copy(client, context, source!, dest!, dryRun);
+    },
+    2,
+  );
+
+  registerMutatingItemCommand(
+    items,
+    "trash",
+    "Move an item to trash",
+    async (service, client, context, args, dryRun) => {
+      return service.trash(client, context, args[0]!, dryRun);
+    },
+    1,
+  );
 
   const del = items
     .command("delete")
@@ -266,7 +296,11 @@ export function registerItemsCommands(items: Command): void {
           return;
         }
         if (wantsJson()) {
-          emitOk({ deleted: true, path, permanent: Boolean(options.permanent) });
+          emitOk({
+            deleted: true,
+            path,
+            permanent: Boolean(options.permanent),
+          });
           return;
         }
         emitPlain(`Deleted ${path}`);
@@ -327,7 +361,11 @@ function registerMutatingItemCommand(
           return;
         }
         if (wantsJson()) {
-          emitOk({ ok: true, action: name, ...Object.fromEntries(args.map((a, i) => [`arg${i}`, a])) });
+          emitOk({
+            ok: true,
+            action: name,
+            ...Object.fromEntries(args.map((a, i) => [`arg${i}`, a])),
+          });
           return;
         }
         emitPlain(`${name} completed`);

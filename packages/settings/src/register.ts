@@ -15,10 +15,7 @@ function outputWantsJson(options: {
 export function registerSettingsCommands(settings: Command): void {
   settings
     .option("--json", "Machine-readable JSON (also: PROTONSETTINGS_JSON=1)")
-    .option(
-      "-o, --output <format>",
-      "Output format (json)",
-    )
+    .option("-o, --output <format>", "Output format (json)")
     .option(
       "-y, --yes",
       "Non-interactive confirmations (also implied by --json / CI)",

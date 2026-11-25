@@ -6,10 +6,9 @@ export async function settingsApi<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { status, data } = await protonFetch<{ Code: number; Error?: string } & T>(
-    path,
-    options,
-  );
+  const { status, data } = await protonFetch<
+    { Code: number; Error?: string } & T
+  >(path, options);
 
   if (status === 204) {
     return data as T;

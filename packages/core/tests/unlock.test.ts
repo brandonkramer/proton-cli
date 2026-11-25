@@ -3,8 +3,9 @@ import type { CryptoProxyLike } from "../src/crypto.ts";
 import type { KeySalt, ProtonUser, ProtonUserKey } from "../src/unlock.ts";
 
 const mockImportPrivateKey = mock(
-  async (_opts: { armoredKey: string; passphrase: string | null }) =>
-    ({ kind: "private" }),
+  async (_opts: { armoredKey: string; passphrase: string | null }) => ({
+    kind: "private",
+  }),
 );
 const mockImportPublicKey = mock(async (_opts: { armoredKey: string }) => ({
   kind: "public",
@@ -94,7 +95,10 @@ describe("unlock", () => {
   test("unlockUserKeys rejects organization-managed keys", async () => {
     await expect(
       unlockUserKeys(
-        { ...testUser([userKey("primary")]), OrganizationPrivateKey: "org-key" },
+        {
+          ...testUser([userKey("primary")]),
+          OrganizationPrivateKey: "org-key",
+        },
         "pass",
         [],
       ),

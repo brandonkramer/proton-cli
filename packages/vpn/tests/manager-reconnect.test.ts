@@ -52,7 +52,9 @@ describe("wireguard reconnect semantics", () => {
 
   test("bringUp does not treat already-exists as success", async () => {
     if (process.platform === "win32") return;
-    await expect(bringUp("/tmp/protonvpn.conf")).rejects.toThrow(/already exists/i);
+    await expect(bringUp("/tmp/protonvpn.conf")).rejects.toThrow(
+      /already exists/i,
+    );
   });
 
   test("bringDown suppresses not-present", async () => {

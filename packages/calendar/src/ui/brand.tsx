@@ -7,7 +7,9 @@ export function Brand({ subtitle }: { subtitle?: string }): ReactNode {
       <Text bold color="cyan">
         Proton Calendar
       </Text>
-      <Text dimColor>proton-cli · E2EE events · not affiliated with Proton AG</Text>
+      <Text dimColor>
+        proton-cli · E2EE events · not affiliated with Proton AG
+      </Text>
       {subtitle ? <Text color="white">{subtitle}</Text> : null}
     </Box>
   );

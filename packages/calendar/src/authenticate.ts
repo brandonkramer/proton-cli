@@ -11,7 +11,9 @@ import {
 /**
  * Dual-mint authenticator for Calendar API (calendar-api.proton.me).
  */
-export const authenticateCalendar: ProductAuthenticator = async (credentials) => {
+export const authenticateCalendar: ProductAuthenticator = async (
+  credentials,
+) => {
   const username = normalizeUsername(credentials.username);
   const existing = await tryExistingSession(username);
   if (existing) {

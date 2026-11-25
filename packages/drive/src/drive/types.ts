@@ -21,7 +21,11 @@ export interface DriveLink {
   FileProperties?: {
     ContentKeyPacket: string;
     ContentKeyPacketSignature?: string;
-    ActiveRevision: { ID: string; ManifestSignature?: string; SignatureEmail?: string };
+    ActiveRevision: {
+      ID: string;
+      ManifestSignature?: string;
+      SignatureEmail?: string;
+    };
   };
   ShareIDs?: string[];
   ShareUrls?: { ShareURLID: string }[];

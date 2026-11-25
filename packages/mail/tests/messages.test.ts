@@ -35,11 +35,8 @@ const sampleMetadata = {
   Flags: 1,
 };
 
-const {
-  listMessages,
-  getMessage,
-  searchMessages,
-} = await import("../src/proton/client.ts");
+const { listMessages, getMessage, searchMessages } =
+  await import("../src/proton/client.ts");
 
 const {
   listMessagesForCommand,
@@ -195,4 +192,3 @@ describe("CASE-LIST-READ", () => {
     expect(decrypted.verified).toBeNull();
   });
 });
-

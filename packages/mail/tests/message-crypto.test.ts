@@ -14,10 +14,12 @@ const mockDecryptMessage = mock(
   }),
 );
 
-const mockImportPublicKey = mock(async ({ armoredKey }: { armoredKey: string }) => ({
-  kind: "public",
-  armoredKey,
-}));
+const mockImportPublicKey = mock(
+  async ({ armoredKey }: { armoredKey: string }) => ({
+    kind: "public",
+    armoredKey,
+  }),
+);
 
 const mockCryptoProxy = {
   setEndpoint: () => {
@@ -184,11 +186,11 @@ describe("mail message crypto (PH1)", () => {
     ).rejects.toThrow(/Public-key lookup failed|network down/);
 
     // Transient failure must not be cached as authoritative empty.
-    const okFetch = mock(async () =>
-      new Response(
-        JSON.stringify({ Code: 1000, Address: { Keys: [] } }),
-        { status: 200 },
-      ),
+    const okFetch = mock(
+      async () =>
+        new Response(JSON.stringify({ Code: 1000, Address: { Keys: [] } }), {
+          status: 200,
+        }),
     ) as unknown as typeof fetch;
     const keys = await fetchSenderPublicKeys("missing@example.com", {
       fetchImpl: okFetch,

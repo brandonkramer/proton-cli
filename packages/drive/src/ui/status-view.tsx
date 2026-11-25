@@ -44,7 +44,9 @@ function StatusApp({
               : "Root folder empty"}
         </StatusMessage>
         <StatusMessage
-          variant={trashCount !== null && trashCount > 0 ? "success" : "warning"}
+          variant={
+            trashCount !== null && trashCount > 0 ? "success" : "warning"
+          }
         >
           {trashCount === null
             ? "Trash not loaded"

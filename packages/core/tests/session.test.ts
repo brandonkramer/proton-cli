@@ -170,7 +170,10 @@ describe("paths + dual-mint sign-in", () => {
       credentials: { username: "alice", password: "secret" },
       products: ["mail", "settings"],
       authenticators: {
-        mail: async () => ({ product: "mail", session: fakeSession("mail-uid") }),
+        mail: async () => ({
+          product: "mail",
+          session: fakeSession("mail-uid"),
+        }),
         settings: async () => ({
           product: "settings",
           session: fakeSession("settings-uid"),
@@ -182,7 +185,9 @@ describe("paths + dual-mint sign-in", () => {
     expect(result.succeeded.sort()).toEqual(["mail", "settings"]);
     // contacts/settings/mail share mail-api sessions
     expect((await loadProductSession("mail"))?.session.UID).toBe("mail-uid");
-    expect((await loadProductSession("settings"))?.session.UID).toBe("mail-uid");
+    expect((await loadProductSession("settings"))?.session.UID).toBe(
+      "mail-uid",
+    );
 
     await rm(root, { recursive: true, force: true });
   });

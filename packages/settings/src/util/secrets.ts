@@ -43,7 +43,9 @@ export function sanitizeForOutput(value: unknown): unknown {
   }
   if (typeof value === "object") {
     const out: Record<string, unknown> = {};
-    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+    for (const [key, nested] of Object.entries(
+      value as Record<string, unknown>,
+    )) {
       if (SECRET_FIELD_NAMES.has(key)) {
         out[key] = "[redacted]";
         continue;
@@ -66,7 +68,9 @@ export function formatSettingsStatus(options: {
     options.signedIn
       ? `Signed in as ${options.username ?? "(unknown)"}`
       : "Not signed in — use proton signin --products settings",
-    options.expiresAt ? `Session expires: ${options.expiresAt}` : "Session: none",
+    options.expiresAt
+      ? `Session expires: ${options.expiresAt}`
+      : "Session: none",
     `Config: ${options.configDir}`,
   ];
   return redactKnownSecrets(lines.join("\n"), options.extraSecrets ?? []);

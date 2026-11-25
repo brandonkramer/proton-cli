@@ -7,7 +7,10 @@ import { handleCommandError } from "../util/command.ts";
 export function registerSignin(program: Command): void {
   program
     .command("signin")
-    .argument("[username]", "Proton username or email (overrides Pass username)")
+    .argument(
+      "[username]",
+      "Proton username or email (overrides Pass username)",
+    )
     .option(
       "--pass <ref>",
       `Proton Pass login item (pass://Vault/Item or Vault/Item). Also: $${PASS_ENV}`,

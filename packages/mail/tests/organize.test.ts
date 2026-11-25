@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+} from "bun:test";
 import type { Session } from "../src/proton/types.ts";
 import {
   ADDRESSES_PATH,
@@ -16,10 +24,7 @@ import {
   MAIL_MESSAGES_UNREAD_PATH,
 } from "../src/proton/constants.ts";
 import { configureAgentFlags } from "../src/util/agent.ts";
-import {
-  assertWriteAllowed,
-  assertYesConfirmed,
-} from "../src/util/safety.ts";
+import { assertWriteAllowed, assertYesConfirmed } from "../src/util/safety.ts";
 import { CliError } from "../src/util/errors.ts";
 
 mock.restore();
@@ -45,7 +50,9 @@ function mockFetch(routes: Record<string, RouteHandler>) {
     const key = query ? `${path}${query}` : path;
     const handler = routes[key] ?? routes[path];
     if (!handler) {
-      throw new Error(`unexpected fetch: ${key || path} ${init?.method ?? "GET"}`);
+      throw new Error(
+        `unexpected fetch: ${key || path} ${init?.method ?? "GET"}`,
+      );
     }
     const body = handler(init);
     return new Response(JSON.stringify(body ?? { Code: 1000 }), {
@@ -77,11 +84,8 @@ const {
   permanentlyDeleteMessages,
 } = await import("../src/service/organize.ts");
 
-const {
-  listUserLabels,
-  createUserLabel,
-  deleteUserLabel,
-} = await import("../src/service/labels.ts");
+const { listUserLabels, createUserLabel, deleteUserLabel } =
+  await import("../src/service/labels.ts");
 
 const { listAccountAddresses } = await import("../src/service/addresses.ts");
 
@@ -287,13 +291,27 @@ describe("CASE-ORGANIZE-LABELS", () => {
       [`${LABELS_PATH}?Type=${LABEL_TYPE_LABEL}`]: () => {
         paths.push("labels");
         return {
-          Labels: [{ ID: "lbl-1", Name: "Work", Color: "#000", Type: LABEL_TYPE_LABEL }],
+          Labels: [
+            {
+              ID: "lbl-1",
+              Name: "Work",
+              Color: "#000",
+              Type: LABEL_TYPE_LABEL,
+            },
+          ],
         };
       },
       [`${LABELS_PATH}?Type=${LABEL_TYPE_FOLDER}`]: () => {
         paths.push("folders");
         return {
-          Labels: [{ ID: "fld-1", Name: "Projects", Color: "#111", Type: LABEL_TYPE_FOLDER }],
+          Labels: [
+            {
+              ID: "fld-1",
+              Name: "Projects",
+              Color: "#111",
+              Type: LABEL_TYPE_FOLDER,
+            },
+          ],
         };
       },
     });
@@ -313,7 +331,12 @@ describe("CASE-ORGANIZE-LABELS", () => {
         method = init?.method;
         posted = init?.body ? JSON.parse(String(init.body)) : undefined;
         return {
-          Label: { ID: "lbl-new", Name: "VIP", Color: "#7272a1", Type: LABEL_TYPE_LABEL },
+          Label: {
+            ID: "lbl-new",
+            Name: "VIP",
+            Color: "#7272a1",
+            Type: LABEL_TYPE_LABEL,
+          },
         };
       },
     });
@@ -333,10 +356,18 @@ describe("CASE-ORGANIZE-LABELS", () => {
     const calls: Array<{ method: string; path: string }> = [];
     const fetchImpl = mockFetch({
       [`${LABELS_PATH}/lbl-1`]: (init) => {
-        calls.push({ method: init?.method ?? "GET", path: `${LABELS_PATH}/lbl-1` });
+        calls.push({
+          method: init?.method ?? "GET",
+          path: `${LABELS_PATH}/lbl-1`,
+        });
         if (init?.method === "PUT") {
           return {
-            Label: { ID: "lbl-1", Name: "Renamed", Color: "#7272a1", Type: LABEL_TYPE_LABEL },
+            Label: {
+              ID: "lbl-1",
+              Name: "Renamed",
+              Color: "#7272a1",
+              Type: LABEL_TYPE_LABEL,
+            },
           };
         }
         return { Code: 1000 };
@@ -455,7 +486,9 @@ describe("CASE-ORGANIZE-LABELS", () => {
     );
     expect(() => assertYesConfirmed("Delete label")).toThrow(/-y\/--yes/);
     configureAgentFlags({ yes: true });
-    expect(() => assertYesConfirmed("Permanently delete messages")).not.toThrow();
+    expect(() =>
+      assertYesConfirmed("Permanently delete messages"),
+    ).not.toThrow();
     expect(() => assertYesConfirmed("Delete label")).not.toThrow();
   });
 });

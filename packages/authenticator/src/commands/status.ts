@@ -3,10 +3,7 @@ import { configDir } from "../config/paths.ts";
 import { loadLocalEntries } from "../config/store.ts";
 import { tryExistingSession } from "../proton/auth.ts";
 import { actionStatus } from "../tui/actions.ts";
-import {
-  handleCommandError,
-  setCommandOutputFormat,
-} from "../util/command.ts";
+import { handleCommandError, setCommandOutputFormat } from "../util/command.ts";
 import {
   addOutputOption,
   resolveOutputFormat,

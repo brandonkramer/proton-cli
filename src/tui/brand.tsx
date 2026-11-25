@@ -8,7 +8,8 @@ export function Brand({ subtitle }: { subtitle?: string }): ReactNode {
         proton-cli
       </Text>
       <Text dimColor>
-        Unofficial · VPN · Authenticator · Contacts · Calendar · Drive · Settings · Mail
+        Unofficial · VPN · Authenticator · Contacts · Calendar · Drive ·
+        Settings · Mail
       </Text>
       {subtitle ? <Text color="white">{subtitle}</Text> : null}
     </Box>

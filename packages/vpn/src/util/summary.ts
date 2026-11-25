@@ -20,10 +20,7 @@ export function formatConnectedSummary(
     lines.push(`Features: ${features.join(", ")}`);
   }
 
-  if (
-    server.EntryCountry &&
-    server.EntryCountry !== server.ExitCountry
-  ) {
+  if (server.EntryCountry && server.EntryCountry !== server.ExitCountry) {
     lines.push(`Secure Core: ${server.EntryCountry} → ${server.ExitCountry}`);
   }
 

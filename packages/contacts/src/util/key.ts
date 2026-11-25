@@ -27,7 +27,9 @@ export async function readArmoredKey(path: string): Promise<string> {
       ? await new Promise<string>((resolve, reject) => {
           const chunks: Buffer[] = [];
           process.stdin.on("data", (chunk: Buffer) => chunks.push(chunk));
-          process.stdin.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+          process.stdin.on("end", () =>
+            resolve(Buffer.concat(chunks).toString("utf8")),
+          );
           process.stdin.on("error", reject);
         })
       : await readFile(path, "utf8");

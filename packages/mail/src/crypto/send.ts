@@ -79,8 +79,12 @@ export interface EncryptForSendOptions {
   recipients: RecipientKeyPref[];
   /** Injected for tests. */
   cryptoProxy?: Awaited<ReturnType<typeof getCryptoProxy>> & {
-    generateSessionKey?: (options?: Record<string, unknown>) => Promise<SessionKeyMaterial>;
-    encryptSessionKey?: (options: Record<string, unknown>) => Promise<string | Uint8Array>;
+    generateSessionKey?: (
+      options?: Record<string, unknown>,
+    ) => Promise<SessionKeyMaterial>;
+    encryptSessionKey?: (
+      options: Record<string, unknown>,
+    ) => Promise<string | Uint8Array>;
   };
 }
 
@@ -95,12 +99,16 @@ export async function encryptForSend(
   const proxy = options.cryptoProxy ?? (await getCryptoProxy());
   const generateSessionKey = (
     proxy as {
-      generateSessionKey?: (options?: Record<string, unknown>) => Promise<SessionKeyMaterial>;
+      generateSessionKey?: (
+        options?: Record<string, unknown>,
+      ) => Promise<SessionKeyMaterial>;
     }
   ).generateSessionKey;
   const encryptSessionKey = (
     proxy as {
-      encryptSessionKey?: (options: Record<string, unknown>) => Promise<string | Uint8Array>;
+      encryptSessionKey?: (
+        options: Record<string, unknown>,
+      ) => Promise<string | Uint8Array>;
     }
   ).encryptSessionKey;
 
@@ -122,9 +130,7 @@ export async function encryptForSend(
     signingKeys: [options.senderKey.privateKey],
     format: "armored",
   } as never);
-  const draftBody = String(
-    (draft as { message: string | Uint8Array }).message,
-  );
+  const draftBody = String((draft as { message: string | Uint8Array }).message);
   if (
     !draftBody.includes("-----BEGIN PGP MESSAGE-----") &&
     options.plaintext.length > 0
@@ -220,9 +226,7 @@ function dedupeRecipients(recipients: RecipientKeyPref[]): RecipientKeyPref[] {
 /** Guard used by tests / callers: reject plaintext Body uploads. */
 export function assertEncryptedBody(body: string): void {
   if (!body.includes("-----BEGIN PGP MESSAGE-----")) {
-    throw new CliError(
-      "Refusing to upload plaintext Body (INV-E2EE-001).",
-    );
+    throw new CliError("Refusing to upload plaintext Body (INV-E2EE-001).");
   }
 }
 
@@ -246,7 +250,9 @@ export async function enrichPackagesWithAttachments(options: {
   const proxy = options.cryptoProxy ?? (await getCryptoProxy());
   const encryptSessionKey = (
     proxy as {
-      encryptSessionKey?: (options: Record<string, unknown>) => Promise<string | Uint8Array>;
+      encryptSessionKey?: (
+        options: Record<string, unknown>,
+      ) => Promise<string | Uint8Array>;
     }
   ).encryptSessionKey;
   if (!encryptSessionKey) {

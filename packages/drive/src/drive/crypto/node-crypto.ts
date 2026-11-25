@@ -1,6 +1,10 @@
 import { createHmac, randomBytes } from "node:crypto";
 import type { DriveLink } from "../types.ts";
-import type { CryptoKey, DriveCryptoProxy, SessionKeyMaterial } from "./proxy.ts";
+import type {
+  CryptoKey,
+  DriveCryptoProxy,
+  SessionKeyMaterial,
+} from "./proxy.ts";
 import { buildRevisionManifest } from "./download-verify.ts";
 import {
   base64ToBytes,
@@ -90,7 +94,9 @@ export async function hashKeyOf(
     verificationKeys: nodeKeys,
     format: "binary",
   });
-  return data instanceof Uint8Array ? data : new TextEncoder().encode(String(data));
+  return data instanceof Uint8Array
+    ? data
+    : new TextEncoder().encode(String(data));
 }
 
 export function lookupHash(name: string, hashKey: Uint8Array): string {
@@ -183,7 +189,9 @@ export async function generateFileKeys(
     format: "binary",
   });
   const keyPacket =
-    encrypted instanceof Uint8Array ? encrypted : base64ToBytes(String(encrypted));
+    encrypted instanceof Uint8Array
+      ? encrypted
+      : base64ToBytes(String(encrypted));
   const { signature } = await proxy.signMessage({
     binaryData: sessionKey.data,
     signingKeys: nodeKeys,
@@ -219,7 +227,9 @@ export async function encryptBlock(
     format: "binary",
   });
   const sigBytes =
-    signature instanceof Uint8Array ? signature : base64ToBytes(String(signature));
+    signature instanceof Uint8Array
+      ? signature
+      : base64ToBytes(String(signature));
   const { message: encSig } = await proxy.encryptMessage({
     binaryData: sigBytes,
     encryptionKeys: nodeKeys,
@@ -238,7 +248,9 @@ export async function decryptBlock(
     sessionKeys: [sessionKey],
     format: "binary",
   });
-  return data instanceof Uint8Array ? data : new TextEncoder().encode(String(data));
+  return data instanceof Uint8Array
+    ? data
+    : new TextEncoder().encode(String(data));
 }
 
 /**
@@ -279,7 +291,9 @@ export async function decryptAndVerifyBlock(
   ) {
     throw new Error("Block EncSignature present but not valid.");
   }
-  return data instanceof Uint8Array ? data : new TextEncoder().encode(String(data));
+  return data instanceof Uint8Array
+    ? data
+    : new TextEncoder().encode(String(data));
 }
 
 export async function decryptFileSessionKey(
@@ -336,7 +350,7 @@ export async function verifyRevisionManifest(
 export function xorVerifier(verCode: Uint8Array, enc: Uint8Array): string {
   const out = new Uint8Array(verCode.length);
   for (let i = 0; i < verCode.length; i++) {
-    out[i] = i < enc.length ? (verCode[i]! ^ enc[i]!) : verCode[i]!;
+    out[i] = i < enc.length ? verCode[i]! ^ enc[i]! : verCode[i]!;
   }
   return bytesToBase64(out);
 }

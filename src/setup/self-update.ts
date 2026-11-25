@@ -79,7 +79,9 @@ export function buildUpdatePlan(
   target = "latest",
 ): UpdatePlan {
   const spec =
-    target === "latest" ? `${PACKAGE_NAME}@latest` : `${PACKAGE_NAME}@${target}`;
+    target === "latest"
+      ? `${PACKAGE_NAME}@latest`
+      : `${PACKAGE_NAME}@${target}`;
   if (channel === "npm") {
     return { channel, command: "npm", args: ["install", "-g", spec] };
   }

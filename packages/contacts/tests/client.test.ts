@@ -33,19 +33,23 @@ const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
         Contacts: [
           {
             ID: "contact-alice-id==" + "x".repeat(44),
-            Cards: [{
-              Type: CardSigned,
-              Data: "BEGIN:VCARD\r\nFN:Alice\r\nitem1.EMAIL;PREF=1:alice@example.com\r\nEND:VCARD",
-              Signature: "sig",
-            }],
+            Cards: [
+              {
+                Type: CardSigned,
+                Data: "BEGIN:VCARD\r\nFN:Alice\r\nitem1.EMAIL;PREF=1:alice@example.com\r\nEND:VCARD",
+                Signature: "sig",
+              },
+            ],
           },
           {
             ID: "contact-anna-id==" + "y".repeat(44),
-            Cards: [{
-              Type: CardSigned,
-              Data: "BEGIN:VCARD\r\nFN:Anna\r\nitem1.EMAIL;PREF=1:anna@example.com\r\nEND:VCARD",
-              Signature: "sig",
-            }],
+            Cards: [
+              {
+                Type: CardSigned,
+                Data: "BEGIN:VCARD\r\nFN:Anna\r\nitem1.EMAIL;PREF=1:anna@example.com\r\nEND:VCARD",
+                Signature: "sig",
+              },
+            ],
           },
         ],
       }),
@@ -53,10 +57,13 @@ const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
     );
   }
 
-  if (path.match(/^\/contacts\/v4\/contacts\/contact-alice/) && method === "PUT") {
-    const signed = (body?.Cards as Array<{ Type: number; Data: string }> | undefined)?.find(
-      (card) => card.Type === CardSigned,
-    );
+  if (
+    path.match(/^\/contacts\/v4\/contacts\/contact-alice/) &&
+    method === "PUT"
+  ) {
+    const signed = (
+      body?.Cards as Array<{ Type: number; Data: string }> | undefined
+    )?.find((card) => card.Type === CardSigned);
     if (signed?.Data) aliceSignedData = signed.Data;
     return new Response(
       JSON.stringify({
@@ -129,7 +136,10 @@ const mockFetch = mock(async (input: string | URL, init?: RequestInit) => {
     return new Response(JSON.stringify({ Code: 1000 }), { status: 200 });
   }
 
-  if (path === "/contacts/v4/contacts/label" || path === "/contacts/v4/contacts/unlabel") {
+  if (
+    path === "/contacts/v4/contacts/label" ||
+    path === "/contacts/v4/contacts/unlabel"
+  ) {
     return new Response(JSON.stringify({ Code: 1000 }), { status: 200 });
   }
 
@@ -143,17 +153,28 @@ mock.module("../src/crypto/proxy.ts", () => ({
     setEndpoint: () => {},
     importPrivateKey: async () => ({}),
     importPublicKey: async () => ({}),
-    signMessage: async () => "-----BEGIN PGP SIGNATURE-----\nsig\n-----END PGP SIGNATURE-----",
-    encryptMessage: async (options: { binaryData?: Uint8Array; textData?: string }) => {
+    signMessage: async () =>
+      "-----BEGIN PGP SIGNATURE-----\nsig\n-----END PGP SIGNATURE-----",
+    encryptMessage: async (options: {
+      binaryData?: Uint8Array;
+      textData?: string;
+    }) => {
       const plain =
         options.textData ??
-        (options.binaryData ? new TextDecoder().decode(options.binaryData) : "");
+        (options.binaryData
+          ? new TextDecoder().decode(options.binaryData)
+          : "");
       encryptedPlaintexts.push(plain);
       return {
-        message: "-----BEGIN PGP MESSAGE-----\ncipher\n-----END PGP MESSAGE-----",
+        message:
+          "-----BEGIN PGP MESSAGE-----\ncipher\n-----END PGP MESSAGE-----",
       };
     },
-    decryptMessage: async ({ armoredMessage }: { armoredMessage?: string }) => ({
+    decryptMessage: async ({
+      armoredMessage,
+    }: {
+      armoredMessage?: string;
+    }) => ({
       data: new TextEncoder().encode(
         armoredMessage === "ENC" || armoredMessage?.includes("PGP MESSAGE")
           ? "BEGIN:VCARD\r\nVERSION:4.0\r\nTEL;PREF=1:+123\r\nNOTE:hello\r\nX-CUSTOM:keep-me\r\nEND:VCARD"
@@ -250,10 +271,15 @@ describe("ContactsClient", () => {
     expect(id.startsWith("new-contact-id")).toBe(true);
     const post = fetchCalls.find((call) => call.method === "POST");
     expect(post).toBeDefined();
-    const cards = (post?.body as { Contacts: Array<{ Cards: Array<{ Type: number; Data: string }> }> })
-      .Contacts[0]?.Cards;
+    const cards = (
+      post?.body as {
+        Contacts: Array<{ Cards: Array<{ Type: number; Data: string }> }>;
+      }
+    ).Contacts[0]?.Cards;
     expect(cards?.some((card) => card.Type === 3)).toBe(true);
-    expect(cards?.every((card) => !card.Data.includes("TEL;PREF=1:+123"))).toBe(true);
+    expect(cards?.every((card) => !card.Data.includes("TEL;PREF=1:+123"))).toBe(
+      true,
+    );
   });
 
   test("delete sends IDs payload", async () => {
@@ -263,7 +289,9 @@ describe("ContactsClient", () => {
       fetchImpl: mockFetch as unknown as typeof fetch,
     });
     await client.delete(["contact-alice-id==" + "x".repeat(44)]);
-    const del = fetchCalls.find((call) => call.path === "/contacts/v4/contacts/delete");
+    const del = fetchCalls.find(
+      (call) => call.path === "/contacts/v4/contacts/delete",
+    );
     expect(del?.method).toBe("PUT");
     expect((del?.body as { IDs: string[] }).IDs).toHaveLength(1);
   });
@@ -287,10 +315,14 @@ describe("ContactsClient", () => {
       url: "",
     });
     const put = fetchCalls.find(
-      (call) => call.method === "PUT" && call.path.startsWith("/contacts/v4/contacts/contact-alice"),
+      (call) =>
+        call.method === "PUT" &&
+        call.path.startsWith("/contacts/v4/contacts/contact-alice"),
     );
     expect(put).toBeDefined();
-    const cards = (put?.body as { Cards: Array<{ Type: number; Data: string }> }).Cards;
+    const cards = (
+      put?.body as { Cards: Array<{ Type: number; Data: string }> }
+    ).Cards;
     expect(cards.length).toBeGreaterThanOrEqual(2);
     const signed = cards.find((card) => card.Type === CardSigned);
     expect(signed?.Data).toContain("FN:Alice Updated");
@@ -315,10 +347,14 @@ describe("ContactsClient", () => {
       armoredKey: SAMPLE_ARMORED_KEY,
     });
     const put = fetchCalls.find(
-      (call) => call.method === "PUT" && call.path.startsWith("/contacts/v4/contacts/contact-alice"),
+      (call) =>
+        call.method === "PUT" &&
+        call.path.startsWith("/contacts/v4/contacts/contact-alice"),
     );
     expect(put).toBeDefined();
-    const cards = (put?.body as { Cards: Array<{ Type: number; Data: string }> }).Cards;
+    const cards = (
+      put?.body as { Cards: Array<{ Type: number; Data: string }> }
+    ).Cards;
     expect(cards).toHaveLength(2);
     expect(cards[0]?.Data).toContain("data:application/pgp-keys;base64,");
     expect(cards[0]?.Data).toContain("X-PM-ENCRYPT:true");
@@ -340,7 +376,8 @@ describe("ContactsClient", () => {
     fetchCalls.length = 0;
     await client.unpinKey(id, "alice@example.com");
     const put = fetchCalls.find((call) => call.method === "PUT");
-    const signedData = (put?.body as { Cards: Array<{ Data: string }> }).Cards[0]?.Data ?? "";
+    const signedData =
+      (put?.body as { Cards: Array<{ Data: string }> }).Cards[0]?.Data ?? "";
     expect(signedData).not.toContain("data:application/pgp-keys;base64,");
     expect(signedData).not.toContain("X-PM-ENCRYPT");
   });
@@ -352,7 +389,9 @@ describe("ContactsClient", () => {
       fetchImpl: mockFetch as unknown as typeof fetch,
     });
     const id = "contact-alice-id==" + "x".repeat(44);
-    await expect(client.unpinKey(id, "alice@example.com")).rejects.toMatchObject({
+    await expect(
+      client.unpinKey(id, "alice@example.com"),
+    ).rejects.toMatchObject({
       exitCode: 3,
     });
   });
@@ -364,9 +403,7 @@ describe("ContactsClient", () => {
       fetchImpl: mockFetch as unknown as typeof fetch,
     });
     const groups = await client.listGroups();
-    expect(groups).toEqual([
-      { id: "group-1", name: "Team", color: "#8080FF" },
-    ]);
+    expect(groups).toEqual([{ id: "group-1", name: "Team", color: "#8080FF" }]);
     expect(fetchCalls[0]?.path).toContain("/core/v4/labels?Type=2");
   });
 

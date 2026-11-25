@@ -49,7 +49,8 @@ export function registerSetup(program: Command): void {
 
         await showMessage({
           variant:
-            result.status === "installed" || result.status === "already-installed"
+            result.status === "installed" ||
+            result.status === "already-installed"
               ? "success"
               : "warning",
           title: "Setup",

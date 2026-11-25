@@ -14,9 +14,7 @@ import { saveAccountPassRef } from "../src/store.ts";
 
 describe("pass helpers", () => {
   test("normalizePassItemRef accepts pass:// and bare refs", () => {
-    expect(normalizePassItemRef("pass://Vault/Item")).toBe(
-      "pass://Vault/Item",
-    );
+    expect(normalizePassItemRef("pass://Vault/Item")).toBe("pass://Vault/Item");
     expect(normalizePassItemRef("Vault/Item/password")).toBe(
       "pass://Vault/Item",
     );
@@ -70,14 +68,17 @@ describe("pass helpers", () => {
       delete process.env.PROTONAUTH_PASS;
       await saveAccountPassRef("pass://Vault/Item");
       expect(await resolvePassRef()).toBe("pass://Vault/Item");
-      expect(await resolvePassRef("pass://Other/Item")).toBe("pass://Other/Item");
+      expect(await resolvePassRef("pass://Other/Item")).toBe(
+        "pass://Other/Item",
+      );
     } finally {
       setConfigRootForTests(null);
       if (prev.PROTON_PASS === undefined) delete process.env.PROTON_PASS;
       else process.env.PROTON_PASS = prev.PROTON_PASS;
       if (prev.PROTONVPN_PASS === undefined) delete process.env.PROTONVPN_PASS;
       else process.env.PROTONVPN_PASS = prev.PROTONVPN_PASS;
-      if (prev.PROTONAUTH_PASS === undefined) delete process.env.PROTONAUTH_PASS;
+      if (prev.PROTONAUTH_PASS === undefined)
+        delete process.env.PROTONAUTH_PASS;
       else process.env.PROTONAUTH_PASS = prev.PROTONAUTH_PASS;
       await rm(root, { recursive: true, force: true });
     }

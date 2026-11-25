@@ -4,7 +4,9 @@ import { listAccountAddresses } from "../service/addresses.ts";
 import { emitOk, isDryRun, wantsJson } from "../util/agent.ts";
 import { reportCommandError } from "../util/errors.ts";
 
-export async function runAddressesList(options: { passRef?: string }): Promise<void> {
+export async function runAddressesList(options: {
+  passRef?: string;
+}): Promise<void> {
   if (isDryRun()) {
     emitOk({ dryRun: true, action: "addresses-list" });
     return;
@@ -24,7 +26,9 @@ export async function runAddressesList(options: { passRef?: string }): Promise<v
   }
 
   for (const address of addresses) {
-    process.stdout.write(`${address.id}\t${address.email}\t${address.keyCount} key(s)\n`);
+    process.stdout.write(
+      `${address.id}\t${address.email}\t${address.keyCount} key(s)\n`,
+    );
   }
 }
 
@@ -35,7 +39,8 @@ export function registerAddresses(mail: Command): void {
     .option("--dry-run", "Print planned action without calling the API")
     .action(async function (this: Command) {
       try {
-        const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         await runAddressesList({ passRef: globals?.pass });
       } catch (error) {
         reportCommandError(error);

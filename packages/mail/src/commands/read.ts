@@ -52,7 +52,9 @@ export async function runMailRead(
   if (message.cc.length > 0) {
     process.stdout.write(`Cc:      ${message.cc.join(", ")}\n`);
   }
-  process.stdout.write(`Time:    ${new Date(message.time * 1000).toISOString()}\n`);
+  process.stdout.write(
+    `Time:    ${new Date(message.time * 1000).toISOString()}\n`,
+  );
   process.stdout.write(`ID:      ${message.id}\n`);
   const verifiedLabel =
     message.verified === true
@@ -82,7 +84,8 @@ export function registerRead(mail: Command): void {
       options: { password?: string; raw?: boolean },
     ) {
       try {
-        const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         if (options.password) {
           process.env.PROTON_PASSWORD = options.password;
         }

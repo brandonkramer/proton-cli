@@ -55,7 +55,9 @@ describe("enrichPackagesWithAttachments", () => {
       } as never,
     });
 
-    expect(pack.Addresses["bob@proton.me"]?.AttachmentKeyPackets?.["att-1"]).toBeTruthy();
+    expect(
+      pack.Addresses["bob@proton.me"]?.AttachmentKeyPackets?.["att-1"],
+    ).toBeTruthy();
     expect(pack.AttachmentKeys?.["att-1"]).toEqual({
       Key: btoa(String.fromCharCode(1, 2, 3, 4)),
       Algorithm: "aes256",

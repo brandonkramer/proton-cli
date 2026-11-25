@@ -23,7 +23,10 @@ export class NotFoundError extends CliError {
   readonly ref: string;
 
   constructor(kind: string, ref: string) {
-    super(ref ? `no ${kind} matching "${ref}"` : `no ${kind} found`, ExitCode.NOT_FOUND);
+    super(
+      ref ? `no ${kind} matching "${ref}"` : `no ${kind} found`,
+      ExitCode.NOT_FOUND,
+    );
     this.name = "NotFoundError";
     this.kind = kind;
     this.ref = ref;

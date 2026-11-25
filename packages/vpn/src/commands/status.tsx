@@ -66,9 +66,7 @@ function StatusApp(): ReactNode {
       {phase === "ready" && data ? (
         <Box flexDirection="column">
           <StatusMessage variant={data.signedIn ? "success" : "warning"}>
-            {data.username
-              ? `Signed in as ${data.username}`
-              : "Not signed in"}
+            {data.username ? `Signed in as ${data.username}` : "Not signed in"}
           </StatusMessage>
           {data.expiresAt ? (
             <Text dimColor>Session expires: {data.expiresAt}</Text>

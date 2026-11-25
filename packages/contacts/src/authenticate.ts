@@ -11,7 +11,9 @@ import {
 /**
  * Dual-mint authenticator for Contacts API (mail-api.proton.me).
  */
-export const authenticateContacts: ProductAuthenticator = async (credentials) => {
+export const authenticateContacts: ProductAuthenticator = async (
+  credentials,
+) => {
   const username = normalizeUsername(credentials.username);
   const existing = await tryExistingSession(username);
   if (existing) {

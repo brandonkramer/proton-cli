@@ -2,8 +2,14 @@ import {
   authenticateAuthenticator,
   clearAuthenticatorState,
 } from "@bkramer/proton-authenticator";
-import { authenticateCalendar, clearCalendarState } from "@bkramer/proton-calendar";
-import { authenticateContacts, clearContactsState } from "@bkramer/proton-contacts";
+import {
+  authenticateCalendar,
+  clearCalendarState,
+} from "@bkramer/proton-calendar";
+import {
+  authenticateContacts,
+  clearContactsState,
+} from "@bkramer/proton-contacts";
 import {
   dualMintSignIn,
   parseProductList,
@@ -13,7 +19,10 @@ import {
   type SignInCredentials,
 } from "@bkramer/proton-core";
 import { authenticateMail, clearMailState } from "@bkramer/proton-mail";
-import { authenticateSettings, clearSettingsState } from "@bkramer/proton-settings";
+import {
+  authenticateSettings,
+  clearSettingsState,
+} from "@bkramer/proton-settings";
 import { authenticateDrive, clearDriveState } from "@bkramer/proton-drive";
 import { authenticateVpn, clearVpnSession } from "@bkramer/proton-vpn";
 import type { Command } from "commander";
@@ -206,11 +215,7 @@ export function registerSignin(program: Command): void {
         const message = error instanceof Error ? error.message : String(error);
         if (opts.json) {
           console.log(
-            JSON.stringify(
-              { version: 1, ok: false, error: message },
-              null,
-              2,
-            ),
+            JSON.stringify({ version: 1, ok: false, error: message }, null, 2),
           );
         } else {
           console.error(message);

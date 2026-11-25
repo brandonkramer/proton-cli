@@ -21,7 +21,9 @@
       "@bkramer/proton-core/*": ["./packages/core/src/*"],
       "@bkramer/proton-vpn": ["./packages/vpn/src/index.ts"],
       "@bkramer/proton-vpn/*": ["./packages/vpn/src/*"],
-      "@bkramer/proton-authenticator": ["./packages/authenticator/src/index.ts"],
+      "@bkramer/proton-authenticator": [
+        "./packages/authenticator/src/index.ts"
+      ],
       "@bkramer/proton-authenticator/*": ["./packages/authenticator/src/*"],
       "@bkramer/proton-drive": ["./packages/drive/src/index.ts"],
       "@bkramer/proton-drive/*": ["./packages/drive/src/*"],
@@ -35,6 +37,11 @@
       "@bkramer/proton-mail/*": ["./packages/mail/src/*"]
     }
   },
-  "include": ["src/**/*", "packages/*/src/**/*", "packages/*/tests/**/*", "tests/**/*"],
+  "include": [
+    "src/**/*",
+    "packages/*/src/**/*",
+    "packages/*/tests/**/*",
+    "tests/**/*"
+  ],
   "exclude": ["node_modules"]
 }

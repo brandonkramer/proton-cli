@@ -1,7 +1,4 @@
-import {
-  resolvePassLogin,
-  resolvePassRef,
-} from "@bkramer/proton-core";
+import { resolvePassLogin, resolvePassRef } from "@bkramer/proton-core";
 
 export async function resolveAccountPassword(options: {
   password?: string;

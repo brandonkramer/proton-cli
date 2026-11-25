@@ -6,10 +6,9 @@ export async function calendarApi<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { status, data } = await protonFetch<{ Code: number; Error?: string } & T>(
-    path,
-    options,
-  );
+  const { status, data } = await protonFetch<
+    { Code: number; Error?: string } & T
+  >(path, options);
 
   if (status === 204) {
     return data as T;
@@ -18,7 +17,10 @@ export async function calendarApi<T>(
   const code = (data as { Code?: number }).Code;
   if (code !== undefined && !isSuccessCode(code)) {
     throw new CliError(
-      messageForApiCode(code, (data as { Error?: string }).Error ?? `API error (HTTP ${status})`),
+      messageForApiCode(
+        code,
+        (data as { Error?: string }).Error ?? `API error (HTTP ${status})`,
+      ),
     );
   }
 

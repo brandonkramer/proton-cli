@@ -113,7 +113,10 @@ export async function createCalendar(
 }
 
 async function calendarMemberId(
-  options: CalendarServiceOptions & { calendarId: string; unlocked: UnlockedCalendarKeys },
+  options: CalendarServiceOptions & {
+    calendarId: string;
+    unlocked: UnlockedCalendarKeys;
+  },
 ): Promise<string> {
   const data = await calendarApi<{
     Members: { ID: string; AddressID: string }[];

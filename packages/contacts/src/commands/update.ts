@@ -23,49 +23,51 @@ export function registerUpdate(contacts: Command): void {
     .option("--address <address>", "Postal address")
     .option("--url <url>", "Website URL")
     .option("--dry-run", "Show payload without calling the API")
-    .action(async (
-      ref: string,
-      options: {
-        name?: string;
-        email: string[];
-        phone: string[];
-        title?: string;
-        org?: string;
-        note?: string;
-        birthday?: string;
-        address?: string;
-        url?: string;
-      },
-    ) => {
-      try {
-        const runtime = await requireContactsRuntime();
-        const id = await runtime.client.resolveRef(ref);
-        const input: NewContactInput = {
-          name: options.name ?? "",
-          emails: options.email,
-          phones: options.phone,
-          title: options.title ?? "",
-          org: options.org ?? "",
-          note: options.note ?? "",
-          birthday: options.birthday ?? "",
-          address: options.address ?? "",
-          url: options.url ?? "",
-        };
-        if (isDryRun()) {
-          const existing = await runtime.client.get(id);
-          emitOk({
-            dryRun: true,
-            action: "update",
-            id,
-            patch: input,
-            existing,
-          });
-          return;
+    .action(
+      async (
+        ref: string,
+        options: {
+          name?: string;
+          email: string[];
+          phone: string[];
+          title?: string;
+          org?: string;
+          note?: string;
+          birthday?: string;
+          address?: string;
+          url?: string;
+        },
+      ) => {
+        try {
+          const runtime = await requireContactsRuntime();
+          const id = await runtime.client.resolveRef(ref);
+          const input: NewContactInput = {
+            name: options.name ?? "",
+            emails: options.email,
+            phones: options.phone,
+            title: options.title ?? "",
+            org: options.org ?? "",
+            note: options.note ?? "",
+            birthday: options.birthday ?? "",
+            address: options.address ?? "",
+            url: options.url ?? "",
+          };
+          if (isDryRun()) {
+            const existing = await runtime.client.get(id);
+            emitOk({
+              dryRun: true,
+              action: "update",
+              id,
+              patch: input,
+              existing,
+            });
+            return;
+          }
+          const contact = await runtime.client.update(id, input);
+          emitOk({ action: "update", contact });
+        } catch (error) {
+          reportCommandError(error);
         }
-        const contact = await runtime.client.update(id, input);
-        emitOk({ action: "update", contact });
-      } catch (error) {
-        reportCommandError(error);
-      }
-    });
+      },
+    );
 }
