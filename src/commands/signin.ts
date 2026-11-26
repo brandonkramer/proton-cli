@@ -156,7 +156,8 @@ export function registerSignin(program: Command): void {
           },
           products,
           partialOk: Boolean(opts.partialOk),
-          productGapMs: 0,
+          // Small gap between hosts so all-products mint is less likely to 2028.
+          productGapMs: 2_000,
           rateLimitRetries: 1,
           rateLimitWaitMs: 45_000,
           onProgress: (event) => {

@@ -128,7 +128,7 @@ export async function runParentSignin(): Promise<void> {
         },
         products: [...PRODUCTS],
         partialOk: true,
-        productGapMs: 0,
+        productGapMs: 2_000,
         rateLimitRetries: 1,
         rateLimitWaitMs: 45_000,
         onProgress: (event) => {
