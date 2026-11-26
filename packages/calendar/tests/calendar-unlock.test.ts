@@ -48,7 +48,10 @@ const mockUnlockCalendarKeys = mock(async () => ({
   ]),
 }));
 
-const decryptCalls: Array<{ decryptionKeys: unknown[]; verificationKeys: unknown[] }> = [];
+const decryptCalls: Array<{
+  decryptionKeys: unknown[];
+  verificationKeys: unknown[];
+}> = [];
 
 mock.module("../src/crypto/unlock.ts", () => ({
   unlockCalendarKeys: mockUnlockCalendarKeys,

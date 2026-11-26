@@ -56,7 +56,9 @@ export function isDryRun(): boolean {
 export const AGENT_SCHEMA_VERSION = 1 as const;
 
 export function emitJson(data: Record<string, unknown>): void {
-  process.stdout.write(`${JSON.stringify({ version: AGENT_SCHEMA_VERSION, ...data })}\n`);
+  process.stdout.write(
+    `${JSON.stringify({ version: AGENT_SCHEMA_VERSION, ...data })}\n`,
+  );
 }
 
 export function emitOk(data: Record<string, unknown>): void {

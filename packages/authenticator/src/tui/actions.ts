@@ -53,7 +53,9 @@ export async function actionSync(): Promise<void> {
       });
       ui.setResult({
         variant:
-          result.remoteTotal === 0 || result.skipped > 0 ? "warning" : "success",
+          result.remoteTotal === 0 || result.skipped > 0
+            ? "warning"
+            : "success",
         title: "Synced",
         body: formatSyncSummary(result),
       });

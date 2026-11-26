@@ -42,26 +42,26 @@ pi install git:github.com/brandonkramer/proton-cli
 
 ### Curated tools → CLI
 
-| MCP tool | Behind it |
-|----------|-----------|
-| `proton_status` | `status --json` |
-| `proton_vpn_status` | `vpn status --json` |
-| `proton_vpn_list` | `vpn countries` or `vpn servers` |
-| `proton_auth_code` | `auth code <query> --json` |
-| `proton_mail_list` | `mail list [--label] --json` |
-| `proton_mail_get` | `mail read <id> --json` |
-| `proton_mail_search` | `mail search <query> --json` |
-| `proton_mail_send` | `mail send` (confirmed) |
-| `proton_mail_reply` | `mail reply <id>` (confirmed) |
-| `proton_contacts_list` | `contacts list --json` |
-| `proton_contacts_create` | `contacts create` (confirmed) |
-| `proton_calendar_upcoming` | `calendar events list` (default next 7 days) |
-| `proton_calendar_create` | `calendar events create` (confirmed) |
-| `proton_drive_list` | `drive items list [path] --json` |
-| `proton_drive_get` | `drive items info` or `download` (download confirmed) |
-| `proton_drive_upload` | `drive items upload` (confirmed) |
-| `proton_settings_get` | `settings get` or `settings mail` |
-| `proton_cli` | `<args…>` allowlisted tops; non-reads need `confirm=true` |
+| MCP tool                   | Behind it                                                 |
+| -------------------------- | --------------------------------------------------------- |
+| `proton_status`            | `status --json`                                           |
+| `proton_vpn_status`        | `vpn status --json`                                       |
+| `proton_vpn_list`          | `vpn countries` or `vpn servers`                          |
+| `proton_auth_code`         | `auth code <query> --json`                                |
+| `proton_mail_list`         | `mail list [--label] --json`                              |
+| `proton_mail_get`          | `mail read <id> --json`                                   |
+| `proton_mail_search`       | `mail search <query> --json`                              |
+| `proton_mail_send`         | `mail send` (confirmed)                                   |
+| `proton_mail_reply`        | `mail reply <id>` (confirmed)                             |
+| `proton_contacts_list`     | `contacts list --json`                                    |
+| `proton_contacts_create`   | `contacts create` (confirmed)                             |
+| `proton_calendar_upcoming` | `calendar events list` (default next 7 days)              |
+| `proton_calendar_create`   | `calendar events create` (confirmed)                      |
+| `proton_drive_list`        | `drive items list [path] --json`                          |
+| `proton_drive_get`         | `drive items info` or `download` (download confirmed)     |
+| `proton_drive_upload`      | `drive items upload` (confirmed)                          |
+| `proton_settings_get`      | `settings get` or `settings mail`                         |
+| `proton_cli`               | `<args…>` allowlisted tops; non-reads need `confirm=true` |
 
 ## Install
 
@@ -83,7 +83,7 @@ Bins: `proton`, `protonvpn`, `protonauth`, `protondrive`, `protoncontacts`, `pro
 
 - Proton account in [Single Password Mode](https://proton.me/support/single-password); TOTP 2FA OK; FIDO2 not supported
 - **VPN:** WireGuard tools (`proton vpn setup`; macOS Homebrew `wireguard-tools` + sudo; Windows winget WireGuard + Admin). Close the Proton VPN desktop app before connect.
-- **Authenticator CAPTCHA (macOS):** native WKWebView helper (`bun run build:captcha` if postinstall skipped; needs Xcode CLT). Solve CAPTCHA in that window, not Safari.
+- **CAPTCHA (sign-in):** native helper (`bun run build:captcha` if postinstall skipped). macOS: WKWebView (Xcode CLT). Windows: WebView2 (.NET SDK + WebView2 Runtime). Solve CAPTCHA in that window, not a normal browser.
 - Optional: [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`)
 
 ## Quick start
@@ -158,14 +158,14 @@ proton vpn status --json
 proton vpn disconnect
 ```
 
-| Flag | Meaning |
-|------|---------|
+| Flag               | Meaning                  |
+| ------------------ | ------------------------ |
 | `--country <code>` | Exit country (e.g. `NL`) |
-| `--city <name>` | City name |
-| `--p2p` | P2P servers |
-| `--securecore` | Secure Core |
-| `--tor` | Tor over VPN |
-| `--free-only` | Free-tier only |
+| `--city <name>`    | City name                |
+| `--p2p`            | P2P servers              |
+| `--securecore`     | Secure Core              |
+| `--tor`            | Tor over VPN             |
+| `--free-only`      | Free-tier only           |
 
 On macOS, connect/disconnect may need sudo. In agent mode use `--sudo` only when an interactive password prompt is OK; otherwise `sudo -n` / elevated shell.
 
@@ -181,7 +181,7 @@ proton auth code github
 proton auth status --output json
 ```
 
-CAPTCHA (if required) needs a human on macOS; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`. Encrypted sync/code ops need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
+CAPTCHA (if required) needs a human on macOS or Windows; agents should reuse an existing session after interactive `proton signin` / `proton auth signin`. Encrypted sync/code ops need account password via `--password`, `--pass`, or `PROTON_PASSWORD`.
 
 ## Contacts (`proton contacts …`)
 
@@ -288,20 +288,20 @@ proton auth status --output json
 proton auth code github --output json
 ```
 
-| Flag / env | Meaning |
-|---|---|
-| `--json` / `PROTONVPN_JSON=1` | JSON on stdout (VPN / shared) |
-| `--output json\|plain\|ink` / `PROTONAUTH_OUTPUT` | Authenticator output format |
-| `-y` / `--yes` | Non-interactive confirms |
-| `--sudo` | Allow interactive macOS sudo for WireGuard |
-| `PROTON_AGENT=1` | Root agent-friendly (no accidental TUI) |
-| `PROTONVPN_AGENT=1` | VPN agent mode |
-| `PROTONAUTH_AGENT=1` / `CI=1` | Auth agent mode (default JSON; no CAPTCHA window / TUI) |
-| `PROTONCONTACTS_JSON=1` / `PROTONCONTACTS_AGENT=1` | Contacts agent mode (JSON; no TUI) |
-| `PROTONCALENDAR_JSON=1` / `PROTONCALENDAR_AGENT=1` | Calendar agent mode (JSON; no TUI) |
-| `PROTON_DRIVE_JSON=1` / `PROTON_DRIVE_AGENT=1` | Drive agent mode (JSON; no TUI) |
-| `PROTONSETTINGS_JSON=1` / `PROTONSETTINGS_AGENT=1` | Settings agent mode (JSON; no TUI) |
-| `PROTONMAIL_JSON=1` / `PROTONMAIL_AGENT=1` | Mail agent mode (JSON; no TUI) |
+| Flag / env                                         | Meaning                                                 |
+| -------------------------------------------------- | ------------------------------------------------------- |
+| `--json` / `PROTONVPN_JSON=1`                      | JSON on stdout (VPN / shared)                           |
+| `--output json\|plain\|ink` / `PROTONAUTH_OUTPUT`  | Authenticator output format                             |
+| `-y` / `--yes`                                     | Non-interactive confirms                                |
+| `--sudo`                                           | Allow interactive macOS sudo for WireGuard              |
+| `PROTON_AGENT=1`                                   | Root agent-friendly (no accidental TUI)                 |
+| `PROTONVPN_AGENT=1`                                | VPN agent mode                                          |
+| `PROTONAUTH_AGENT=1` / `CI=1`                      | Auth agent mode (default JSON; no CAPTCHA window / TUI) |
+| `PROTONCONTACTS_JSON=1` / `PROTONCONTACTS_AGENT=1` | Contacts agent mode (JSON; no TUI)                      |
+| `PROTONCALENDAR_JSON=1` / `PROTONCALENDAR_AGENT=1` | Calendar agent mode (JSON; no TUI)                      |
+| `PROTON_DRIVE_JSON=1` / `PROTON_DRIVE_AGENT=1`     | Drive agent mode (JSON; no TUI)                         |
+| `PROTONSETTINGS_JSON=1` / `PROTONSETTINGS_AGENT=1` | Settings agent mode (JSON; no TUI)                      |
+| `PROTONMAIL_JSON=1` / `PROTONMAIL_AGENT=1`         | Mail agent mode (JSON; no TUI)                          |
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 

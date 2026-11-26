@@ -48,7 +48,9 @@ export function parseRespondStatus(status: string): number {
     case "decline":
       return ATTENDEE_STATUS.DECLINED;
     default:
-      throw new Error(`invalid --status "${status}" (use: accept, tentative, decline)`);
+      throw new Error(
+        `invalid --status "${status}" (use: accept, tentative, decline)`,
+      );
   }
 }
 
@@ -87,10 +89,13 @@ async function fetchAccountEmails(
   session: Session,
   fetchImpl?: typeof fetch,
 ): Promise<string[]> {
-  const data = await calendarApi<{ Addresses: { Email: string }[] }>(ADDRESSES_PATH, {
-    session,
-    fetchImpl,
-  });
+  const data = await calendarApi<{ Addresses: { Email: string }[] }>(
+    ADDRESSES_PATH,
+    {
+      session,
+      fetchImpl,
+    },
+  );
   return (data.Addresses ?? []).map((entry) => entry.Email);
 }
 
@@ -106,13 +111,20 @@ async function findSelfAttendeePaged(
     const data = await calendarApi<{
       Attendees: RawAttendee[];
       MoreAttendees?: number;
-    }>(`/calendar/v1/${options.calendarId}/events/${options.eventId}/attendees`, {
-      session: options.session,
-      fetchImpl: options.fetchImpl,
-      query: { Page: page },
-    });
+    }>(
+      `/calendar/v1/${options.calendarId}/events/${options.eventId}/attendees`,
+      {
+        session: options.session,
+        fetchImpl: options.fetchImpl,
+        query: { Page: page },
+      },
+    );
 
-    const match = findSelfAttendee(options.uid, options.emails, data.Attendees ?? []);
+    const match = findSelfAttendee(
+      options.uid,
+      options.emails,
+      data.Attendees ?? [],
+    );
     if (match) return match;
 
     if (data.MoreAttendees !== 1 || (data.Attendees ?? []).length === 0) {
@@ -137,10 +149,14 @@ export async function respondToEvent(
 
   const event = data.Event;
   if (event.IsOrganizer === 1) {
-    throw new Error("You are the organizer of this event; RSVP is for attendees.");
+    throw new Error(
+      "You are the organizer of this event; RSVP is for attendees.",
+    );
   }
 
-  const emails = options.emails ?? (await fetchAccountEmails(options.session, options.fetchImpl));
+  const emails =
+    options.emails ??
+    (await fetchAccountEmails(options.session, options.fetchImpl));
   let self = findSelfAttendee(
     event.UID,
     emails,

@@ -75,10 +75,12 @@ function installHint(): string {
  * Detect WireGuard tools and install them when a package manager is available.
  * Never throws — safe for postinstall.
  */
-export async function ensureWireGuardInstalled(options: {
-  /** When true, skip auto-install (CI / dry check). */
-  checkOnly?: boolean;
-} = {}): Promise<WireGuardSetupResult> {
+export async function ensureWireGuardInstalled(
+  options: {
+    /** When true, skip auto-install (CI / dry check). */
+    checkOnly?: boolean;
+  } = {},
+): Promise<WireGuardSetupResult> {
   if (await isWireGuardInstalled()) {
     return { status: "already-installed" };
   }
@@ -108,7 +110,11 @@ export async function ensureWireGuardInstalled(options: {
       }
       return {
         status: "failed",
-        reason: (result.stderr || result.stdout || "brew install failed").trim(),
+        reason: (
+          result.stderr ||
+          result.stdout ||
+          "brew install failed"
+        ).trim(),
         hint: installHint(),
       };
     }
@@ -131,11 +137,18 @@ export async function ensureWireGuardInstalled(options: {
         "--accept-source-agreements",
       ]);
       if (result.code === 0 && (await isWireGuardInstalled())) {
-        return { status: "installed", via: "winget install WireGuard.WireGuard" };
+        return {
+          status: "installed",
+          via: "winget install WireGuard.WireGuard",
+        };
       }
       return {
         status: "failed",
-        reason: (result.stderr || result.stdout || "winget install failed").trim(),
+        reason: (
+          result.stderr ||
+          result.stdout ||
+          "winget install failed"
+        ).trim(),
         hint: installHint(),
       };
     }

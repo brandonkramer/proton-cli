@@ -40,7 +40,11 @@ export async function listFolders(
 }
 
 export async function createUserLabel(
-  options: LabelsServiceOptions & { name: string; color?: string; parentId?: string },
+  options: LabelsServiceOptions & {
+    name: string;
+    color?: string;
+    parentId?: string;
+  },
 ): Promise<LabelSummary> {
   return createLabel({
     session: options.session,
@@ -55,7 +59,11 @@ export async function createUserLabel(
 }
 
 export async function createFolder(
-  options: LabelsServiceOptions & { name: string; color?: string; parentId?: string },
+  options: LabelsServiceOptions & {
+    name: string;
+    color?: string;
+    parentId?: string;
+  },
 ): Promise<LabelSummary> {
   return createLabel({
     session: options.session,

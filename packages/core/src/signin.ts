@@ -113,6 +113,8 @@ export async function dualMintSignIn(
   const written: ProductId[] = [];
   const covered = new Set<ProductId>();
   let mintedCount = 0;
+  /** Once Proton 2028s us, more mints only dig the hole deeper. */
+  let rateLimited = false;
 
   for (const product of products) {
     if (covered.has(product)) continue;
@@ -123,6 +125,14 @@ export async function dualMintSignIn(
         product,
         error: `No authenticator registered for product "${product}".`,
       });
+      continue;
+    }
+
+    if (rateLimited) {
+      const error =
+        "Skipped — account is login rate-limited (2028). Wait several minutes, then retry only remaining products.";
+      failed.push({ product, error });
+      onProgress?.({ type: "error", product, error });
       continue;
     }
 
@@ -138,8 +148,10 @@ export async function dualMintSignIn(
     onProgress?.({ type: "start", product });
 
     let lastError: string | undefined;
-    let session: Awaited<ReturnType<ProductAuthenticator>>["session"] | undefined;
+    let session:
+      Awaited<ReturnType<ProductAuthenticator>>["session"] | undefined;
     let username = credentials.username;
+    let hitRateLimit = false;
 
     for (let attempt = 0; attempt <= rateLimitRetries; attempt++) {
       try {
@@ -155,26 +167,38 @@ export async function dualMintSignIn(
         }
         session = result.session;
         lastError = undefined;
+        hitRateLimit = false;
         break;
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
-        if (isRateLimitError(error) && attempt < rateLimitRetries) {
-          const seconds = Math.round(rateLimitWaitMs / 1000);
-          onProgress?.({
-            type: "wait",
-            message: `Rate limited (2028) — waiting ${seconds}s, retry ${attempt + 1}/${rateLimitRetries}…`,
-          });
-          await sleep(rateLimitWaitMs);
-          continue;
+        if (isRateLimitError(error)) {
+          hitRateLimit = true;
+          if (attempt < rateLimitRetries) {
+            const seconds = Math.round(rateLimitWaitMs / 1000);
+            onProgress?.({
+              type: "wait",
+              message: `Rate limited (2028) — waiting ${seconds}s, retry ${attempt + 1}/${rateLimitRetries}…`,
+            });
+            await sleep(rateLimitWaitMs);
+            continue;
+          }
         }
         break;
       }
     }
 
     if (!session || lastError) {
+      if (hitRateLimit) rateLimited = true;
       const error = lastError ?? "unknown error";
       failed.push({ product, error });
       onProgress?.({ type: "error", product, error });
+      if (hitRateLimit) {
+        onProgress?.({
+          type: "wait",
+          message:
+            "Stopping further product mints (rate limit). Wait several minutes before retrying.",
+        });
+      }
       continue;
     }
 

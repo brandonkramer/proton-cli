@@ -24,7 +24,9 @@ function printLabels(title: string, labels: LabelSummary[]): void {
   }
 }
 
-export async function runLabelsList(options: { passRef?: string }): Promise<void> {
+export async function runLabelsList(options: {
+  passRef?: string;
+}): Promise<void> {
   if (isDryRun()) {
     emitOk({ dryRun: true, action: "labels-list" });
     return;
@@ -38,7 +40,9 @@ export async function runLabelsList(options: { passRef?: string }): Promise<void
   printLabels("labels", labels);
 }
 
-export async function runFoldersList(options: { passRef?: string }): Promise<void> {
+export async function runFoldersList(options: {
+  passRef?: string;
+}): Promise<void> {
   if (isDryRun()) {
     emitOk({ dryRun: true, action: "folders-list" });
     return;
@@ -61,7 +65,8 @@ export function registerLabels(mail: Command): void {
     .option("--dry-run", "Print planned action without calling the API")
     .action(async function (this: Command) {
       try {
-        const globals = this.parent?.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         await runLabelsList({ passRef: globals?.pass });
       } catch (error) {
         reportCommandError(error);
@@ -80,7 +85,8 @@ export function registerLabels(mail: Command): void {
       options: { name: string; color: string; parent?: string },
     ) {
       try {
-        const globals = this.parent?.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         if (isDryRun()) {
           emitOk({
             dryRun: true,
@@ -123,7 +129,8 @@ export function registerLabels(mail: Command): void {
       options: { name?: string; color?: string; parent?: string },
     ) {
       try {
-        const globals = this.parent?.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         if (isDryRun()) {
           emitOk({
             dryRun: true,
@@ -161,7 +168,8 @@ export function registerLabels(mail: Command): void {
     .option("--dry-run", "Show target without calling the API")
     .action(async function (this: Command, labelId: string) {
       try {
-        const globals = this.parent?.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         if (isDryRun()) {
           emitOk({ dryRun: true, action: "labels-delete", labelId });
           return;
@@ -181,7 +189,9 @@ export function registerLabels(mail: Command): void {
       }
     });
 
-  const folders = labels.command("folders").description("Mail folders (Type=3)");
+  const folders = labels
+    .command("folders")
+    .description("Mail folders (Type=3)");
 
   folders
     .command("list")
@@ -190,8 +200,7 @@ export function registerLabels(mail: Command): void {
     .action(async function (this: Command) {
       try {
         const globals = this.parent?.parent?.parent?.optsWithGlobals() as
-          | { pass?: string }
-          | undefined;
+          { pass?: string } | undefined;
         await runFoldersList({ passRef: globals?.pass });
       } catch (error) {
         reportCommandError(error);
@@ -211,8 +220,7 @@ export function registerLabels(mail: Command): void {
     ) {
       try {
         const globals = this.parent?.parent?.parent?.optsWithGlobals() as
-          | { pass?: string }
-          | undefined;
+          { pass?: string } | undefined;
         if (isDryRun()) {
           emitOk({
             dryRun: true,
@@ -234,7 +242,9 @@ export function registerLabels(mail: Command): void {
         emitOk({
           action: "folders-create",
           folder,
-          ...(wantsJson() ? {} : { message: `Created folder "${folder.name}"` }),
+          ...(wantsJson()
+            ? {}
+            : { message: `Created folder "${folder.name}"` }),
         });
       } catch (error) {
         reportCommandError(error);
@@ -256,8 +266,7 @@ export function registerLabels(mail: Command): void {
     ) {
       try {
         const globals = this.parent?.parent?.parent?.optsWithGlobals() as
-          | { pass?: string }
-          | undefined;
+          { pass?: string } | undefined;
         if (isDryRun()) {
           emitOk({
             dryRun: true,
@@ -281,7 +290,9 @@ export function registerLabels(mail: Command): void {
         emitOk({
           action: "folders-update",
           folder,
-          ...(wantsJson() ? {} : { message: `Updated folder "${folder.name}"` }),
+          ...(wantsJson()
+            ? {}
+            : { message: `Updated folder "${folder.name}"` }),
         });
       } catch (error) {
         reportCommandError(error);
@@ -296,8 +307,7 @@ export function registerLabels(mail: Command): void {
     .action(async function (this: Command, folderId: string) {
       try {
         const globals = this.parent?.parent?.parent?.optsWithGlobals() as
-          | { pass?: string }
-          | undefined;
+          { pass?: string } | undefined;
         if (isDryRun()) {
           emitOk({ dryRun: true, action: "folders-delete", folderId });
           return;

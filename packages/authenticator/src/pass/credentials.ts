@@ -34,7 +34,10 @@ export function normalizePassItemRef(raw: string): string {
   }
 
   const fieldNames = new Set(["password", "username", "email", "totp"]);
-  if (parts.length >= 3 && fieldNames.has(parts[parts.length - 1]!.toLowerCase())) {
+  if (
+    parts.length >= 3 &&
+    fieldNames.has(parts[parts.length - 1]!.toLowerCase())
+  ) {
     parts.pop();
   }
 
@@ -84,15 +87,15 @@ async function viewField(
   options: { optional?: boolean } = {},
 ): Promise<string | null> {
   const uri = `${itemRef}/${field}`;
-  const { stdout, stderr, exitCode } = await runPassCli([
-    "item",
-    "view",
-    uri,
-  ]);
+  const { stdout, stderr, exitCode } = await runPassCli(["item", "view", uri]);
 
   if (exitCode !== 0) {
     const detail = stderr || stdout;
-    if (/not authenticated|please log in|session.*(expired|locked)|locked/i.test(detail)) {
+    if (
+      /not authenticated|please log in|session.*(expired|locked)|locked/i.test(
+        detail,
+      )
+    ) {
       throw new CliError(
         "Proton Pass CLI is not authenticated.\n" +
           "Run `pass-cli login`, then retry.",

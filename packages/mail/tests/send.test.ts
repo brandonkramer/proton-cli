@@ -394,7 +394,9 @@ describe("CASE-SEND-DRYRUN", () => {
           ]),
           addresses: [{ ID: "addr-1", Email: "me@proton.me", Keys: [] }],
           loadRecipientKeys: async () => {
-            throw new CliError("Public-key lookup failed for bob@proton.me: network down");
+            throw new CliError(
+              "Public-key lookup failed for bob@proton.me: network down",
+            );
           },
         },
       ),

@@ -73,18 +73,17 @@ async function fetchUser(session: Session, fetchImpl?: typeof fetch) {
 }
 
 async function fetchKeySalts(session: Session, fetchImpl?: typeof fetch) {
-  const data = await mailApi<{ KeySalts: { ID: string; KeySalt: string | null }[] }>(
-    KEYS_SALTS_PATH,
-    { session, fetchImpl },
-  );
+  const data = await mailApi<{
+    KeySalts: { ID: string; KeySalt: string | null }[];
+  }>(KEYS_SALTS_PATH, { session, fetchImpl });
   return data.KeySalts;
 }
 
 async function fetchAddresses(session: Session, fetchImpl?: typeof fetch) {
-  const data = await mailApi<{ Addresses: ProtonAddress[] }>(
-    ADDRESSES_PATH,
-    { session, fetchImpl },
-  );
+  const data = await mailApi<{ Addresses: ProtonAddress[] }>(ADDRESSES_PATH, {
+    session,
+    fetchImpl,
+  });
   return data.Addresses;
 }
 
@@ -193,7 +192,8 @@ export async function unlockMailKeysWithOptions(
 
   const addressKeys = new Map<string, UnlockedAddressKey>();
   for (const address of addresses) {
-    const primaryKey = address.Keys.find((k) => k.Primary === 1) ?? address.Keys[0];
+    const primaryKey =
+      address.Keys.find((k) => k.Primary === 1) ?? address.Keys[0];
     const basePass = primaryKey
       ? await passphraseForKey(options.password, primaryKey.ID, salts)
       : options.password;
@@ -213,7 +213,9 @@ export async function unlockMailKeysWithOptions(
   }
 
   if (addressKeys.size === 0) {
-    throw new Error("Could not unlock any address keys. Check the account password.");
+    throw new Error(
+      "Could not unlock any address keys. Check the account password.",
+    );
   }
 
   return { userKeys, addresses, addressKeys };
@@ -233,7 +235,10 @@ export function primaryAddressKey(
   unlocked: Pick<UnlockedMailKeys, "addresses" | "addressKeys">,
 ): UnlockedAddressKey {
   const candidates = unlocked.addresses
-    .filter((address) => isEnabledAddress(address) && unlocked.addressKeys.has(address.ID))
+    .filter(
+      (address) =>
+        isEnabledAddress(address) && unlocked.addressKeys.has(address.ID),
+    )
     .sort((a, b) => (a.Order ?? 0) - (b.Order ?? 0));
 
   for (const address of candidates) {

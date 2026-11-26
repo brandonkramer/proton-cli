@@ -22,7 +22,11 @@ export interface TaskController {
   ) => void;
   setNote: (note: string | null) => void;
   setResult: (
-    result: { variant: "success" | "error" | "info" | "warning"; title: string; body?: string } | null,
+    result: {
+      variant: "success" | "error" | "info" | "warning";
+      title: string;
+      body?: string;
+    } | null,
   ) => void;
   done: () => void;
 }
@@ -96,7 +100,9 @@ function TaskApp({
       setSteps,
       updateStep: (id, patch) => {
         setSteps((current) =>
-          current.map((step) => (step.id === id ? { ...step, ...patch } : step)),
+          current.map((step) =>
+            step.id === id ? { ...step, ...patch } : step,
+          ),
         );
       },
       setNote,
@@ -193,4 +199,3 @@ export async function runTask<T>(options: {
     throw error;
   }
 }
-

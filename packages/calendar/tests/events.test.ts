@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+} from "bun:test";
 import type { Session } from "../src/proton/types.ts";
 import { configureAgentFlags } from "../src/util/agent.ts";
 
@@ -28,7 +36,9 @@ const mockUnlockCalendarForEvents = mock(async () => ({
   email: "alice@proton.me",
 }));
 
-const mockDecryptCards = mock(async () => ["SUMMARY:Meeting\r\nLOCATION:Vienna\r\n"]);
+const mockDecryptCards = mock(async () => [
+  "SUMMARY:Meeting\r\nLOCATION:Vienna\r\n",
+]);
 
 const mockEncryptAndSignCardSplit = mock(async () => ({
   signedCard: { Type: 2, Data: "signed", Signature: "sig" },
@@ -81,16 +91,12 @@ mock.module("../src/crypto/proxy.ts", () => ({
   }),
 }));
 
-const {
-  listEvents,
-  getEvent,
-  createEvent,
-  updateEvent,
-  deleteEvent,
-} = await import("../src/service/events.ts");
+const { listEvents, getEvent, createEvent, updateEvent, deleteEvent } =
+  await import("../src/service/events.ts");
 
 const { parseDuration } = await import("../src/util/duration.ts");
-const { icalField, parseTime, icalTrigger } = await import("../src/util/ical.ts");
+const { icalField, parseTime, icalTrigger } =
+  await import("../src/util/ical.ts");
 
 function mockFetch(routes: Record<string, (init?: RequestInit) => unknown>) {
   return (async (input: string | URL, init?: RequestInit) => {
@@ -127,11 +133,14 @@ describe("duration + ical helpers", () => {
   });
 
   test("icalField extracts SUMMARY", () => {
-    expect(icalField("SUMMARY:Meeting\r\nLOCATION:Vienna", "SUMMARY")).toBe("Meeting");
+    expect(icalField("SUMMARY:Meeting\r\nLOCATION:Vienna", "SUMMARY")).toBe(
+      "Meeting",
+    );
   });
 
   test("escapeIcalText escapes commas semicolons newlines", async () => {
-    const { escapeIcalText, unescapeIcalText } = await import("../src/util/ical.ts");
+    const { escapeIcalText, unescapeIcalText } =
+      await import("../src/util/ical.ts");
     const raw = "Hello, world; line2\nnext";
     expect(escapeIcalText(raw)).toBe("Hello\\, world\\; line2\\nnext");
     expect(unescapeIcalText(escapeIcalText(raw))).toBe(raw);
@@ -332,8 +341,9 @@ describe("events service", () => {
       fetchImpl,
     });
 
-    const event = (synced as { Events: Array<{ Event: Record<string, unknown> }> })
-      .Events[0]?.Event;
+    const event = (
+      synced as { Events: Array<{ Event: Record<string, unknown> }> }
+    ).Events[0]?.Event;
     expect(event?.Permissions).toBe(42);
     expect(event?.IsOrganizer).toBe(0);
     expect(event?.Notifications).toEqual([{ Type: 1, Trigger: "-PT15M" }]);
@@ -343,8 +353,7 @@ describe("events service", () => {
     ]);
     expect(event?.Attendees).toEqual([{ Token: "tok", Status: 1 }]);
     const firstCall = mockEncryptAndSignCardSplit.mock.calls[0] as
-      | [string, ...unknown[]]
-      | undefined;
+      [string, ...unknown[]] | undefined;
     const signedPayload = firstCall?.[0];
     expect(signedPayload).toContain("SEQUENCE:3");
   });
@@ -401,4 +410,3 @@ describe("events commands dry-run", () => {
     expect(mockEncryptAndSignCardSplit).not.toHaveBeenCalled();
   });
 });
-

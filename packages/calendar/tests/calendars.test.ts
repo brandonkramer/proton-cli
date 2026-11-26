@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+} from "bun:test";
 import type { Session } from "../src/proton/types.ts";
 import { configureAgentFlags } from "../src/util/agent.ts";
 
@@ -68,7 +76,15 @@ mock.module("../src/proton/auth.ts", () => ({
 mock.module("../src/crypto/unlock.ts", () => ({
   unlockCalendarKeys: mockUnlockCalendarKeys,
   primaryAddressKey: (unlocked: {
-    addressKeys: Map<string, { addressId: string; email: string; privateKey: unknown; publicKey: unknown }>;
+    addressKeys: Map<
+      string,
+      {
+        addressId: string;
+        email: string;
+        privateKey: unknown;
+        publicKey: unknown;
+      }
+    >;
     addresses: { ID: string; Email: string }[];
   }) => {
     const first = unlocked.addressKeys.values().next().value;
@@ -85,12 +101,8 @@ mock.module("../src/crypto/password-scope.ts", () => ({
   unlockPasswordScope: mockUnlockPasswordScope,
 }));
 
-const {
-  listCalendars,
-  createCalendar,
-  renameCalendar,
-  deleteCalendar,
-} = await import("../src/service/calendars.ts");
+const { listCalendars, createCalendar, renameCalendar, deleteCalendar } =
+  await import("../src/service/calendars.ts");
 
 const { validateAccentColor } = await import("../src/util/colors.ts");
 
@@ -175,7 +187,10 @@ describe("calendar service", () => {
     const fetchImpl = mockFetch({
       "/calendar/v1": (init) => {
         calls.push(`${init?.method ?? "GET"} /calendar/v1`);
-        if (init?.method === "POST" && !init.body?.toString().includes("PrivateKey")) {
+        if (
+          init?.method === "POST" &&
+          !init.body?.toString().includes("PrivateKey")
+        ) {
           return { Code: 1000, Calendar: { ID: "new-cal" } };
         }
         return { Code: 1000 };

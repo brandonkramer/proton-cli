@@ -16,8 +16,8 @@ export const LOGICALS_TTL_MS = 10 * 60 * 1000;
  * App version header. Using the Linux VPN client format avoids some CAPTCHA
  * challenges that web client versions trigger. Bump when Proton rejects it (5003).
  */
-export const APP_VERSION = "linux-vpn@4.13.1";
-export const USER_AGENT = "ProtonVPN/4.13.1 (Linux; Ubuntu)";
+export const APP_VERSION = "linux-vpn@4.19.1";
+export const USER_AGENT = "ProtonVPN/4.19.1 (Linux; Ubuntu)";
 
 export const WIREGUARD_PORT = 51820;
 export const WIREGUARD_IPV4 = "10.2.0.2/32";

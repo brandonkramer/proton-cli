@@ -37,14 +37,16 @@ bun link
 - **VPN — WireGuard tools** (install tries this via Homebrew / winget; or `proton vpn setup`)
   - **macOS:** Homebrew → `wireguard-tools` (sudo for connect/disconnect)
   - **Windows:** WireGuard app via winget (Administrator terminal for connect/disconnect)
-- **Authenticator — CAPTCHA (macOS):** native WKWebView helper, built on `postinstall` when possible (`bun run build:captcha` to retry; needs Xcode CLT)
+- **CAPTCHA (sign-in):** native helper, built on `postinstall` when possible (`bun run build:captcha` to retry)
+  - **macOS:** WKWebView (needs Xcode CLT)
+  - **Windows:** WebView2 (needs .NET SDK to build once + WebView2 Runtime)
 - Optional: [Proton Pass CLI](https://protonpass.github.io/pass-cli/) (`pass-cli`) for credential injection
 
 Close the Proton VPN desktop app before connecting so tunnels do not conflict.
 
 On macOS, VPN connect/disconnect may ask for your **Mac login password** (sudo), not your Proton password.
 
-CAPTCHA (if Proton requires it on sign-in): solve it in the **native WKWebView window**, not Safari/`verify.proton.me`.
+CAPTCHA (if Proton requires it on sign-in): solve it in the **native helper window**, not a normal browser/`verify.proton.me`.
 
 ## Agent plugins (Cursor / Codex / Claude / Pi)
 
@@ -56,12 +58,12 @@ proton install-mcp --scope user --host cursor
 proton mcp                                      # stdio MCP (used by hosts)
 ```
 
-| Host | Install |
-|------|---------|
-| Cursor | `proton install-mcp --host cursor` (user or project) — or load `.cursor-plugin/` |
-| Codex | `proton install-mcp --host codex` — or load `.codex-plugin/` |
+| Host   | Install                                                                                                                                  |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Cursor | `proton install-mcp --host cursor` (user or project) — or load `.cursor-plugin/`                                                         |
+| Codex  | `proton install-mcp --host codex` — or load `.codex-plugin/`                                                                             |
 | Claude | `proton install-mcp --host claude` (project → `.mcp.json`; user → `claude plugin marketplace add` / install) — or load `.claude-plugin/` |
-| Pi | `pi install git:github.com/brandonkramer/proton-cli` (skills via `"pi"` in package.json); wire `proton mcp` through your MCP adapter |
+| Pi     | `pi install git:github.com/brandonkramer/proton-cli` (skills via `"pi"` in package.json); wire `proton mcp` through your MCP adapter     |
 
 Sign-in / CAPTCHA stay interactive on a human TTY. Prefer curated MCP tools (mail/contacts/calendar/drive/vpn/settings reads + common writes) or `proton_cli` with `confirm=true` for non-reads. See `skills/proton-cli/SKILL.md`.
 
@@ -106,14 +108,14 @@ proton vpn status --json
 proton vpn disconnect
 ```
 
-| Flag | Meaning |
-|------|---------|
+| Flag               | Meaning                  |
+| ------------------ | ------------------------ |
 | `--country <code>` | Exit country (e.g. `NL`) |
-| `--city <name>` | City name |
-| `--p2p` | P2P servers |
-| `--securecore` | Secure Core |
-| `--tor` | Tor over VPN |
-| `--free-only` | Free-tier only |
+| `--city <name>`    | City name                |
+| `--p2p`            | P2P servers              |
+| `--securecore`     | Secure Core              |
+| `--tor`            | Tor over VPN             |
+| `--free-only`      | Free-tier only           |
 
 Country / feature availability depends on your Proton plan.
 
@@ -251,20 +253,20 @@ proton auth status --output json
 proton auth code github --output json
 ```
 
-| Flag / env | Meaning |
-|---|---|
-| `--json` / `PROTONVPN_JSON=1` | JSON on stdout (VPN / shared) |
-| `--output json\|plain\|ink` / `PROTONAUTH_OUTPUT` | Authenticator output format |
-| `-y` / `--yes` | Non-interactive confirms |
-| `--sudo` | Allow interactive macOS sudo for WireGuard |
-| `PROTON_AGENT=1` | Root `proton` agent-friendly (no accidental TUI) |
-| `PROTONVPN_AGENT=1` | VPN agent mode (JSON-friendly; `sudo -n` only unless `--sudo`) |
-| `PROTONAUTH_AGENT=1` / `CI=1` | Auth agent mode (default JSON; no CAPTCHA window / TUI) |
-| `PROTONCONTACTS_JSON=1` / `PROTONCONTACTS_AGENT=1` | Contacts agent mode (JSON; no TUI) |
-| `PROTONCALENDAR_JSON=1` / `PROTONCALENDAR_AGENT=1` | Calendar agent mode (JSON; no TUI) |
-| `PROTON_DRIVE_JSON=1` / `PROTON_DRIVE_AGENT=1` | Drive agent mode (JSON; no TUI) |
-| `PROTONSETTINGS_JSON=1` / `PROTONSETTINGS_AGENT=1` | Settings agent mode (JSON; no TUI) |
-| `PROTONMAIL_JSON=1` / `PROTONMAIL_AGENT=1` | Mail agent mode (JSON; no TUI) |
+| Flag / env                                         | Meaning                                                        |
+| -------------------------------------------------- | -------------------------------------------------------------- |
+| `--json` / `PROTONVPN_JSON=1`                      | JSON on stdout (VPN / shared)                                  |
+| `--output json\|plain\|ink` / `PROTONAUTH_OUTPUT`  | Authenticator output format                                    |
+| `-y` / `--yes`                                     | Non-interactive confirms                                       |
+| `--sudo`                                           | Allow interactive macOS sudo for WireGuard                     |
+| `PROTON_AGENT=1`                                   | Root `proton` agent-friendly (no accidental TUI)               |
+| `PROTONVPN_AGENT=1`                                | VPN agent mode (JSON-friendly; `sudo -n` only unless `--sudo`) |
+| `PROTONAUTH_AGENT=1` / `CI=1`                      | Auth agent mode (default JSON; no CAPTCHA window / TUI)        |
+| `PROTONCONTACTS_JSON=1` / `PROTONCONTACTS_AGENT=1` | Contacts agent mode (JSON; no TUI)                             |
+| `PROTONCALENDAR_JSON=1` / `PROTONCALENDAR_AGENT=1` | Calendar agent mode (JSON; no TUI)                             |
+| `PROTON_DRIVE_JSON=1` / `PROTON_DRIVE_AGENT=1`     | Drive agent mode (JSON; no TUI)                                |
+| `PROTONSETTINGS_JSON=1` / `PROTONSETTINGS_AGENT=1` | Settings agent mode (JSON; no TUI)                             |
+| `PROTONMAIL_JSON=1` / `PROTONMAIL_AGENT=1`         | Mail agent mode (JSON; no TUI)                                 |
 
 VPN exit codes: `0` ok · `1` error · `2` usage · `3` not signed in · `4` privilege needed.
 
@@ -272,17 +274,17 @@ CAPTCHA never opens a window in agent mode (`captcha_required` — sign in inter
 
 ## Monorepo
 
-| Path | Package | Owns |
-|---|---|---|
-| `packages/core` | `@bkramer/proton-core` | Shared config, dual-mint sessions, Pass helpers |
-| `packages/vpn` | `@bkramer/proton-vpn` | WireGuard + vpn-api (`proton vpn …`) |
-| `packages/authenticator` | `@bkramer/proton-authenticator` | E2EE TOTP/Steam sync (`proton auth …`) |
-| `packages/contacts` | `@bkramer/proton-contacts` | E2EE contacts/groups (`proton contacts …`) |
-| `packages/calendar` | `@bkramer/proton-calendar` | E2EE calendars/events (`proton calendar …`) |
-| `packages/drive` | `@bkramer/proton-drive` | E2EE Drive files/folders/photos (`proton drive …`) |
-| `packages/settings` | `@bkramer/proton-settings` | Account/mail API preferences (`proton settings …`) |
-| `packages/mail` | `@bkramer/proton-mail` | E2EE Mail list/read/search/send (`proton mail …`) |
-| `src/` | root bins | `proton` router + legacy wrappers |
+| Path                     | Package                         | Owns                                               |
+| ------------------------ | ------------------------------- | -------------------------------------------------- |
+| `packages/core`          | `@bkramer/proton-core`          | Shared config, dual-mint sessions, Pass helpers    |
+| `packages/vpn`           | `@bkramer/proton-vpn`           | WireGuard + vpn-api (`proton vpn …`)               |
+| `packages/authenticator` | `@bkramer/proton-authenticator` | E2EE TOTP/Steam sync (`proton auth …`)             |
+| `packages/contacts`      | `@bkramer/proton-contacts`      | E2EE contacts/groups (`proton contacts …`)         |
+| `packages/calendar`      | `@bkramer/proton-calendar`      | E2EE calendars/events (`proton calendar …`)        |
+| `packages/drive`         | `@bkramer/proton-drive`         | E2EE Drive files/folders/photos (`proton drive …`) |
+| `packages/settings`      | `@bkramer/proton-settings`      | Account/mail API preferences (`proton settings …`) |
+| `packages/mail`          | `@bkramer/proton-mail`          | E2EE Mail list/read/search/send (`proton mail …`)  |
+| `src/`                   | root bins                       | `proton` router + legacy wrappers                  |
 
 Config root: `~/.config/proton-cli/` (`account.json` for the saved Pass ref; per-product sessions under `sessions/`).
 

@@ -21,7 +21,7 @@ export function registerConnect(program: Command): void {
     .argument("[server]", "Optional server name (e.g. US#23)")
     .description("Connect via WireGuard to a Proton VPN server")
     .option("-c, --country <code>", "Exit country code (e.g. US, NL)")
-    .option("--city <name>", "City name (e.g. \"New York\")")
+    .option("--city <name>", 'City name (e.g. "New York")')
     .option("--p2p", "Prefer / require P2P servers")
     .option("--securecore", "Use Secure Core servers")
     .option("--tor", "Use Tor-over-VPN servers")

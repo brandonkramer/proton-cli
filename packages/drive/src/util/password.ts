@@ -1,7 +1,4 @@
-import {
-  resolvePassLogin,
-  resolvePassRef,
-} from "@bkramer/proton-core";
+import { resolvePassLogin, resolvePassRef } from "@bkramer/proton-core";
 import { CliError } from "./errors.ts";
 import { ExitCode } from "./exit.ts";
 

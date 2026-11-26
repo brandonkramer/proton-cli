@@ -1,9 +1,6 @@
 import { resolvePassRef } from "@bkramer/proton-core";
 import { saveSession } from "../config/store.ts";
-import {
-  resolvePassLogin,
-  resolvePassTotp,
-} from "../pass/credentials.ts";
+import { resolvePassLogin, resolvePassTotp } from "../pass/credentials.ts";
 import {
   authInfoRequiresTotp,
   ensureVpnScope,

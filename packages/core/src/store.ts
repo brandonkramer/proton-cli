@@ -47,7 +47,10 @@ async function unlinkIfExists(path: string): Promise<void> {
   }
 }
 
-export async function saveAccount(username: string, products: ProductId[]): Promise<void> {
+export async function saveAccount(
+  username: string,
+  products: ProductId[],
+): Promise<void> {
   const existing = await loadAccount();
   const payload: AccountRecord = {
     username,
@@ -63,7 +66,9 @@ export async function loadAccount(): Promise<AccountRecord | null> {
 }
 
 /** Persist default Pass login item; preserves username/products when present. */
-export async function saveAccountPassRef(passRef: string): Promise<AccountRecord> {
+export async function saveAccountPassRef(
+  passRef: string,
+): Promise<AccountRecord> {
   const existing = await loadAccount();
   const payload: AccountRecord = {
     username: existing?.username ?? "",

@@ -15,8 +15,12 @@ describe("assertContiguousBlockIndices", () => {
 
   test("rejects gaps / reorders / duplicates / empty", () => {
     expect(() => assertContiguousBlockIndices([])).toThrow(/no content blocks/);
-    expect(() => assertContiguousBlockIndices([1, 3])).toThrow(/Omitted or reordered/);
-    expect(() => assertContiguousBlockIndices([2, 1])).toThrow(/Omitted or reordered/);
+    expect(() => assertContiguousBlockIndices([1, 3])).toThrow(
+      /Omitted or reordered/,
+    );
+    expect(() => assertContiguousBlockIndices([2, 1])).toThrow(
+      /Omitted or reordered/,
+    );
     expect(() => assertContiguousBlockIndices([1, 1])).toThrow(/Duplicate/);
   });
 });
@@ -29,9 +33,9 @@ describe("assertBlockHash", () => {
   });
 
   test("fails on mismatch", () => {
-    expect(() =>
-      assertBlockHash(new Uint8Array([1]), "not-the-hash"),
-    ).toThrow(/Block hash mismatch/);
+    expect(() => assertBlockHash(new Uint8Array([1]), "not-the-hash")).toThrow(
+      /Block hash mismatch/,
+    );
   });
 });
 
@@ -48,7 +52,9 @@ describe("buildRevisionManifest", () => {
 describe("requireDestructiveConfirm", () => {
   test("allows when --yes configured", () => {
     configureAgentFlags({ yes: true, json: false, dryRun: false });
-    expect(() => requireDestructiveConfirm("Permanently deleting /x")).not.toThrow();
+    expect(() =>
+      requireDestructiveConfirm("Permanently deleting /x"),
+    ).not.toThrow();
     configureAgentFlags({ yes: false, json: false, dryRun: false });
   });
 
@@ -64,16 +70,17 @@ describe("requireDestructiveConfirm", () => {
     const prevTty = stdin.isTTY;
     stdin.isTTY = true;
     try {
-      expect(() => requireDestructiveConfirm("Emptying trash permanently")).toThrow(
-        /-y\/--yes/,
-      );
+      expect(() =>
+        requireDestructiveConfirm("Emptying trash permanently"),
+      ).toThrow(/-y\/--yes/);
     } finally {
       stdin.isTTY = prevTty;
       if (prevCi !== undefined) process.env.CI = prevCi;
       else delete process.env.CI;
       if (prevAgent !== undefined) process.env.PROTON_AGENT = prevAgent;
       else delete process.env.PROTON_AGENT;
-      if (prevDriveAgent !== undefined) process.env.PROTON_DRIVE_AGENT = prevDriveAgent;
+      if (prevDriveAgent !== undefined)
+        process.env.PROTON_DRIVE_AGENT = prevDriveAgent;
       else delete process.env.PROTON_DRIVE_AGENT;
     }
   });

@@ -1,7 +1,4 @@
-import {
-  resolvePassLogin,
-  resolvePassRef,
-} from "@bkramer/proton-core";
+import { resolvePassLogin, resolvePassRef } from "@bkramer/proton-core";
 import { isNonInteractive } from "./agent.ts";
 import { CliError } from "./errors.ts";
 import { ExitCode } from "./exit.ts";
@@ -13,9 +10,11 @@ export function passwordFromEnv(): string | undefined {
   return value || undefined;
 }
 
-export async function resolveAccountPassword(options: {
-  passRef?: string;
-} = {}): Promise<string> {
+export async function resolveAccountPassword(
+  options: {
+    passRef?: string;
+  } = {},
+): Promise<string> {
   const fromEnv = passwordFromEnv();
   if (fromEnv) return fromEnv;
 

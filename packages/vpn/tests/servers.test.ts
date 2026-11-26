@@ -37,11 +37,43 @@ function server(
 }
 
 const fixtures: LogicalServer[] = [
-  server({ Name: "US#1", ExitCountry: "US", City: "New York", Score: 2, Load: 40 }),
-  server({ Name: "US#2", ExitCountry: "US", City: "Dallas", Score: 1, Load: 70 }),
-  server({ Name: "NL#1", ExitCountry: "NL", City: "Amsterdam", Score: 1.5, Load: 20, Features: 4 }),
-  server({ Name: "CH#SC", ExitCountry: "US", EntryCountry: "CH", City: "Zurich", Score: 3, Features: 1 }),
-  server({ Name: "JP#FREE", ExitCountry: "JP", City: "Tokyo", Score: 1, Tier: 0 }),
+  server({
+    Name: "US#1",
+    ExitCountry: "US",
+    City: "New York",
+    Score: 2,
+    Load: 40,
+  }),
+  server({
+    Name: "US#2",
+    ExitCountry: "US",
+    City: "Dallas",
+    Score: 1,
+    Load: 70,
+  }),
+  server({
+    Name: "NL#1",
+    ExitCountry: "NL",
+    City: "Amsterdam",
+    Score: 1.5,
+    Load: 20,
+    Features: 4,
+  }),
+  server({
+    Name: "CH#SC",
+    ExitCountry: "US",
+    EntryCountry: "CH",
+    City: "Zurich",
+    Score: 3,
+    Features: 1,
+  }),
+  server({
+    Name: "JP#FREE",
+    ExitCountry: "JP",
+    City: "Tokyo",
+    Score: 1,
+    Tier: 0,
+  }),
   server({ Name: "OFF#1", ExitCountry: "DE", Status: 0, Score: 0.1 }),
 ];
 
@@ -72,7 +104,9 @@ describe("selectServer", () => {
   });
 
   test("throws when nothing matches", () => {
-    expect(() => selectServer(fixtures, { country: "ZZ" })).toThrow(/No suitable/);
+    expect(() => selectServer(fixtures, { country: "ZZ" })).toThrow(
+      /No suitable/,
+    );
   });
 });
 

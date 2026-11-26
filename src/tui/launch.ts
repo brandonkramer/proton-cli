@@ -2,26 +2,11 @@ import {
   launchAuthTui,
   signOutAuthenticator,
 } from "@bkramer/proton-authenticator";
-import {
-  launchContactsTui,
-  signOutContacts,
-} from "@bkramer/proton-contacts";
-import {
-  launchCalendarTui,
-  signOutCalendar,
-} from "@bkramer/proton-calendar";
-import {
-  launchDriveTui,
-  signOutDrive,
-} from "@bkramer/proton-drive";
-import {
-  launchMailTui,
-  signOutMail,
-} from "@bkramer/proton-mail";
-import {
-  launchSettingsTui,
-  signOutSettings,
-} from "@bkramer/proton-settings";
+import { launchContactsTui, signOutContacts } from "@bkramer/proton-contacts";
+import { launchCalendarTui, signOutCalendar } from "@bkramer/proton-calendar";
+import { launchDriveTui, signOutDrive } from "@bkramer/proton-drive";
+import { launchMailTui, signOutMail } from "@bkramer/proton-mail";
+import { launchSettingsTui, signOutSettings } from "@bkramer/proton-settings";
 import { clearAllSessions } from "@bkramer/proton-core";
 import { launchVpnTui, signOutVpn } from "@bkramer/proton-vpn";
 import { showMessage } from "./message.tsx";

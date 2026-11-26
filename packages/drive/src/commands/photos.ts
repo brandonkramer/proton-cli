@@ -44,29 +44,29 @@ export function registerPhotosCommands(photos: Command): void {
     .option("--json", "Machine-readable JSON output");
   addDriveAuthOptions(list);
   list.action(async (_options, command) => {
-      const opts = applyDriveGlobals(command);
-      try {
-        await withPhotos(opts, async (service, client, photosContext) => {
-          const result = await service.listPhotos(
-            client,
-            photosContext,
-            isDryRun(),
-          );
-          if (result && "action" in result) {
-            emitDryRun(result);
-            return;
-          }
-          if (wantsJson()) {
-            emitOk({ photos: result });
-            return;
-          }
-          for (const photo of result) {
-            emitPlain(`${photo.linkId}\t${photo.captureTime}`);
-          }
-        });
-      } catch (error) {
-        await handleCommandError(error);
-      }
+    const opts = applyDriveGlobals(command);
+    try {
+      await withPhotos(opts, async (service, client, photosContext) => {
+        const result = await service.listPhotos(
+          client,
+          photosContext,
+          isDryRun(),
+        );
+        if (result && "action" in result) {
+          emitDryRun(result);
+          return;
+        }
+        if (wantsJson()) {
+          emitOk({ photos: result });
+          return;
+        }
+        for (const photo of result) {
+          emitPlain(`${photo.linkId}\t${photo.captureTime}`);
+        }
+      });
+    } catch (error) {
+      await handleCommandError(error);
+    }
   });
 
   const upload = photos

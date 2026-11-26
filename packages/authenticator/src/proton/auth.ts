@@ -34,7 +34,10 @@ export async function getAuthInfo(username: string): Promise<AuthInfoResponse> {
 
   if (status !== 200 || !isSuccessCode(data.Code)) {
     throw new CliError(
-      messageForApiCode(data.Code, data.Error ?? `auth/info failed (HTTP ${status})`),
+      messageForApiCode(
+        data.Code,
+        data.Error ?? `auth/info failed (HTTP ${status})`,
+      ),
     );
   }
   if (!data.Modulus || !data.ServerEphemeral) {
@@ -137,11 +140,14 @@ async function srpAuthAttempt(options: {
     body.TwoFactorCode = options.totp;
   }
 
-  const { status, data } = await protonFetch<AuthAttemptResult["data"]>(AUTH_PATH, {
-    method: "POST",
-    body,
-    humanVerification: options.humanVerification,
-  });
+  const { status, data } = await protonFetch<AuthAttemptResult["data"]>(
+    AUTH_PATH,
+    {
+      method: "POST",
+      body,
+      humanVerification: options.humanVerification,
+    },
+  );
 
   return {
     status,

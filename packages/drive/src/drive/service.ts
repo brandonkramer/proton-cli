@@ -11,7 +11,12 @@ import {
   verifySession,
 } from "../proton/auth.ts";
 import { NotFoundError, NotSignedInError } from "../util/errors.ts";
-import { baseOf, dirOf, joinDrivePath, normalizeDrivePath } from "../util/paths.ts";
+import {
+  baseOf,
+  dirOf,
+  joinDrivePath,
+  normalizeDrivePath,
+} from "../util/paths.ts";
 import { resolveAccountPassword } from "../util/password.ts";
 import { DriveApiClient } from "./client.ts";
 import {
@@ -84,10 +89,11 @@ export class DriveService {
     this.fetchImpl = options.fetchImpl;
   }
 
-  async open(options: {
-    password?: string;
-    passRef?: string;
-  }): Promise<{ client: DriveApiClient; context: DriveContext; unlocked: UnlockedKeys }> {
+  async open(options: { password?: string; passRef?: string }): Promise<{
+    client: DriveApiClient;
+    context: DriveContext;
+    unlocked: UnlockedKeys;
+  }> {
     const saved = await loadSession();
     if (!saved) {
       throw new NotSignedInError();
@@ -107,11 +113,7 @@ export class DriveService {
       session,
       fetchImpl: this.fetchImpl,
     });
-    const unlocked = await unlockDriveKeys(
-      session,
-      password,
-      this.fetchImpl,
-    );
+    const unlocked = await unlockDriveKeys(session, password, this.fetchImpl);
     const context = await this.resolveContext(client, unlocked);
     return { client, context, unlocked };
   }
@@ -143,7 +145,8 @@ export class DriveService {
         : new TextEncoder().encode(String(sharePassphrase));
 
     let sharePassBinary = "";
-    for (const byte of passphraseBytes) sharePassBinary += String.fromCharCode(byte);
+    for (const byte of passphraseBytes)
+      sharePassBinary += String.fromCharCode(byte);
 
     const sharePrivate = await crypto.importPrivateKey({
       armoredKey: share.Key,
@@ -315,7 +318,11 @@ export class DriveService {
     const parentLink = await client.getLink(context.shareId, parent.linkId);
     const hashKey = await hashKeyOf(parentLink, parent.nodeKeys);
     const hash = lookupHash(name, hashKey);
-    const encName = await encryptName(name, parent.nodeKeys, context.addressKeys);
+    const encName = await encryptName(
+      name,
+      parent.nodeKeys,
+      context.addressKeys,
+    );
     const node = await generateNodeKeys(parent.nodeKeys, context.addressKeys);
     const nodeKeys = [node.nodePrivateKey];
     const nodeHashKey = await generateNodeHashKey(nodeKeys, nodeKeys);
@@ -366,7 +373,11 @@ export class DriveService {
     const parentLink = await client.getLink(context.shareId, parent.linkId);
     const hashKey = await hashKeyOf(parentLink, parent.nodeKeys);
     const hash = lookupHash(fileName, hashKey);
-    const encName = await encryptName(fileName, parent.nodeKeys, context.addressKeys);
+    const encName = await encryptName(
+      fileName,
+      parent.nodeKeys,
+      context.addressKeys,
+    );
     const node = await generateNodeKeys(parent.nodeKeys, context.addressKeys);
     const nodeKeys = [node.nodePrivateKey];
     const fileKeys = await generateFileKeys(nodeKeys);
@@ -391,10 +402,7 @@ export class DriveService {
     );
     const verCode = base64ToBytes(verification.verificationCode);
 
-    const reader =
-      source instanceof Uint8Array
-        ? null
-        : source.getReader();
+    const reader = source instanceof Uint8Array ? null : source.getReader();
 
     const rawHashes = new Map<number, Uint8Array>();
     const tokens = new Map<number, string>();
@@ -562,7 +570,11 @@ export class DriveService {
       fileProps.ContentKeyPacketSignature,
     );
     const revisionId = fileProps.ActiveRevision.ID;
-    const revision = await client.listRevisionBlocks(shareId, linkId, revisionId);
+    const revision = await client.listRevisionBlocks(
+      shareId,
+      linkId,
+      revisionId,
+    );
     const blocks = revision.blocks;
     assertContiguousBlockIndices(blocks.map((b) => b.index));
 
@@ -624,7 +636,11 @@ export class DriveService {
     const parent = await this.resolvePath(client, context, parentPath);
     const parentLink = await client.getLink(context.shareId, parent.linkId);
     const hashKey = await hashKeyOf(parentLink, parent.nodeKeys);
-    const encName = await encryptName(newName, parent.nodeKeys, context.addressKeys);
+    const encName = await encryptName(
+      newName,
+      parent.nodeKeys,
+      context.addressKeys,
+    );
 
     await client.renameLink(context.shareId, resolved.linkId, {
       Name: encName,
@@ -805,7 +821,8 @@ export class DriveService {
         : new TextEncoder().encode(String(sharePassphrase));
 
     let sharePassBinary = "";
-    for (const byte of passphraseBytes) sharePassBinary += String.fromCharCode(byte);
+    for (const byte of passphraseBytes)
+      sharePassBinary += String.fromCharCode(byte);
 
     const sharePrivate = await crypto.importPrivateKey({
       armoredKey: share.Key,
@@ -924,7 +941,12 @@ export class DriveService {
     const link = await client.getLink(context.shareId, resolved.linkId);
     for (const sid of link.ShareIDs ?? []) {
       if (sid !== context.shareId) {
-        const sessionKey = await this.shareSessionKey(client, context, sid, resolved);
+        const sessionKey = await this.shareSessionKey(
+          client,
+          context,
+          sid,
+          resolved,
+        );
         return { shareId: sid, sessionKey };
       }
     }
@@ -947,7 +969,10 @@ export class DriveService {
   }
 
   planShareStatus(path: string): DryRunAction {
-    return { action: "share.status", detail: { path: normalizeDrivePath(path) } };
+    return {
+      action: "share.status",
+      detail: { path: normalizeDrivePath(path) },
+    };
   }
 
   async shareStatus(
@@ -991,26 +1016,22 @@ export class DriveService {
 
       const members = await client.listMembers(sid);
       status.members.push(
-        ...members.map(
-          (m): ShareMember => ({
-            memberId: m.memberId,
-            email: m.email,
-            role: shareRoleLabel(m.permissions),
-            createTime: m.createTime,
-          }),
-        ),
+        ...members.map((m): ShareMember => ({
+          memberId: m.memberId,
+          email: m.email,
+          role: shareRoleLabel(m.permissions),
+          createTime: m.createTime,
+        })),
       );
 
       const invites = await client.listOutgoingInvites(sid);
       status.pendingInvitations.push(
-        ...invites.map(
-          (i): ShareInvitee => ({
-            invitationId: i.invitationId,
-            email: i.inviteeEmail,
-            role: shareRoleLabel(i.permissions),
-            createTime: i.createTime,
-          }),
-        ),
+        ...invites.map((i): ShareInvitee => ({
+          invitationId: i.invitationId,
+          email: i.inviteeEmail,
+          role: shareRoleLabel(i.permissions),
+          createTime: i.createTime,
+        })),
       );
     }
 
@@ -1042,7 +1063,12 @@ export class DriveService {
     );
 
     const existing = await client.listShareUrls(shareId);
-    if (existing.length > 0 && !options.setEdit && !options.setExpiry && !options.setPassword) {
+    if (
+      existing.length > 0 &&
+      !options.setEdit &&
+      !options.setExpiry &&
+      !options.setPassword
+    ) {
       const u = existing[0]!;
       const { generated } = await decryptShareUrlPassword(
         u.password,
@@ -1095,7 +1121,10 @@ export class DriveService {
   }
 
   planShareUnlink(path: string): DryRunAction {
-    return { action: "share.unlink", detail: { path: normalizeDrivePath(path) } };
+    return {
+      action: "share.unlink",
+      detail: { path: normalizeDrivePath(path) },
+    };
   }
 
   async unlinkShare(
@@ -1149,7 +1178,9 @@ export class DriveService {
 
     const publicKeys = await client.fetchAddressPublicKeys(email);
     if (publicKeys.length === 0) {
-      throw new Error(`${email} is not a Proton user (external invitations unsupported).`);
+      throw new Error(
+        `${email} is not a Proton user (external invitations unsupported).`,
+      );
     }
 
     const keyPacketB64 = await encryptSessionKeyForPublicKeys(
@@ -1222,9 +1253,7 @@ export class DriveService {
     throw new NotFoundError(email);
   }
 
-  async listInvitations(
-    client: DriveApiClient,
-  ): Promise<DriveInvitation[]> {
+  async listInvitations(client: DriveApiClient): Promise<DriveInvitation[]> {
     const out: DriveInvitation[] = [];
     let anchor = "";
     for (;;) {
@@ -1266,13 +1295,13 @@ export class DriveService {
 
     const details = await client.getInvitation(invitationId);
     const inviteeKeys = unlocked.addresses
-      .filter((a) => a.Email.toLowerCase() === details.inviteeEmail.toLowerCase())
+      .filter(
+        (a) => a.Email.toLowerCase() === details.inviteeEmail.toLowerCase(),
+      )
       .flatMap((a) => unlocked.addressKeys.get(a.ID) ?? []);
 
     const keys =
-      inviteeKeys.length > 0
-        ? inviteeKeys
-        : primaryAddress(unlocked).keys;
+      inviteeKeys.length > 0 ? inviteeKeys : primaryAddress(unlocked).keys;
 
     const crypto = await getDriveCrypto();
     const sessionKey = await crypto.decryptSessionKey({
@@ -1455,4 +1484,3 @@ function guessMimeType(fileName: string): string {
   if (lower.endsWith(".mov")) return "video/quicktime";
   return "application/octet-stream";
 }
-

@@ -1,9 +1,6 @@
 import type { Command } from "commander";
 import { requireMailRuntime } from "../context.ts";
-import {
-  searchMessages,
-  type MessageSummary,
-} from "../service/messages.ts";
+import { searchMessages, type MessageSummary } from "../service/messages.ts";
 import { DEFAULT_PAGE_SIZE } from "../proton/constants.ts";
 import { emitOk, isDryRun, wantsJson } from "../util/agent.ts";
 import { reportCommandError } from "../util/errors.ts";
@@ -75,8 +72,12 @@ export function registerSearch(mail: Command): void {
     .command("search")
     .description("Search messages by keyword")
     .argument("<query>", "Search keyword")
-    .option("--page <n>", "Page index (0-based)", (value) => Number.parseInt(value, 10))
-    .option("--page-size <n>", "Page size", (value) => Number.parseInt(value, 10))
+    .option("--page <n>", "Page index (0-based)", (value) =>
+      Number.parseInt(value, 10),
+    )
+    .option("--page-size <n>", "Page size", (value) =>
+      Number.parseInt(value, 10),
+    )
     .option("--dry-run", "Print planned search without calling the API")
     .action(async function (
       this: Command,
@@ -84,7 +85,8 @@ export function registerSearch(mail: Command): void {
       options: { page?: number; pageSize?: number },
     ) {
       try {
-        const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         await runMailSearch(query, {
           ...options,
           passRef: globals?.pass,

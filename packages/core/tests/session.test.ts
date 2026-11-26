@@ -170,7 +170,10 @@ describe("paths + dual-mint sign-in", () => {
       credentials: { username: "alice", password: "secret" },
       products: ["mail", "settings"],
       authenticators: {
-        mail: async () => ({ product: "mail", session: fakeSession("mail-uid") }),
+        mail: async () => ({
+          product: "mail",
+          session: fakeSession("mail-uid"),
+        }),
         settings: async () => ({
           product: "settings",
           session: fakeSession("settings-uid"),
@@ -182,7 +185,9 @@ describe("paths + dual-mint sign-in", () => {
     expect(result.succeeded.sort()).toEqual(["mail", "settings"]);
     // contacts/settings/mail share mail-api sessions
     expect((await loadProductSession("mail"))?.session.UID).toBe("mail-uid");
-    expect((await loadProductSession("settings"))?.session.UID).toBe("mail-uid");
+    expect((await loadProductSession("settings"))?.session.UID).toBe(
+      "mail-uid",
+    );
 
     await rm(root, { recursive: true, force: true });
   });
@@ -247,6 +252,52 @@ describe("paths + dual-mint sign-in", () => {
     ]);
     expect(await loadProductSession("vpn")).toBeNull();
     expect(await loadAccount()).toBeNull();
+
+    await rm(root, { recursive: true, force: true });
+  });
+
+  test("dualMintSignIn stops remaining products after 2028 rate limit", async () => {
+    const root = await mkdtemp(join(tmpdir(), "proton-cli-"));
+    setConfigRootForTests(root);
+
+    let driveCalls = 0;
+    const waits: string[] = [];
+    const result = await dualMintSignIn({
+      productGapMs: 0,
+      rateLimitRetries: 0,
+      credentials: { username: "bob", password: "x" },
+      products: ["vpn", "drive", "calendar"],
+      onProgress: (event) => {
+        if (event.type === "wait") waits.push(event.message);
+      },
+      authenticators: {
+        vpn: async () => {
+          throw new Error("Too many recent logins (2028)");
+        },
+        drive: async () => {
+          driveCalls += 1;
+          return { product: "drive", session: fakeSession("drive-uid") };
+        },
+        calendar: async () => {
+          driveCalls += 1;
+          return { product: "calendar", session: fakeSession("cal-uid") };
+        },
+      },
+    });
+
+    expect(driveCalls).toBe(0);
+    expect(result.succeeded).toEqual([]);
+    expect(result.failed.map((f) => f.product)).toEqual([
+      "vpn",
+      "drive",
+      "calendar",
+    ]);
+    expect(result.failed[0]?.error).toMatch(/2028/);
+    expect(result.failed[1]?.error).toMatch(/Skipped/);
+    expect(result.failed[2]?.error).toMatch(/Skipped/);
+    expect(waits.some((m) => /Stopping further product mints/i.test(m))).toBe(
+      true,
+    );
 
     await rm(root, { recursive: true, force: true });
   });

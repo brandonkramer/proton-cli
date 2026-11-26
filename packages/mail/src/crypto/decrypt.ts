@@ -73,14 +73,11 @@ export async function decryptMessageBody(
       verificationKeys,
       format: "utf8",
     } as never);
-    const plaintext = toUtf8(
-      (result as { data: string | Uint8Array }).data,
-    );
+    const plaintext = toUtf8((result as { data: string | Uint8Array }).data);
     const verifiedFlag = (result as { verified?: unknown }).verified;
     return {
       plaintext,
-      verified:
-        verificationKeys.length > 0 ? Boolean(verifiedFlag) : null,
+      verified: verificationKeys.length > 0 ? Boolean(verifiedFlag) : null,
     };
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);

@@ -23,14 +23,20 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-function mcpServerBlock(command: string, args: string[]): Record<string, unknown> {
+function mcpServerBlock(
+  command: string,
+  args: string[],
+): Record<string, unknown> {
   return {
     command,
     args,
   };
 }
 
-function resolveProtonLaunch(root: string): { command: string; args: string[] } {
+function resolveProtonLaunch(root: string): {
+  command: string;
+  args: string[];
+} {
   const entry = join(root, "src", "index.ts");
   return { command: "bun", args: ["run", entry, "mcp"] };
 }
@@ -92,7 +98,10 @@ args = [${argsToml}]
   return path;
 }
 
-async function writeProjectSkill(projectDir: string, dryRun: boolean): Promise<string> {
+async function writeProjectSkill(
+  projectDir: string,
+  dryRun: boolean,
+): Promise<string> {
   const destDir = join(projectDir, ".agents", "skills", "proton-cli");
   const dest = join(destDir, "SKILL.md");
   const src = join(repoRoot(), "skills", "proton-cli", "SKILL.md");
@@ -138,13 +147,17 @@ function printClaudeUserInstall(root: string): void {
   console.log(`  claude plugin marketplace add ${root}`);
   console.log("  claude plugin install proton@proton-local --scope user");
   console.log("  claude plugin update proton@proton-local");
-  console.log("(requires `claude` on PATH; marketplace manifest: .claude-plugin/marketplace.json)");
+  console.log(
+    "(requires `claude` on PATH; marketplace manifest: .claude-plugin/marketplace.json)",
+  );
 }
 
 export function registerInstallMcp(program: Command): void {
   program
     .command("install-mcp")
-    .description("Wire proton MCP + skill into Cursor, Codex, Claude, and/or Pi")
+    .description(
+      "Wire proton MCP + skill into Cursor, Codex, Claude, and/or Pi",
+    )
     .option(
       "--scope <scope>",
       "user | project | local (default: project)",
@@ -159,117 +172,127 @@ export function registerInstallMcp(program: Command): void {
     .option("--root <path>", "Plugin/repo root (default: this package)")
     .option("--project-dir <path>", "Project directory (default: cwd)")
     .option("--dry-run", "Print actions without writing", false)
-    .action(async (options: {
-      scope: string;
-      host: string[];
-      root?: string;
-      projectDir?: string;
-      dryRun?: boolean;
-    }) => {
-      const scope = options.scope.toLowerCase() as Scope;
-      if (!["user", "project", "local"].includes(scope)) {
-        console.error("invalid --scope (want user|project|local)");
-        process.exitCode = 1;
-        return;
-      }
-
-      const hostsRaw = options.host.length ? options.host : ["all"];
-      const hosts = new Set<Host>();
-      for (const h of hostsRaw) {
-        const v = h.toLowerCase() as Host;
-        if (v === "all") {
-          for (const host of ALL_HOSTS) hosts.add(host);
-        } else if (
-          v === "cursor" ||
-          v === "codex" ||
-          v === "claude" ||
-          v === "pi"
-        ) {
-          hosts.add(v);
-        } else {
-          console.error(
-            `invalid --host ${h} (want cursor|codex|claude|pi|all)`,
-          );
+    .action(
+      async (options: {
+        scope: string;
+        host: string[];
+        root?: string;
+        projectDir?: string;
+        dryRun?: boolean;
+      }) => {
+        const scope = options.scope.toLowerCase() as Scope;
+        if (!["user", "project", "local"].includes(scope)) {
+          console.error("invalid --scope (want user|project|local)");
           process.exitCode = 1;
           return;
         }
-      }
 
-      const root = resolve(options.root?.trim() || repoRoot());
-      const projectDir = resolve(options.projectDir?.trim() || process.cwd());
-      const dryRun = Boolean(options.dryRun);
-      const launch = resolveProtonLaunch(root);
-      const server = mcpServerBlock(launch.command, launch.args);
+        const hostsRaw = options.host.length ? options.host : ["all"];
+        const hosts = new Set<Host>();
+        for (const h of hostsRaw) {
+          const v = h.toLowerCase() as Host;
+          if (v === "all") {
+            for (const host of ALL_HOSTS) hosts.add(host);
+          } else if (
+            v === "cursor" ||
+            v === "codex" ||
+            v === "claude" ||
+            v === "pi"
+          ) {
+            hosts.add(v);
+          } else {
+            console.error(
+              `invalid --host ${h} (want cursor|codex|claude|pi|all)`,
+            );
+            process.exitCode = 1;
+            return;
+          }
+        }
 
-      console.log(`plugin root: ${root}`);
-      console.log(`scope:       ${scope}`);
-      console.log(`hosts:       ${[...hosts].join(",")}`);
-      if (dryRun) console.log("dry-run; no changes will be written");
+        const root = resolve(options.root?.trim() || repoRoot());
+        const projectDir = resolve(options.projectDir?.trim() || process.cwd());
+        const dryRun = Boolean(options.dryRun);
+        const launch = resolveProtonLaunch(root);
+        const server = mcpServerBlock(launch.command, launch.args);
 
-      const written: string[] = [];
+        console.log(`plugin root: ${root}`);
+        console.log(`scope:       ${scope}`);
+        console.log(`hosts:       ${[...hosts].join(",")}`);
+        if (dryRun) console.log("dry-run; no changes will be written");
 
-      if (scope === "project" || scope === "local") {
-        written.push(await writeProjectSkill(projectDir, dryRun));
-        if (hosts.has("cursor")) {
-          written.push(
-            await mergeCursorMcp(join(projectDir, ".cursor", "mcp.json"), server, dryRun),
-          );
-        }
-        if (hosts.has("codex")) {
-          written.push(
-            await writeCodexToml(
-              join(projectDir, ".codex", "config.toml"),
-              launch.command,
-              launch.args,
-              dryRun,
-            ),
-          );
-        }
-        if (hosts.has("claude")) {
-          // Claude Code project MCP config
-          written.push(
-            await mergeCursorMcp(join(projectDir, ".mcp.json"), server, dryRun),
-          );
-        }
-        if (hosts.has("pi")) {
-          written.push(await writePiSettingsHint(projectDir, dryRun));
-        }
-      } else {
-        // user scope
-        if (hosts.has("cursor")) {
-          written.push(
-            await mergeCursorMcp(
-              join(homedir(), ".cursor", "mcp.json"),
-              server,
-              dryRun,
-            ),
-          );
-        }
-        if (hosts.has("codex")) {
-          written.push(
-            await writeCodexToml(
-              join(homedir(), ".codex", "config.toml"),
-              launch.command,
-              launch.args,
-              dryRun,
-            ),
-          );
-        }
-        if (hosts.has("claude")) {
-          printClaudeUserInstall(root);
-        }
-        if (hosts.has("pi")) {
-          console.log(
-            "Pi (user): run `pi install git:github.com/brandonkramer/proton-cli` (or `pi install <checkout>`).",
-          );
-          console.log(
-            `MCP command for pi-mcp-adapter: ${launch.command} ${launch.args.join(" ")}`,
-          );
-        }
-      }
+        const written: string[] = [];
 
-      for (const path of written) {
-        console.log(`${dryRun ? "would write" : "wrote"} ${path}`);
-      }
-    });
+        if (scope === "project" || scope === "local") {
+          written.push(await writeProjectSkill(projectDir, dryRun));
+          if (hosts.has("cursor")) {
+            written.push(
+              await mergeCursorMcp(
+                join(projectDir, ".cursor", "mcp.json"),
+                server,
+                dryRun,
+              ),
+            );
+          }
+          if (hosts.has("codex")) {
+            written.push(
+              await writeCodexToml(
+                join(projectDir, ".codex", "config.toml"),
+                launch.command,
+                launch.args,
+                dryRun,
+              ),
+            );
+          }
+          if (hosts.has("claude")) {
+            // Claude Code project MCP config
+            written.push(
+              await mergeCursorMcp(
+                join(projectDir, ".mcp.json"),
+                server,
+                dryRun,
+              ),
+            );
+          }
+          if (hosts.has("pi")) {
+            written.push(await writePiSettingsHint(projectDir, dryRun));
+          }
+        } else {
+          // user scope
+          if (hosts.has("cursor")) {
+            written.push(
+              await mergeCursorMcp(
+                join(homedir(), ".cursor", "mcp.json"),
+                server,
+                dryRun,
+              ),
+            );
+          }
+          if (hosts.has("codex")) {
+            written.push(
+              await writeCodexToml(
+                join(homedir(), ".codex", "config.toml"),
+                launch.command,
+                launch.args,
+                dryRun,
+              ),
+            );
+          }
+          if (hosts.has("claude")) {
+            printClaudeUserInstall(root);
+          }
+          if (hosts.has("pi")) {
+            console.log(
+              "Pi (user): run `pi install git:github.com/brandonkramer/proton-cli` (or `pi install <checkout>`).",
+            );
+            console.log(
+              `MCP command for pi-mcp-adapter: ${launch.command} ${launch.args.join(" ")}`,
+            );
+          }
+        }
+
+        for (const path of written) {
+          console.log(`${dryRun ? "would write" : "wrote"} ${path}`);
+        }
+      },
+    );
 }

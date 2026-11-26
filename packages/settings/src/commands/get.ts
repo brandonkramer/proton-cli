@@ -1,5 +1,8 @@
 import type { Command } from "commander";
-import { getAccountSettings, requireSettingsRuntime } from "../settings/client.ts";
+import {
+  getAccountSettings,
+  requireSettingsRuntime,
+} from "../settings/client.ts";
 import { formatAccountSettings } from "../settings/format.ts";
 import { wantsJson } from "../util/agent.ts";
 import { handleCommandError } from "../util/command.ts";

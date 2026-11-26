@@ -12,7 +12,9 @@ export const DRAFT_ACTION = {
   FORWARD: 2,
 } as const;
 
-export function parseAddressList(values: string[] | undefined): MailRecipient[] {
+export function parseAddressList(
+  values: string[] | undefined,
+): MailRecipient[] {
   if (!values || values.length === 0) return [];
   const out: MailRecipient[] = [];
   for (const raw of values) {
@@ -50,9 +52,7 @@ export function formatReplyBody(
   sender: MailRecipient,
   time: number,
 ): string {
-  const when = time
-    ? new Date(time * 1000).toUTCString()
-    : "unknown time";
+  const when = time ? new Date(time * 1000).toUTCString() : "unknown time";
   const from = sender.Name
     ? `${sender.Name} <${sender.Address}>`
     : sender.Address;

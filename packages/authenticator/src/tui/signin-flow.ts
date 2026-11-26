@@ -155,7 +155,7 @@ export async function runInteractiveSignin(
             detail: "solve in the floating native window",
           });
           ui.setNote(
-            "Use the floating CAPTCHA window (not Safari / verify.proton.me).",
+            "Use the floating CAPTCHA window (not a normal browser / verify.proton.me).",
           );
         },
       });

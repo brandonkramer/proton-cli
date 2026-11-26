@@ -20,7 +20,11 @@ function emitDryRun(plan: DryRunAction): void {
 
 async function withOpen(
   opts: DriveCommandOptions,
-  run: (service: DriveService, client: Awaited<ReturnType<DriveService["open"]>>["client"], context: Awaited<ReturnType<DriveService["open"]>>["context"]) => Promise<void>,
+  run: (
+    service: DriveService,
+    client: Awaited<ReturnType<DriveService["open"]>>["client"],
+    context: Awaited<ReturnType<DriveService["open"]>>["context"],
+  ) => Promise<void>,
 ): Promise<void> {
   const service = new DriveService();
   const { client, context } = await service.open({
@@ -84,7 +88,10 @@ export function registerShareCommands(share: Command): void {
     .argument("<path>", "Drive item path")
     .option("--edit", "Allow editing (default: view only)")
     .option("--expires <duration>", "Link expiration (seconds)")
-    .option("--link-password <password>", "Custom password appended to generated link password")
+    .option(
+      "--link-password <password>",
+      "Custom password appended to generated link password",
+    )
     .option("--dry-run", "Print planned action without mutating Drive")
     .option("--json", "Machine-readable JSON output");
   addDriveAuthOptions(link);

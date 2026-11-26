@@ -3,10 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setConfigRootForTests } from "@bkramer/proton-core";
-import {
-  loadSession,
-  saveSession,
-} from "../src/config/store.ts";
+import { loadSession, saveSession } from "../src/config/store.ts";
 import { sessionPath } from "../src/config/paths.ts";
 import type { Session } from "../src/proton/types.ts";
 

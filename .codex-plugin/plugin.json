@@ -9,13 +9,7 @@
   "homepage": "https://github.com/brandonkramer/proton-cli#readme",
   "repository": "https://github.com/brandonkramer/proton-cli",
   "license": "GPL-3.0-or-later",
-  "keywords": [
-    "proton",
-    "protonvpn",
-    "proton-mail",
-    "mcp",
-    "cli"
-  ],
+  "keywords": ["proton", "protonvpn", "proton-mail", "mcp", "cli"],
   "skills": "./skills/",
   "mcpServers": {
     "proton": {

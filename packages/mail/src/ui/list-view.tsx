@@ -1,10 +1,7 @@
 import { Select } from "@inkjs/ui";
 import { Box, Text, useApp, useInput } from "ink";
 import type { ReactNode } from "react";
-import type {
-  DecryptedMessage,
-  MessageSummary,
-} from "../service/messages.ts";
+import type { DecryptedMessage, MessageSummary } from "../service/messages.ts";
 import { formatMessageBodyForDisplay } from "../util/html-to-text.ts";
 import { Brand } from "./brand.tsx";
 import { renderPrompt, renderUntilExit } from "./render.tsx";
@@ -67,11 +64,7 @@ function MessageListApp({
   );
 }
 
-export type MessageDetailAction =
-  | "close"
-  | "reply"
-  | "reply-all"
-  | "forward";
+export type MessageDetailAction = "close" | "reply" | "reply-all" | "forward";
 
 function MessageDetailApp({
   message,

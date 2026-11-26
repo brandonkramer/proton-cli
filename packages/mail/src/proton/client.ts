@@ -280,21 +280,9 @@ export async function uploadAttachment(
   form.append("MIMEType", options.file.mimeType);
   form.append("Disposition", "attachment");
   form.append("ContentID", "");
-  form.append(
-    "KeyPackets",
-    new Blob([options.file.keyPackets]),
-    "blob",
-  );
-  form.append(
-    "DataPacket",
-    new Blob([options.file.dataPacket]),
-    "blob",
-  );
-  form.append(
-    "Signature",
-    new Blob([options.file.signature]),
-    "blob",
-  );
+  form.append("KeyPackets", new Blob([options.file.keyPackets]), "blob");
+  form.append("DataPacket", new Blob([options.file.dataPacket]), "blob");
+  form.append("Signature", new Blob([options.file.signature]), "blob");
 
   const data = await mailApi<{ Attachment?: MailAttachment }>(
     MAIL_ATTACHMENTS_PATH,
@@ -345,13 +333,10 @@ export async function listLabels(
   const types = options.types ?? [LABEL_TYPE_LABEL, LABEL_TYPE_FOLDER];
   const labels: LabelSummary[] = [];
   for (const type of types) {
-    const data = await mailApi<LabelsResponse>(
-      `${LABELS_PATH}?Type=${type}`,
-      {
-        session: options.session,
-        fetchImpl: options.fetchImpl,
-      },
-    );
+    const data = await mailApi<LabelsResponse>(`${LABELS_PATH}?Type=${type}`, {
+      session: options.session,
+      fetchImpl: options.fetchImpl,
+    });
     for (const label of data.Labels ?? []) {
       labels.push(mapLabel(label));
     }
@@ -379,12 +364,15 @@ export async function createLabel(
 export async function updateLabel(
   options: MailClientOptions & { labelId: string; request: UpdateLabelRequest },
 ): Promise<LabelSummary> {
-  const data = await mailApi<LabelResponse>(`${LABELS_PATH}/${options.labelId}`, {
-    method: "PUT",
-    body: options.request,
-    session: options.session,
-    fetchImpl: options.fetchImpl,
-  });
+  const data = await mailApi<LabelResponse>(
+    `${LABELS_PATH}/${options.labelId}`,
+    {
+      method: "PUT",
+      body: options.request,
+      session: options.session,
+      fetchImpl: options.fetchImpl,
+    },
+  );
   if (!data.Label) {
     throw new CliError(`Failed to update label: ${options.labelId}`);
   }

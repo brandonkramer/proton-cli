@@ -74,8 +74,7 @@ interface PassListItem {
 
 function parsePassListItems(stdout: string): PassListItem[] {
   const parsed = JSON.parse(stdout) as
-    | { items?: PassListItem[] }
-    | PassListItem[];
+    { items?: PassListItem[] } | PassListItem[];
   return Array.isArray(parsed) ? parsed : (parsed.items ?? []);
 }
 
@@ -114,11 +113,7 @@ async function viewField(
   options: { optional?: boolean } = {},
 ): Promise<string | null> {
   const uri = `${itemRef}/${field}`;
-  const { stdout, stderr, exitCode } = await runPassCli([
-    "item",
-    "view",
-    uri,
-  ]);
+  const { stdout, stderr, exitCode } = await runPassCli(["item", "view", uri]);
 
   if (exitCode !== 0) {
     const detail = stderr || stdout;
@@ -292,10 +287,7 @@ export async function resolveFreshPassTotp(
     const elapsed = Date.now() - started;
     if (elapsed >= maxWaitMs) return totp;
 
-    const waitMs = Math.min(
-      msUntilNextTotpWindow(),
-      maxWaitMs - elapsed,
-    );
+    const waitMs = Math.min(msUntilNextTotpWindow(), maxWaitMs - elapsed);
     if (waitMs > 0) {
       await Bun.sleep(waitMs);
     }
@@ -303,7 +295,9 @@ export async function resolveFreshPassTotp(
 }
 
 /** Sync: CLI option, then env (`PROTON_PASS`, …). Does not read account.json. */
-export function resolvePassRefFromEnv(optionValue?: string): string | undefined {
+export function resolvePassRefFromEnv(
+  optionValue?: string,
+): string | undefined {
   const fromOption = optionValue?.trim();
   if (fromOption) return fromOption;
   for (const key of PASS_ENV_CANDIDATES) {

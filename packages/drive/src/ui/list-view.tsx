@@ -38,7 +38,9 @@ function ItemListApp({
         </Box>
       )}
       <Box marginTop={1}>
-        <Text dimColor>q / Esc close · CLI: `proton drive items list --json`</Text>
+        <Text dimColor>
+          q / Esc close · CLI: `proton drive items list --json`
+        </Text>
       </Box>
     </Box>
   );
@@ -70,7 +72,9 @@ function TrashListApp({ items }: { items: TrashEntry[] }): ReactNode {
         </Box>
       )}
       <Box marginTop={1}>
-        <Text dimColor>q / Esc close · CLI: `proton drive trash list --json`</Text>
+        <Text dimColor>
+          q / Esc close · CLI: `proton drive trash list --json`
+        </Text>
       </Box>
     </Box>
   );

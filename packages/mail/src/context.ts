@@ -4,7 +4,12 @@ import {
   type ProtonAddress,
   type UnlockedAddressKey,
 } from "./crypto/unlock.ts";
-import { loadSession, persistSession, refreshSession, verifySession } from "./proton/auth.ts";
+import {
+  loadSession,
+  persistSession,
+  refreshSession,
+  verifySession,
+} from "./proton/auth.ts";
 import type { Session } from "./proton/types.ts";
 import { resolveAccountPassword } from "./util/password.ts";
 import { CliError } from "./util/errors.ts";
@@ -22,13 +27,15 @@ export interface MailRuntime {
   addresses?: ProtonAddress[];
 }
 
-export async function requireMailRuntime(options: {
-  passRef?: string;
-  /** Pre-resolved account password (avoids a second prompt). */
-  password?: string;
-  fetchImpl?: typeof fetch;
-  unlockKeys?: boolean;
-} = {}): Promise<MailRuntime> {
+export async function requireMailRuntime(
+  options: {
+    passRef?: string;
+    /** Pre-resolved account password (avoids a second prompt). */
+    password?: string;
+    fetchImpl?: typeof fetch;
+    unlockKeys?: boolean;
+  } = {},
+): Promise<MailRuntime> {
   const saved = await loadSession();
   if (!saved) {
     throw new CliError(

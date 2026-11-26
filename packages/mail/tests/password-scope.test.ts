@@ -14,7 +14,10 @@ const { unlockPasswordScope } = await import("../src/crypto/password-scope.ts");
 describe("unlockPasswordScope", () => {
   test("POSTs auth/info then PUTs users/unlock with SRP proofs", async () => {
     const calls: Array<{ path: string; method?: string; body?: unknown }> = [];
-    const fetchImpl = (async (input: string | URL | Request, init?: RequestInit) => {
+    const fetchImpl = (async (
+      input: string | URL | Request,
+      init?: RequestInit,
+    ) => {
       const url = String(input);
       const path = url.replace(/^https?:\/\/[^/]+/, "");
       const body = init?.body ? JSON.parse(String(init.body)) : undefined;

@@ -98,7 +98,9 @@ export async function clearSession(): Promise<void> {
   await clearProductSession("authenticator");
 }
 
-export async function saveLocalEntries(store: LocalEntriesStore): Promise<void> {
+export async function saveLocalEntries(
+  store: LocalEntriesStore,
+): Promise<void> {
   await writeSecureJson(localEntriesPath(), store);
 }
 

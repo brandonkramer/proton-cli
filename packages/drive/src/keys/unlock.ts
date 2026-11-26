@@ -1,7 +1,4 @@
-import {
-  getDriveCrypto,
-  type CryptoKey,
-} from "../drive/crypto/proxy.ts";
+import { getDriveCrypto, type CryptoKey } from "../drive/crypto/proxy.ts";
 import {
   unlockUserKeys,
   type DecryptedUserKey,
@@ -9,12 +6,13 @@ import {
   type ProtonUser,
 } from "@bkramer/proton-core";
 import { CliError } from "../util/errors.ts";
-import { ADDRESSES_PATH, KEYS_SALTS_PATH, USERS_PATH } from "../proton/constants.ts";
-import { protonFetch } from "../proton/http.ts";
 import {
-  isSuccessCode,
-  type Session,
-} from "../proton/types.ts";
+  ADDRESSES_PATH,
+  KEYS_SALTS_PATH,
+  USERS_PATH,
+} from "../proton/constants.ts";
+import { protonFetch } from "../proton/http.ts";
+import { isSuccessCode, type Session } from "../proton/types.ts";
 
 export type { CryptoKey };
 
@@ -66,9 +64,7 @@ async function fetchUser(
     fetchImpl,
   });
   if (status !== 200 || !isSuccessCode(data.Code) || !data.User) {
-    throw new CliError(
-      data.Error ?? `Failed to fetch user (HTTP ${status}).`,
-    );
+    throw new CliError(data.Error ?? `Failed to fetch user (HTTP ${status}).`);
   }
   return data.User;
 }
@@ -77,10 +73,13 @@ async function fetchKeySalts(
   session: Session,
   fetchImpl?: typeof fetch,
 ): Promise<KeySalt[]> {
-  const { status, data } = await protonFetch<KeySaltsResponse>(KEYS_SALTS_PATH, {
-    session,
-    fetchImpl,
-  });
+  const { status, data } = await protonFetch<KeySaltsResponse>(
+    KEYS_SALTS_PATH,
+    {
+      session,
+      fetchImpl,
+    },
+  );
   if (status !== 200 || !isSuccessCode(data.Code) || !data.KeySalts) {
     throw new CliError(
       data.Error ?? `Failed to fetch key salts (HTTP ${status}).`,
@@ -127,7 +126,9 @@ async function decryptToken(
     expectSigned: true,
   });
 
-  return data instanceof Uint8Array ? data : new TextEncoder().encode(String(data));
+  return data instanceof Uint8Array
+    ? data
+    : new TextEncoder().encode(String(data));
 }
 
 function bytesToPassphrase(bytes: Uint8Array): string {
@@ -208,9 +209,11 @@ export async function unlockDriveKeys(
   return { userKeys, addressKeys, addresses };
 }
 
-export function primaryAddress(
-  unlocked: UnlockedKeys,
-): { addressId: string; email: string; keys: CryptoKey[] } {
+export function primaryAddress(unlocked: UnlockedKeys): {
+  addressId: string;
+  email: string;
+  keys: CryptoKey[];
+} {
   for (const address of unlocked.addresses) {
     const keys = unlocked.addressKeys.get(address.ID);
     if (!keys?.length) continue;

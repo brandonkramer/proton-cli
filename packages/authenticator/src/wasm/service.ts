@@ -16,9 +16,8 @@ let loading: Promise<WasmModule> | null = null;
  */
 async function initWasm(): Promise<WasmModule> {
   const require = createRequire(import.meta.url);
-  const pkgJson = require.resolve(
-    "@protontech/authenticator-rust-core/package.json",
-  );
+  const pkgJson =
+    require.resolve("@protontech/authenticator-rust-core/package.json");
   const workerDir = join(dirname(pkgJson), "worker");
   const gluePath = join(workerDir, "proton_authenticator_web_bg.js");
   const wasmPath = join(workerDir, "proton_authenticator_web_bg.wasm");

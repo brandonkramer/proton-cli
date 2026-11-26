@@ -13,7 +13,10 @@ import { configureAgentFlags } from "./util/agent.ts";
 /** Register `proton vpn …` (and legacy `protonvpn …`) commands. */
 export function registerVpnCommands(vpn: Command): void {
   vpn
-    .option("--json", "Machine-readable JSON on stdout (also: PROTONVPN_JSON=1)")
+    .option(
+      "--json",
+      "Machine-readable JSON on stdout (also: PROTONVPN_JSON=1)",
+    )
     .option(
       "-y, --yes",
       "Non-interactive confirmations (also implied by --json / CI)",

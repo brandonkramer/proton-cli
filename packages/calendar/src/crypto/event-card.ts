@@ -185,7 +185,9 @@ export async function encryptAndSignCardSplit(
       format: "binary",
     });
     sharedKeyPacket = bytesToBase64(
-      keyPacket instanceof Uint8Array ? keyPacket : base64ToBytes(String(keyPacket)),
+      keyPacket instanceof Uint8Array
+        ? keyPacket
+        : base64ToBytes(String(keyPacket)),
     );
   }
 
@@ -195,7 +197,9 @@ export async function encryptAndSignCardSplit(
     format: "binary",
   });
   const dataBytes =
-    dataPacket instanceof Uint8Array ? dataPacket : base64ToBytes(String(dataPacket));
+    dataPacket instanceof Uint8Array
+      ? dataPacket
+      : base64ToBytes(String(dataPacket));
 
   const { signature } = await proxy.signMessage({
     textData: encryptedData,
@@ -228,7 +232,9 @@ export async function encryptPartWithSessionKey(
     format: "binary",
   });
   const dataBytes =
-    dataPacket instanceof Uint8Array ? dataPacket : base64ToBytes(String(dataPacket));
+    dataPacket instanceof Uint8Array
+      ? dataPacket
+      : base64ToBytes(String(dataPacket));
   const { signature } = await proxy.signMessage({
     textData: data,
     signingKeys: [signingKey],
@@ -254,7 +260,9 @@ export async function encryptSessionKeyForRecipient(
     format: "binary",
   });
   return bytesToBase64(
-    keyPacket instanceof Uint8Array ? keyPacket : base64ToBytes(String(keyPacket)),
+    keyPacket instanceof Uint8Array
+      ? keyPacket
+      : base64ToBytes(String(keyPacket)),
   );
 }
 

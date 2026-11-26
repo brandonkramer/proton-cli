@@ -27,8 +27,7 @@ function envTruthy(name: string): boolean {
 
 const argv = process.argv.slice(2);
 if (argv.length === 0) {
-  const isTty =
-    Boolean(process.stdin.isTTY) && Boolean(process.stdout.isTTY);
+  const isTty = Boolean(process.stdin.isTTY) && Boolean(process.stdout.isTTY);
   const agent =
     process.env.CI === "1" ||
     process.env.CI === "true" ||

@@ -7,17 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Windows CAPTCHA helper via WebView2 (same CLI contract as macOS WKWebView); `bun run build:captcha` uses `dotnet publish` on win32
+
+### Changed
+
+- Sign-in CAPTCHA supported on macOS and Windows; Linux still reports `captcha_unsupported`
+
 ## [0.4.3] - 2026-07-25
 
 ### Added
+
 - MCP curated tools for high-frequency agent paths: mail get/search/send/reply, contacts list/create, calendar upcoming/create, drive get/upload, settings get, vpn list
 
 ### Changed
+
 - MCP `proton_cli` confirm gating is deny-by-default (explicit safe-read allowlist) instead of verb heuristics
 
 ## [0.4.2] - 2026-07-25
 
 ### Added
+
 - Agent plugins: `.cursor-plugin` / `.codex-plugin` / `.claude-plugin` manifests, Pi `"pi"` skills package field
 - `proton mcp` stdio MCP server (curated tools + allowlisted `proton_cli`)
 - `proton install-mcp` to wire Cursor / Codex / Claude / Pi (`--scope user|project|local`)
@@ -25,24 +36,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.1] - 2026-07-25
 
 ### Added
+
 - Contacts TUI **Add contact** (name / email / optional phone)
 - Calendar TUI **Add event** (calendar pick, title, start, duration, optional location)
 - Drive TUI **Upload file** (local path + destination folder)
 - Mail TUI **List sent** and `proton mail sent` (shortcut for `list --label sent`); sent list shows recipients
 
 ### Changed
+
 - README: document `proton account`, mail attach/compose/contacts picker, and mail-api session sharing
 - README: Contacts/Calendar/Drive TUI create/upload menu entries
 
 ## [0.4.0] - 2026-07-25
 
 ### Added
+
 - `proton account [pass://Vault/Item]` saves a default Proton Pass login ref for sign-in TOTP and password unlock (persists across `signout`; also `--clear` / show)
 - Mail TUI Compose (to/subject/body) plus Reply / Reply all / Forward after reading a message
 - Mail TUI Compose: pick To from Contacts or type email; optional local file attachments
 - Mail live send supports `--attach` (encrypt + multipart upload to draft, then send packages)
 
 ### Fixed
+
 - Multi-product sign-in waits for a new Pass TOTP per product (Proton rejects reusing the same code) and no longer inserts fixed 8s delays (only backs off on 2028)
 - Multi-product sign-in shares one session across Contacts/Settings/Mail (same `mail-api` host) and retries on API 2028 “too many recent logins”
 - Sign-in no longer sends TOTP on `/auth` (password + CAPTCHA only); 2FA uses `/auth/v4/2fa` after login — fixes post-CAPTCHA 8002 on Authenticator/Drive/etc.
@@ -66,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2026-07-24
 
 ### Added
+
 - **Mail** (`proton mail …`): E2EE list/read/search/send/organize via Proton Mail REST API; nested TUI from parent menu; dual-mint via `proton signin --products mail|all`
 - Parent TUI Mail entry (list inbox / search / status)
 - **Settings** (`proton settings …`): account/mail API get/set; nested TUI from parent menu; dual-mint via `proton signin --products settings|set|all`
@@ -78,9 +94,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parent TUI Contacts entry (list / groups / status)
 
 ### Removed
+
 - **Bridge Mail preview** (`protonmail` bin): replaced by unified Mail via Proton Mail API + dual-mint sign-in
 
 ### Fixed
+
 - Mail send fails closed when recipient key lookup errors (no silent clear-text downgrade)
 - Product sessions retain refresh tokens past access-token expiry; Drive/Settings/Calendar refresh on require
 - Contacts/Calendar/Drive verify signatures on read/download; Mail exposes verification status
@@ -90,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Authenticator sync keeps local ciphertext when remote decrypt fails; ambiguous OTP matches rejected non-interactively
 
 ### Changed
+
 - Document Authenticator as E2EE TOTP/Steam seed sync (alongside Contacts/Calendar/Drive/Mail)
 - README, AGENTS.md, and agent skill document Mail alongside other products
 - Shared sign-in defaults to all shipped products (seven API mints)
@@ -97,15 +116,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-07-24
 
 ### Added
+
 - Unified parent TUI on bare `proton` (TTY); VPN and Authenticator menus nest from it
 - Sign-in progress spinners for Pass reads and each product mint
 
 ### Fixed
+
 - Dual-mint sign-in no longer fails with CryptoProxy `already initialised` (shared init in `@bkramer/proton-core`)
 - Dual-mint requests a fresh TOTP per product (codes are single-use per API host)
 - Postinstall / error hints use `@bkramer/proton-cli` and `proton vpn` / `proton auth` (not legacy package names)
 
 ### Changed
+
 - Removed `proton vpn tui` / `proton auth tui`; product menus no longer offer Sign in (use parent menu)
 - Authenticator TUI layout matches VPN/parent (StatusMessage, plain Select)
 - README and skill document WireGuard/CAPTCHA requirements, connect flags, exit codes, agent envs, Pass/`pass-cli`, and dual-mint TOTP rules
@@ -114,10 +136,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.1] - 2026-07-24
 
 ### Fixed
+
 - Ship full GPL-3.0 license text (was a short stub)
 - OpenPGP postinstall patch finds Bun’s nested `.bun/@protontech+openpgp@*` store (not only classic `node_modules/openpgp`)
 
 ### Changed
+
 - Authenticator HTTP User-Agent uses `@bkramer/proton-cli/<version>`
 - npm package renamed to `@bkramer/proton-cli` (was briefly `proton-unified-cli`)
 - Workspace packages renamed to `@bkramer/proton-core`, `@bkramer/proton-vpn`, `@bkramer/proton-authenticator`
@@ -125,6 +149,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-07-24
 
 ### Added
+
 - Unified `proton` CLI monorepo with `vpn` and `auth` namespaces
 - Shared `proton signin` dual-mint sessions (Pass-aware) and `proton signout` / `status`
 - Legacy bins `protonvpn` and `protonauth` forwarding to namespaced commands

@@ -74,9 +74,7 @@ export function selectServer(
   return filtered[0]!;
 }
 
-export function bestPhysicalServer(
-  server: LogicalServer,
-): PhysicalServer {
+export function bestPhysicalServer(server: LogicalServer): PhysicalServer {
   const online = server.Servers.find((s) => s.Status === STATUS_ONLINE);
   return online ?? server.Servers[0]!;
 }

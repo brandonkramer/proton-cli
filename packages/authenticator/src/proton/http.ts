@@ -40,8 +40,7 @@ export async function protonFetch<T>(
   }
 
   if (options.humanVerification) {
-    headers["x-pm-human-verification-token"] =
-      options.humanVerification.token;
+    headers["x-pm-human-verification-token"] = options.humanVerification.token;
     headers["x-pm-human-verification-token-type"] =
       options.humanVerification.tokenType;
   }

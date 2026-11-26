@@ -98,7 +98,9 @@ export async function buildShareUrlPasswordFields(
     format: "binary",
   });
   const keyPacketB64 = bytesToBase64(
-    keyPacket instanceof Uint8Array ? keyPacket : base64ToBytes(String(keyPacket)),
+    keyPacket instanceof Uint8Array
+      ? keyPacket
+      : base64ToBytes(String(keyPacket)),
   );
 
   const { message: encPassword } = await crypto.encryptMessage({
@@ -137,7 +139,10 @@ export async function decryptShareUrlPassword(
     format: "utf8",
   });
   const full = String(data);
-  if (flags & FLAG_GENERATED_PASSWORD && full.length >= GENERATED_PASSWORD_LEN) {
+  if (
+    flags & FLAG_GENERATED_PASSWORD &&
+    full.length >= GENERATED_PASSWORD_LEN
+  ) {
     const generated = full.slice(0, GENERATED_PASSWORD_LEN);
     const custom =
       flags & FLAG_CUSTOM_PASSWORD ? full.slice(GENERATED_PASSWORD_LEN) : "";
@@ -168,7 +173,9 @@ export async function signInviteKeyPacket(
     format: "binary",
   });
   const sigBytes =
-    signature instanceof Uint8Array ? signature : base64ToBytes(String(signature));
+    signature instanceof Uint8Array
+      ? signature
+      : base64ToBytes(String(signature));
   return bytesToBase64(sigBytes);
 }
 
@@ -194,7 +201,9 @@ export async function signAcceptSessionKey(
     format: "binary",
   });
   const sigBytes =
-    signature instanceof Uint8Array ? signature : base64ToBytes(String(signature));
+    signature instanceof Uint8Array
+      ? signature
+      : base64ToBytes(String(signature));
   return bytesToBase64(sigBytes);
 }
 
@@ -214,6 +223,8 @@ export async function encryptSessionKeyForPublicKeys(
     format: "binary",
   });
   return bytesToBase64(
-    keyPacket instanceof Uint8Array ? keyPacket : base64ToBytes(String(keyPacket)),
+    keyPacket instanceof Uint8Array
+      ? keyPacket
+      : base64ToBytes(String(keyPacket)),
   );
 }

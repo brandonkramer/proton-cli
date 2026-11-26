@@ -47,18 +47,27 @@ interface UnlockFetchOptions {
 }
 
 async function fetchUser(session: Session, fetchImpl?: typeof fetch) {
-  const data = await calendarApi<{ User: { ID: string; Name: string; Keys: { ID: string; Version: number; PrivateKey: string; Token?: string | null; Primary?: number; Active?: number }[] } }>(
-    USERS_PATH,
-    { session, fetchImpl },
-  );
+  const data = await calendarApi<{
+    User: {
+      ID: string;
+      Name: string;
+      Keys: {
+        ID: string;
+        Version: number;
+        PrivateKey: string;
+        Token?: string | null;
+        Primary?: number;
+        Active?: number;
+      }[];
+    };
+  }>(USERS_PATH, { session, fetchImpl });
   return data.User;
 }
 
 async function fetchKeySalts(session: Session, fetchImpl?: typeof fetch) {
-  const data = await calendarApi<{ KeySalts: { ID: string; KeySalt: string | null }[] }>(
-    KEY_SALTS_PATH,
-    { session, fetchImpl },
-  );
+  const data = await calendarApi<{
+    KeySalts: { ID: string; KeySalt: string | null }[];
+  }>(KEY_SALTS_PATH, { session, fetchImpl });
   return data.KeySalts;
 }
 
@@ -148,7 +157,8 @@ export async function unlockCalendarKeys(
 
   const addressKeys = new Map<string, UnlockedAddressKey>();
   for (const address of addresses) {
-    const primaryKey = address.Keys.find((k) => k.Primary === 1) ?? address.Keys[0];
+    const primaryKey =
+      address.Keys.find((k) => k.Primary === 1) ?? address.Keys[0];
     const basePass = primaryKey
       ? await passphraseForKey(options.password, primaryKey.ID, salts)
       : options.password;
@@ -168,7 +178,9 @@ export async function unlockCalendarKeys(
   }
 
   if (addressKeys.size === 0) {
-    throw new Error("Could not unlock any address keys. Check the account password.");
+    throw new Error(
+      "Could not unlock any address keys. Check the account password.",
+    );
   }
 
   return { userKeys, addresses, addressKeys };

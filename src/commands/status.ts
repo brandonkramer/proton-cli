@@ -1,8 +1,4 @@
-import {
-  listSavedSessions,
-  loadAccount,
-  PRODUCTS,
-} from "@bkramer/proton-core";
+import { listSavedSessions, loadAccount, PRODUCTS } from "@bkramer/proton-core";
 import type { Command } from "commander";
 
 export function registerStatus(program: Command): void {

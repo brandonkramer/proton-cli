@@ -26,15 +26,25 @@ export interface CalendarCryptoProxy {
     message: string | Uint8Array;
     signature?: Uint8Array;
   }>;
-  signMessage: (options: Record<string, unknown>) => Promise<{ signature: string | Uint8Array }>;
+  signMessage: (
+    options: Record<string, unknown>,
+  ) => Promise<{ signature: string | Uint8Array }>;
   verifyMessage: (options: Record<string, unknown>) => Promise<{
     verificationStatus: number;
     data?: string | Uint8Array;
   }>;
-  getArmoredSignature: (options: { binarySignature: Uint8Array }) => Promise<string>;
-  encryptSessionKey: (options: Record<string, unknown>) => Promise<string | Uint8Array>;
-  decryptSessionKey: (options: Record<string, unknown>) => Promise<SessionKeyMaterial>;
-  generateSessionKey: (options?: Record<string, unknown>) => Promise<SessionKeyMaterial>;
+  getArmoredSignature: (options: {
+    binarySignature: Uint8Array;
+  }) => Promise<string>;
+  encryptSessionKey: (
+    options: Record<string, unknown>,
+  ) => Promise<string | Uint8Array>;
+  decryptSessionKey: (
+    options: Record<string, unknown>,
+  ) => Promise<SessionKeyMaterial>;
+  generateSessionKey: (
+    options?: Record<string, unknown>,
+  ) => Promise<SessionKeyMaterial>;
 }
 
 /** Full CryptoProxy after shared core init (REQ-CAL-003). */

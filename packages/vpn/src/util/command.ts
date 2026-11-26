@@ -5,8 +5,7 @@ import { showMessage } from "../ui/message.tsx";
 
 export async function handleCommandError(error: unknown): Promise<void> {
   const message = error instanceof Error ? error.message : String(error);
-  const exitCode =
-    error instanceof CliError ? error.exitCode : ExitCode.ERROR;
+  const exitCode = error instanceof CliError ? error.exitCode : ExitCode.ERROR;
 
   if (isQuietUi()) {
     emitError(message, exitCode);

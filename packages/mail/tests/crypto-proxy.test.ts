@@ -36,6 +36,6 @@ describe("mail crypto proxy", () => {
       "utf8",
     );
     expect(users).toContain("unlockUserKeys");
-    expect(users).toContain('@bkramer/proton-core');
+    expect(users).toContain("@bkramer/proton-core");
   });
 });

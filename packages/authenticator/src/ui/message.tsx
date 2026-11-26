@@ -39,9 +39,8 @@ export async function showMessage(options: {
   holdMs?: number;
 }): Promise<void> {
   const { preferNonInteractive } = await import("../util/agent.ts");
-  const { resolveOutputFormat, writeJson, writePlain } = await import(
-    "../util/output.ts"
-  );
+  const { resolveOutputFormat, writeJson, writePlain } =
+    await import("../util/output.ts");
 
   if (preferNonInteractive() || resolveOutputFormat() !== "ink") {
     const format = resolveOutputFormat();
@@ -55,9 +54,7 @@ export async function showMessage(options: {
       return;
     }
     writePlain(
-      options.body
-        ? `${options.title}: ${options.body}`
-        : options.title,
+      options.body ? `${options.title}: ${options.body}` : options.title,
     );
     return;
   }

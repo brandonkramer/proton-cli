@@ -2,10 +2,7 @@ import type { Command } from "commander";
 import { PASS_ENV } from "../pass/credentials.ts";
 import { formatSyncSummary, syncEntries } from "../sync/sync.ts";
 import { actionSync } from "../tui/actions.ts";
-import {
-  handleCommandError,
-  setCommandOutputFormat,
-} from "../util/command.ts";
+import { handleCommandError, setCommandOutputFormat } from "../util/command.ts";
 import {
   addOutputOption,
   resolveOutputFormat,

@@ -23,11 +23,11 @@ export function registerUpdate(program: Command): void {
     .argument("[version]", "Target version (default: latest)")
     .option("--check", "Only check for updates; do not install")
     .option("--json", "Machine-readable JSON")
-    .action(async function (
-      this: Command,
-      versionArg: string | undefined,
-    ) {
-      const opts = this.optsWithGlobals() as { check?: boolean; json?: boolean };
+    .action(async function (this: Command, versionArg: string | undefined) {
+      const opts = this.optsWithGlobals() as {
+        check?: boolean;
+        json?: boolean;
+      };
       try {
         const current = await currentVersion();
         const channel = detectInstallChannel();
@@ -87,7 +87,9 @@ export function registerUpdate(program: Command): void {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         if (opts.json) {
-          console.log(JSON.stringify({ version: 1, ok: false, error: message }));
+          console.log(
+            JSON.stringify({ version: 1, ok: false, error: message }),
+          );
         } else {
           console.error(message);
         }

@@ -16,13 +16,18 @@ export interface ContactsRuntime {
   client: ContactsClient;
 }
 
-export async function requireContactsRuntime(options: {
-  passRef?: string;
-  fetchImpl?: typeof fetch;
-} = {}): Promise<ContactsRuntime> {
+export async function requireContactsRuntime(
+  options: {
+    passRef?: string;
+    fetchImpl?: typeof fetch;
+  } = {},
+): Promise<ContactsRuntime> {
   const saved = await loadSession();
   if (!saved) {
-    throw new CliError("Not signed in to Contacts. Run `proton signin --products contacts`.", ExitCode.NOT_SIGNED_IN);
+    throw new CliError(
+      "Not signed in to Contacts. Run `proton signin --products contacts`.",
+      ExitCode.NOT_SIGNED_IN,
+    );
   }
 
   let session = saved.session;

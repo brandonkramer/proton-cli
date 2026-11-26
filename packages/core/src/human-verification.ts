@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { chmod, mkdir } from "node:fs/promises";
+import { chmod, copyFile, mkdir, readdir, rm } from "node:fs/promises";
 
 export const API_CODE_HUMAN_VERIFICATION = 9001;
 
@@ -62,6 +62,14 @@ function preferNonInteractive(): boolean {
   );
 }
 
+function captchaSupportedPlatform(): boolean {
+  return process.platform === "darwin" || process.platform === "win32";
+}
+
+function captchaBinaryName(): string {
+  return process.platform === "win32" ? "captcha-webview.exe" : "captcha-webview";
+}
+
 /**
  * Load from *-api.proton.me so `/captcha/v1/assets` resolves to the CAPTCHA SPA.
  * `mail.proton.me/api/...` makes that path hit the Mail web app (blank window).
@@ -77,21 +85,25 @@ function coreSrcDir(): string {
   return dirname(fileURLToPath(import.meta.url));
 }
 
-/** Authenticator package root (owns the Swift helper + bin/). */
+/** Authenticator package root (owns the platform helpers + bin/). */
 function authenticatorRoot(): string {
   return join(coreSrcDir(), "../../authenticator");
 }
 
 function repoRootBin(): string {
-  return join(coreSrcDir(), "../../../bin/captcha-webview");
+  return join(coreSrcDir(), "../../../bin", captchaBinaryName());
 }
 
 function authenticatorBinaryPath(): string {
-  return join(authenticatorRoot(), "bin/captcha-webview");
+  return join(authenticatorRoot(), "bin", captchaBinaryName());
 }
 
-function sourcePath(): string {
+function swiftSourcePath(): string {
   return join(authenticatorRoot(), "scripts/captcha-webview.swift");
+}
+
+function csprojPath(): string {
+  return join(authenticatorRoot(), "scripts/captcha-webview.csproj");
 }
 
 async function resolveCaptchaBinary(): Promise<string | null> {
@@ -103,13 +115,8 @@ async function resolveCaptchaBinary(): Promise<string | null> {
   return null;
 }
 
-async function ensureCaptchaBinary(): Promise<string> {
-  const existing = await resolveCaptchaBinary();
-  if (existing) return existing;
-
-  const bin = authenticatorBinaryPath();
-  await mkdir(join(authenticatorRoot(), "bin"), { recursive: true });
-  const source = sourcePath();
+async function buildDarwinBinary(bin: string): Promise<void> {
+  const source = swiftSourcePath();
   const proc = Bun.spawn(["swiftc", "-O", "-o", bin, source], {
     stdout: "pipe",
     stderr: "pipe",
@@ -132,11 +139,97 @@ async function ensureCaptchaBinary(): Promise<string> {
   } catch {
     // ignore
   }
-  return bin;
+}
+
+async function buildWin32Binary(bin: string): Promise<void> {
+  const binDir = dirname(bin);
+  const publishDir = join(binDir, ".captcha-publish");
+  await rm(publishDir, { recursive: true, force: true });
+
+  const proc = Bun.spawn(
+    [
+      "dotnet",
+      "publish",
+      csprojPath(),
+      "-c",
+      "Release",
+      "-r",
+      "win-x64",
+      "--self-contained",
+      "false",
+      "-o",
+      publishDir,
+      "-p:PublishSingleFile=true",
+      "-p:IncludeNativeLibrariesForSelfExtract=true",
+    ],
+    {
+      stdout: "pipe",
+      stderr: "pipe",
+      stdin: "ignore",
+    },
+  );
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+
+  if (exitCode !== 0) {
+    await rm(publishDir, { recursive: true, force: true }).catch(() => {});
+    throw new HumanVerificationError(
+      "Failed to build CAPTCHA helper (needs .NET SDK).\n" +
+        `${stderr || stdout || `exit ${exitCode}`}\n` +
+        "Install .NET 8+ SDK, then retry: bun run build:captcha",
+    );
+  }
+
+  const publishedExe = join(publishDir, "captcha-webview.exe");
+  if (!(await Bun.file(publishedExe).exists())) {
+    await rm(publishDir, { recursive: true, force: true }).catch(() => {});
+    throw new HumanVerificationError(
+      "CAPTCHA helper publish succeeded but captcha-webview.exe was missing.\n" +
+        "Retry with: bun run build:captcha",
+    );
+  }
+
+  await copyFile(publishedExe, bin);
+  for (const name of await readdir(publishDir)) {
+    if (name === "captcha-webview.exe") continue;
+    if (!/\.(dll|json|pdb)$/i.test(name) && !name.endsWith(".exe")) continue;
+    try {
+      await copyFile(join(publishDir, name), join(binDir, name));
+    } catch {
+      // best-effort sidecars
+    }
+  }
+  await rm(publishDir, { recursive: true, force: true }).catch(() => {});
+}
+
+async function ensureCaptchaBinary(): Promise<string> {
+  const existing = await resolveCaptchaBinary();
+  if (existing) return existing;
+
+  const bin = authenticatorBinaryPath();
+  await mkdir(join(authenticatorRoot(), "bin"), { recursive: true });
+
+  if (process.platform === "darwin") {
+    await buildDarwinBinary(bin);
+    return bin;
+  }
+
+  if (process.platform === "win32") {
+    await buildWin32Binary(bin);
+    return bin;
+  }
+
+  throw new HumanVerificationError(
+    `CAPTCHA helper is not supported on ${process.platform}.`,
+    "captcha_unsupported",
+  );
 }
 
 /**
- * macOS WKWebView CAPTCHA.
+ * Native CAPTCHA helper (macOS WKWebView / Windows WebView2).
  *
  * Important: completing CAPTCHA on verify.proton.me in a normal browser does
  * NOT return a token to this CLI (postMessage-only). Solve it in the helper window.
@@ -174,7 +267,7 @@ async function solveCaptchaWithWebView(
     if (timedOut) {
       throw new HumanVerificationError(
         "Timed out waiting for CAPTCHA.\n" +
-          "Solve the CAPTCHA in the floating native window (not verify.proton.me in Safari).",
+          "Solve the CAPTCHA in the floating native window (not verify.proton.me in a normal browser).",
       );
     }
 
@@ -240,10 +333,10 @@ export async function solveCaptchaInBrowser(
 
   const timeoutMs = options.timeoutMs ?? 5 * 60 * 1000;
 
-  if (process.platform !== "darwin") {
+  if (!captchaSupportedPlatform()) {
     throw new HumanVerificationError(
-      "CAPTCHA is currently supported on macOS only (native WKWebView helper).\n" +
-        "Run `proton signin` from a Mac desktop session.",
+      "CAPTCHA is currently supported on macOS (WKWebView) and Windows (WebView2) only.\n" +
+        "Run `proton signin` from a macOS or Windows desktop session.",
       "captcha_unsupported",
     );
   }

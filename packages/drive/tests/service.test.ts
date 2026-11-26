@@ -2,8 +2,12 @@ import { afterAll, describe, expect, mock, test } from "bun:test";
 import type { DriveLink } from "../src/drive/types.ts";
 import { LINK_TYPE_FILE, LINK_TYPE_FOLDER } from "../src/drive/types.ts";
 
-const mockDecryptName = mock(async (_enc: string, _keys: unknown[]) => "visible.txt");
-const mockUnlockNode = mock(async (_link: DriveLink, _parent: unknown[]) => ["node-key"]);
+const mockDecryptName = mock(
+  async (_enc: string, _keys: unknown[]) => "visible.txt",
+);
+const mockUnlockNode = mock(async (_link: DriveLink, _parent: unknown[]) => [
+  "node-key",
+]);
 
 mock.module("../src/drive/crypto/node-crypto.ts", () => ({
   decryptName: mockDecryptName,
@@ -81,7 +85,10 @@ const childFile: DriveLink = {
 };
 
 function mockFetch(): typeof fetch {
-  return (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+  return (async (
+    input: Parameters<typeof fetch>[0],
+    init?: Parameters<typeof fetch>[1],
+  ) => {
     const url = String(input);
     const method = init?.method ?? "GET";
 
@@ -95,7 +102,12 @@ function mockFetch(): typeof fetch {
         ],
       });
     }
-    if (url.includes("/drive/shares/share-1") && !url.includes("/links/") && !url.includes("/folders/") && !url.includes("/files/")) {
+    if (
+      url.includes("/drive/shares/share-1") &&
+      !url.includes("/links/") &&
+      !url.includes("/folders/") &&
+      !url.includes("/files/")
+    ) {
       return jsonResponse({
         Share: {
           AddressID: "addr-1",
@@ -137,12 +149,17 @@ function mockFetch(): typeof fetch {
         User: {
           ID: "u1",
           Name: "alice",
-          Keys: [{ ID: "k1", Version: 3, PrivateKey: "pk", Primary: 1, Active: 1 }],
+          Keys: [
+            { ID: "k1", Version: 3, PrivateKey: "pk", Primary: 1, Active: 1 },
+          ],
         },
       });
     }
     if (url.includes("/core/v4/keys/salts")) {
-      return jsonResponse({ Code: 1000, KeySalts: [{ ID: "k1", KeySalt: null }] });
+      return jsonResponse({
+        Code: 1000,
+        KeySalts: [{ ID: "k1", KeySalt: null }],
+      });
     }
     if (url.includes("/core/v4/addresses")) {
       return jsonResponse({
@@ -184,7 +201,8 @@ mock.module("../src/proton/http.ts", () => ({
     const fetchImpl = options.fetchImpl ?? mockFetch();
     const response = await fetchImpl(`https://drive-api.proton.me${path}`, {
       method: options.method,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body:
+        options.body === undefined ? undefined : JSON.stringify(options.body),
     });
     const raw = await response.text();
     const data = JSON.parse(raw) as T;

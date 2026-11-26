@@ -99,8 +99,12 @@ function registerListCommand(
       "Label ID or system name (inbox, sent, drafts, trash, spam, archive, starred, all)",
       defaultLabel,
     )
-    .option("--page <n>", "Page index (0-based)", (value) => Number.parseInt(value, 10))
-    .option("--page-size <n>", "Page size", (value) => Number.parseInt(value, 10))
+    .option("--page <n>", "Page index (0-based)", (value) =>
+      Number.parseInt(value, 10),
+    )
+    .option("--page-size <n>", "Page size", (value) =>
+      Number.parseInt(value, 10),
+    )
     .option("--unread", "Unread messages only")
     .option("--dry-run", "Print planned query without calling the API")
     .action(async function (
@@ -113,7 +117,8 @@ function registerListCommand(
       },
     ) {
       try {
-        const globals = this.parent?.optsWithGlobals() as { pass?: string } | undefined;
+        const globals = this.parent?.optsWithGlobals() as
+          { pass?: string } | undefined;
         await runMailList({
           ...options,
           label: options.label ?? defaultLabel,

@@ -65,9 +65,7 @@ export async function showHome(): Promise<TuiIntent> {
         ...(snap?.tunnelUp
           ? [{ label: "Disconnect", value: "disconnect" }]
           : []),
-        ...(snap?.signedIn
-          ? [{ label: "Sign out", value: "signout" }]
-          : []),
+        ...(snap?.signedIn ? [{ label: "Sign out", value: "signout" }] : []),
         { label: "Back", value: "quit" },
       ];
 

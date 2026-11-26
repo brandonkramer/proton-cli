@@ -40,7 +40,9 @@ describe("renderWireGuardConfig", () => {
     });
 
     expect(conf).toContain("[Interface]");
-    expect(conf).toContain("PrivateKey = privateKeyBase64===========================");
+    expect(conf).toContain(
+      "PrivateKey = privateKeyBase64===========================",
+    );
     expect(conf).toContain("Address = 10.2.0.2/32");
     expect(conf).toContain("DNS = 10.2.0.1");
     expect(conf).toContain("[Peer]");

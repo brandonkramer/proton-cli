@@ -77,7 +77,15 @@ interface RawEvent {
 
 function defaultRange(): { start: Date; end: Date } {
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
   const end = new Date(start);
   end.setDate(end.getDate() + 30);
   return { start, end };
@@ -138,9 +146,9 @@ function mapEvent(
   };
 }
 
-async function buildReminders(reminders: string[] | undefined): Promise<
-  { Type: number; Trigger: string }[] | null
-> {
+async function buildReminders(
+  reminders: string[] | undefined,
+): Promise<{ Type: number; Trigger: string }[] | null> {
   if (!reminders || reminders.length === 0) return null;
   return reminders.map((entry) => ({
     Type: 1,
@@ -304,7 +312,9 @@ export async function createEvent(
 
   const reminders = await buildReminders(options.input.reminders);
   const organizer =
-    options.input.attendees && options.input.attendees.length > 0 ? ctx.email : "";
+    options.input.attendees && options.input.attendees.length > 0
+      ? ctx.email
+      : "";
   const uid = `${Date.now()}@proton-cli`;
   const signed = signedVevent({
     uid,
@@ -410,13 +420,10 @@ export async function updateEvent(
   const title = options.title ?? existing.title;
   const location = options.location ?? existing.location;
   const description = options.description ?? existing.description;
-  const start =
-    options.start ?? new Date(current.Event.StartTime * 1000);
+  const start = options.start ?? new Date(current.Event.StartTime * 1000);
   const end = options.end ?? new Date(current.Event.EndTime * 1000);
   const timeChanged = Boolean(options.start || options.end);
-  const nextSequence = timeChanged
-    ? existing.sequence + 1
-    : existing.sequence;
+  const nextSequence = timeChanged ? existing.sequence + 1 : existing.sequence;
 
   const signed = signedVevent({
     uid: current.Event.UID,
@@ -511,8 +518,12 @@ export async function resolveEventRef(
   const needle = options.args[0]!;
   const calendars = await listCalendars(options);
   const range = defaultRange();
-  const matches: { calendarId: string; eventId: string; title: string; start: Date }[] =
-    [];
+  const matches: {
+    calendarId: string;
+    eventId: string;
+    title: string;
+    start: Date;
+  }[] = [];
 
   for (const cal of calendars) {
     let events: EventSummary[] = [];

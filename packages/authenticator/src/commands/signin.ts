@@ -3,10 +3,7 @@ import { loadLocalEntries } from "../config/store.ts";
 import { PASS_ENV } from "../pass/credentials.ts";
 import { tryExistingSession } from "../proton/auth.ts";
 import { runInteractiveSignin } from "../tui/signin-flow.ts";
-import {
-  handleCommandError,
-  setCommandOutputFormat,
-} from "../util/command.ts";
+import { handleCommandError, setCommandOutputFormat } from "../util/command.ts";
 import {
   addOutputOption,
   resolveOutputFormat,
@@ -27,7 +24,9 @@ export function registerSignin(program: Command): void {
         `Proton Pass login item (pass://Vault/Item or Vault/Item). Also: $${PASS_ENV}`,
       )
       .option("--no-sync", "Skip initial Authenticator sync after sign-in")
-      .description("Sign in to Proton and ensure Authenticator Key (then sync)"),
+      .description(
+        "Sign in to Proton and ensure Authenticator Key (then sync)",
+      ),
   ).action(
     async (
       usernameArg?: string,

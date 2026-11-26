@@ -16,9 +16,7 @@ export function parseEntryTypeFilter(raw?: string): EntryTypeFilter {
   const key = raw.trim().toLowerCase();
   const parsed = TYPE_ALIASES[key];
   if (!parsed) {
-    throw new Error(
-      `Unknown entry type "${raw}". Use totp, steam, or all.`,
-    );
+    throw new Error(`Unknown entry type "${raw}". Use totp, steam, or all.`);
   }
   return parsed;
 }

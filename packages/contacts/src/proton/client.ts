@@ -96,7 +96,9 @@ export interface ContactsClientOptions {
   fetchImpl?: typeof fetch;
 }
 
-export function cardPayload(cards: ContactCard[]): Array<Record<string, unknown>> {
+export function cardPayload(
+  cards: ContactCard[],
+): Array<Record<string, unknown>> {
   return cards.map((card) => ({
     Type: card.Type,
     Data: card.Data,
@@ -183,7 +185,9 @@ export class ContactsClient {
     const needle = ref.toLowerCase();
     const matches = contacts.filter((contact) => {
       if (contact.name.toLowerCase().includes(needle)) return true;
-      return contact.emails.some((email) => email.toLowerCase().includes(needle));
+      return contact.emails.some((email) =>
+        email.toLowerCase().includes(needle),
+      );
     });
     const picked = pickRef(
       "contact",
@@ -204,7 +208,9 @@ export class ContactsClient {
     const cards: ContactCard[] = [await signCard(signed, this.#userKey)];
     const fields = toVCardFields(input);
     if (hasEncryptedFields(fields)) {
-      cards.push(await encryptAndSignCard(encryptedVCard(fields), this.#userKey));
+      cards.push(
+        await encryptAndSignCard(encryptedVCard(fields), this.#userKey),
+      );
     }
     return cards;
   }
@@ -243,11 +249,11 @@ export class ContactsClient {
       patch.phones.length > 0 ||
       Boolean(
         patch.note ||
-          patch.org ||
-          patch.title ||
-          patch.birthday ||
-          patch.address ||
-          patch.url,
+        patch.org ||
+        patch.title ||
+        patch.birthday ||
+        patch.address ||
+        patch.url,
       );
 
     let signedIndex = -1;
@@ -539,7 +545,10 @@ export class ContactsClient {
     }
   }
 
-  async removeGroupMembers(groupId: string, contactIds: string[]): Promise<void> {
+  async removeGroupMembers(
+    groupId: string,
+    contactIds: string[],
+  ): Promise<void> {
     const body: ContactLabelRequest = {
       LabelID: groupId,
       ContactIDs: contactIds,
@@ -553,7 +562,9 @@ export class ContactsClient {
       },
     );
     if (status !== 200) {
-      throw new CliError(`Failed to remove contacts from group (HTTP ${status}).`);
+      throw new CliError(
+        `Failed to remove contacts from group (HTTP ${status}).`,
+      );
     }
   }
 }

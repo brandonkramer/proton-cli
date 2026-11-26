@@ -20,7 +20,11 @@ function emitDryRun(plan: DryRunAction): void {
 
 async function withOpen(
   opts: DriveCommandOptions,
-  run: (service: DriveService, client: Awaited<ReturnType<DriveService["open"]>>["client"], context: Awaited<ReturnType<DriveService["open"]>>["context"]) => Promise<void>,
+  run: (
+    service: DriveService,
+    client: Awaited<ReturnType<DriveService["open"]>>["client"],
+    context: Awaited<ReturnType<DriveService["open"]>>["context"],
+  ) => Promise<void>,
 ): Promise<void> {
   const service = new DriveService();
   const { client, context } = await service.open({

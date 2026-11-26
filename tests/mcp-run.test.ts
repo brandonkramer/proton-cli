@@ -24,9 +24,9 @@ describe("mcp run allowlist", () => {
   });
 
   test("strips flags for positional matching", () => {
-    expect(positionalArgs(["mail", "list", "--label", "sent", "--json"])).toEqual(
-      ["mail", "list"],
-    );
+    expect(
+      positionalArgs(["mail", "list", "--label", "sent", "--json"]),
+    ).toEqual(["mail", "list"]);
     expect(positionalArgs(["vpn", "servers", "-c", "US", "--p2p"])).toEqual([
       "vpn",
       "servers",
